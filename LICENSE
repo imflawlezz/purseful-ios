@@ -1,0 +1,68 @@
+Copyright (c) 2026 imflawlezz
+
+All rights reserved.
+
+This software and its source code (the "Software") are made publicly
+available for transparency and personal reference. This is source-available
+software; it is not open source under the Open Source Initiative definition.
+
+PERMITTED USES
+
+The following uses are allowed without prior written permission:
+
+  1. Viewing and reading the source code.
+
+  2. Cloning the repository, building the Software from source, and running
+     it locally on devices you own or control, for personal,
+     non-commercial use only.
+
+  3. Submitting contributions to the official repository (for example via
+     pull request) in accordance with the Contributions section below.
+
+PROHIBITED USES
+
+The following are explicitly prohibited without prior written permission
+from the copyright holder:
+
+  1. Copying, reproducing, or duplicating the Software or any substantial
+     portion of it for any purpose other than the permitted uses above.
+
+  2. Modifying, adapting, translating, or creating derivative works based
+     on the Software, except for local personal use as described above or
+     for contributions submitted to the official repository.
+
+  3. Distributing, publishing, sublicensing, or otherwise transferring
+     the Software, any portion of it, or any derivative works to any third
+     party.
+
+  4. Using the Software or any portion of it for commercial purposes,
+     including but not limited to selling, licensing, or incorporating it
+     into a paid product or service.
+
+  5. Deploying or running the Software as a hosted or cloud-based service
+     for others.
+
+CONTRIBUTIONS
+
+If you submit a contribution to the official repository (including code,
+documentation, or other materials), you represent that you have the right
+to submit it. You grant the copyright holder a perpetual, worldwide,
+non-exclusive, royalty-free license to use, reproduce, modify, and
+incorporate that contribution into the Software. Contributions are
+accepted at the copyright holder's discretion and may be included,
+rejected, or modified without obligation.
+
+DISCLAIMER
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF,
+OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+PERMISSION REQUESTS
+
+To request permission for any use not covered above, contact the copyright
+holder via GitHub: https://github.com/imflawlezz
