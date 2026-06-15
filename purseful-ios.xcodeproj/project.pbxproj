@@ -6,9 +6,56 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		EC2A10062FC3900600504DF9 /* PursefulWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EC2A10012FC3900100504DF9 /* PursefulWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		EC2A10092FC3900900504DF9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EC1D8E322FC38E1E00504DF9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EC2A100A2FC3900A00504DF9;
+			remoteInfo = PursefulWidgets;
+		};
+		EC2A100B2FC3900B00504DF9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EC1D8E322FC38E1E00504DF9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EC2A100C2FC3900C00504DF9;
+			remoteInfo = "purseful-iosTests";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		EC2A10052FC3900500504DF9 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				EC2A10062FC3900600504DF9 /* PursefulWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		EC1D8E3A2FC38E1E00504DF9 /* purseful-ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "purseful-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		EC2A10012FC3900100504DF9 /* PursefulWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PursefulWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		EC2A10022FC3900200504DF9 /* purseful-iosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "purseful-iosTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		EC2A10192FC3901900504DF9 /* Exceptions for "PursefulWidgets" folder in "PursefulWidgets" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = EC2A100A2FC3900A00504DF9 /* PursefulWidgets */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		EC1D8E3C2FC38E1E00504DF9 /* purseful-ios */ = {
@@ -16,10 +63,37 @@
 			path = "purseful-ios";
 			sourceTree = "<group>";
 		};
+		EC2A10032FC3900300504DF9 /* PursefulWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				EC2A10192FC3901900504DF9 /* Exceptions for "PursefulWidgets" folder in "PursefulWidgets" target */,
+			);
+			path = PursefulWidgets;
+			sourceTree = "<group>";
+		};
+		EC2A10042FC3900400504DF9 /* purseful-iosTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "purseful-iosTests";
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		EC1D8E372FC38E1E00504DF9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EC2A10072FC3900700504DF9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EC2A10082FC3900800504DF9 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -33,6 +107,8 @@
 			isa = PBXGroup;
 			children = (
 				EC1D8E3C2FC38E1E00504DF9 /* purseful-ios */,
+				EC2A10032FC3900300504DF9 /* PursefulWidgets */,
+				EC2A10042FC3900400504DF9 /* purseful-iosTests */,
 				EC1D8E3B2FC38E1E00504DF9 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +117,8 @@
 			isa = PBXGroup;
 			children = (
 				EC1D8E3A2FC38E1E00504DF9 /* purseful-ios.app */,
+				EC2A10012FC3900100504DF9 /* PursefulWidgets.appex */,
+				EC2A10022FC3900200504DF9 /* purseful-iosTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -55,10 +133,12 @@
 				EC1D8E362FC38E1E00504DF9 /* Sources */,
 				EC1D8E372FC38E1E00504DF9 /* Frameworks */,
 				EC1D8E382FC38E1E00504DF9 /* Resources */,
+				EC2A10052FC3900500504DF9 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				EC2A100D2FC3900D00504DF9 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				EC1D8E3C2FC38E1E00504DF9 /* purseful-ios */,
@@ -69,6 +149,51 @@
 			productName = "purseful-ios";
 			productReference = EC1D8E3A2FC38E1E00504DF9 /* purseful-ios.app */;
 			productType = "com.apple.product-type.application";
+		};
+		EC2A100A2FC3900A00504DF9 /* PursefulWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EC2A10102FC3901000504DF9 /* Build configuration list for PBXNativeTarget "PursefulWidgets" */;
+			buildPhases = (
+				EC2A100E2FC3900E00504DF9 /* Sources */,
+				EC2A10072FC3900700504DF9 /* Frameworks */,
+				EC2A100F2FC3900F00504DF9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				EC2A10032FC3900300504DF9 /* PursefulWidgets */,
+			);
+			name = PursefulWidgets;
+			packageProductDependencies = (
+			);
+			productName = PursefulWidgets;
+			productReference = EC2A10012FC3900100504DF9 /* PursefulWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		EC2A100C2FC3900C00504DF9 /* purseful-iosTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EC2A10112FC3901100504DF9 /* Build configuration list for PBXNativeTarget "purseful-iosTests" */;
+			buildPhases = (
+				EC2A10122FC3901200504DF9 /* Sources */,
+				EC2A10082FC3900800504DF9 /* Frameworks */,
+				EC2A10132FC3901300504DF9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EC2A10142FC3901400504DF9 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				EC2A10042FC3900400504DF9 /* purseful-iosTests */,
+			);
+			name = "purseful-iosTests";
+			packageProductDependencies = (
+			);
+			productName = "purseful-iosTests";
+			productReference = EC2A10022FC3900200504DF9 /* purseful-iosTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -100,12 +225,28 @@
 			projectRoot = "";
 			targets = (
 				EC1D8E392FC38E1E00504DF9 /* purseful-ios */,
+				EC2A100A2FC3900A00504DF9 /* PursefulWidgets */,
+				EC2A100C2FC3900C00504DF9 /* purseful-iosTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		EC1D8E382FC38E1E00504DF9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EC2A100F2FC3900F00504DF9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EC2A10132FC3901300504DF9 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +263,34 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		EC2A100E2FC3900E00504DF9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EC2A10122FC3901200504DF9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		EC2A100D2FC3900D00504DF9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EC2A100A2FC3900A00504DF9 /* PursefulWidgets */;
+			targetProxy = EC2A10092FC3900900504DF9 /* PBXContainerItemProxy */;
+		};
+		EC2A10142FC3901400504DF9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EC2A100C2FC3900C00504DF9 /* purseful-iosTests */;
+			targetProxy = EC2A100B2FC3900B00504DF9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		EC1D8E432FC38E2200504DF9 /* Debug */ = {
@@ -249,23 +417,28 @@
 		EC1D8E462FC38E2200504DF9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = Purseful;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "purseful-ios/purseful-ios.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = AW9Z462NX3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Purseful;
+				INFOPLIST_KEY_CFBundleURLTypes = "{\n    CFBundleURLName = \"dev.imflawlezz.purseful-ios\";\n    CFBundleURLSchemes =     (\n        purseful\n    );\n}";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Purseful uses the camera to scan receipts for expense entry.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "dev.imflawlezz.purseful-ios";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -281,23 +454,28 @@
 		EC1D8E472FC38E2200504DF9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = Purseful;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "purseful-ios/purseful-ios.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = AW9Z462NX3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Purseful;
+				INFOPLIST_KEY_CFBundleURLTypes = "{\n    CFBundleURLName = \"dev.imflawlezz.purseful-ios\";\n    CFBundleURLSchemes =     (\n        purseful\n    );\n}";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Purseful uses the camera to scan receipts for expense entry.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "dev.imflawlezz.purseful-ios";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -307,6 +485,94 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		EC2A10152FC3901500504DF9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = PursefulWidgets/PursefulWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = AW9Z462NX3;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PursefulWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.imflawlezz.purseful-ios.widgets";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		EC2A10162FC3901600504DF9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = PursefulWidgets/PursefulWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = AW9Z462NX3;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PursefulWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.imflawlezz.purseful-ios.widgets";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		EC2A10172FC3901700504DF9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = AW9Z462NX3;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.imflawlezz.purseful-iosTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/purseful-ios.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/purseful-ios";
+			};
+			name = Debug;
+		};
+		EC2A10182FC3901800504DF9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = AW9Z462NX3;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.imflawlezz.purseful-iosTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/purseful-ios.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/purseful-ios";
 			};
 			name = Release;
 		};
@@ -327,6 +593,24 @@
 			buildConfigurations = (
 				EC1D8E462FC38E2200504DF9 /* Debug */,
 				EC1D8E472FC38E2200504DF9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EC2A10102FC3901000504DF9 /* Build configuration list for PBXNativeTarget "PursefulWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EC2A10152FC3901500504DF9 /* Debug */,
+				EC2A10162FC3901600504DF9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EC2A10112FC3901100504DF9 /* Build configuration list for PBXNativeTarget "purseful-iosTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EC2A10172FC3901700504DF9 /* Debug */,
+				EC2A10182FC3901800504DF9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
