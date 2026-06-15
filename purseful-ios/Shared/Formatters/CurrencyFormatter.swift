@@ -88,6 +88,30 @@ enum DateFormatters {
         return f
     }()
 
+    static let reportDateTime: DateFormatter = {
+        let f = DateFormatter()
+        f.dateStyle = .short
+        f.timeStyle = .short
+        return f
+    }()
+
+    /// Compact single-line timestamp for PDF ledger columns.
+    static let reportPDFDateTime: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "dd.MM.yy HH:mm"
+        return f
+    }()
+
+    static let reportPDFRange: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "dd.MM.yyyy"
+        return f
+    }()
+
+    static func reportPDFRangeString(from date: Date) -> String {
+        reportPDFRange.string(from: date)
+    }
+
     static let monthYear: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "MMMM yyyy"

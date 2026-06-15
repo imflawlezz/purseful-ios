@@ -136,6 +136,15 @@ enum ReportPeriod: String, CaseIterable, Identifiable {
         }
         return (start, end)
     }
+
+    /// Inclusive custom range with start/end-of-day normalization.
+    static func normalizedCustomRange(start: Date, end: Date) -> (start: Date, end: Date) {
+        let calendar = Calendar.current
+        let orderedStart = calendar.startOfDay(for: min(start, end))
+        let endDay = calendar.startOfDay(for: max(start, end))
+        let orderedEnd = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: endDay) ?? endDay
+        return (orderedStart, orderedEnd)
+    }
 }
 
 enum TransactionSortOption: String, CaseIterable, Identifiable {

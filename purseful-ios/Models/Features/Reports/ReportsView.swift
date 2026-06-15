@@ -9,10 +9,12 @@ struct ReportsView: View {
     @Query(sort: \Category.sortOrder) private var categories: [Category]
 
     @State private var period: ReportPeriod = .thirtyDays
-    @State private var customStart = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date()
-    @State private var customEnd = Date()
+    @State private var lastPresetPeriod: ReportPeriod = .thirtyDays
+    @State private var customStart = Calendar.current.startOfDay(for: ReportPeriod.thirtyDays.dateRange.start)
+    @State private var customEnd = Calendar.current.startOfDay(for: Date())
     @State private var showShareSheet = false
-    @State private var shareImage: UIImage?
+    @State private var shareURL: URL?
+    @State private var isExporting = false
     @State private var showDailySpendCategories = false
 
     @Bindable private var settings = AppSettings.shared
@@ -26,7 +28,9 @@ struct ReportsView: View {
     }
 
     private var dateRange: (start: Date, end: Date) {
-        if period == .custom { return (customStart, customEnd) }
+        if period == .custom {
+            return ReportPeriod.normalizedCustomRange(start: customStart, end: customEnd)
+        }
         return period.dateRange
     }
 
@@ -55,20 +59,41 @@ struct ReportsView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        shareImage = renderReportImage()
-                        showShareSheet = true
+                        exportReportPDF()
                     } label: {
-                        Image(systemName: "square.and.arrow.up")
+                        if isExporting {
+                            ProgressView()
+                        } else {
+                            Image(systemName: "square.and.arrow.up")
+                        }
                     }
+                    .disabled(isExporting)
                 }
             }
             .sheet(isPresented: $showShareSheet) {
-                if let shareImage {
-                    ShareSheet(items: [shareImage])
+                if let shareURL {
+                    ShareSheet(items: [shareURL])
                 }
             }
             .sheet(isPresented: $showDailySpendCategories) {
                 DailySpendCategoryPickerView()
+            }
+            .overlay {
+                if isExporting {
+                    ZStack {
+                        Color.black.opacity(0.25)
+                            .ignoresSafeArea()
+                        VStack(spacing: 14) {
+                            ProgressView()
+                                .controlSize(.large)
+                            Text("Generating PDF…")
+                                .font(.subheadline.weight(.semibold))
+                        }
+                        .padding(.horizontal, 28)
+                        .padding(.vertical, 22)
+                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    }
+                }
             }
         }
     }
@@ -85,6 +110,15 @@ struct ReportsView: View {
                 }
             }
             .pickerStyle(.segmented)
+            .onChange(of: period) { _, new in
+                if new == .custom {
+                    let range = lastPresetPeriod.dateRange
+                    customStart = Calendar.current.startOfDay(for: range.start)
+                    customEnd = Calendar.current.startOfDay(for: range.end)
+                } else {
+                    lastPresetPeriod = new
+                }
+            }
 
             GlassCard {
                 HStack(spacing: 10) {
@@ -107,10 +141,19 @@ struct ReportsView: View {
             }
 
             if period == .custom {
-                DatePicker("Start", selection: $customStart, displayedComponents: .date)
-                    .datePickerStyle(.compact)
-                DatePicker("End", selection: $customEnd, displayedComponents: .date)
-                    .datePickerStyle(.compact)
+                GlassCard {
+                    CustomDateRangeRow(start: $customStart, end: $customEnd)
+                }
+                .onChange(of: customStart) { _, newStart in
+                    if newStart > customEnd {
+                        customEnd = newStart
+                    }
+                }
+                .onChange(of: customEnd) { _, newEnd in
+                    if newEnd < customStart {
+                        customStart = newEnd
+                    }
+                }
             }
         }
     }
@@ -417,14 +460,94 @@ struct ReportsView: View {
         }
     }
 
-    @MainActor
-    private func renderReportImage() -> UIImage {
-        let renderer = ImageRenderer(content: VStack {
-            Text("Purseful Report")
-                .font(.title.bold())
-            categoryChart
-            dailyAverageCard
-        }.padding().frame(width: 360))
-        return renderer.uiImage ?? UIImage()
+    private func exportReportPDF() {
+        guard !isExporting else { return }
+        isExporting = true
+
+        let range = dateRange
+        let snapshotTransactions = transactions
+        let currency = baseCurrency
+        let rates = exchangeRates
+
+        Task { @MainActor in
+            await Task.yield()
+
+            let result = ReportSummaryBuilder.build(
+                transactions: snapshotTransactions,
+                from: range.start,
+                through: range.end,
+                baseCurrency: currency,
+                exchangeRates: rates
+            )
+
+            await Task.yield()
+
+            do {
+                let url = try ReportPDFExportService.export(summary: result.summary, lines: result.lines)
+                shareURL = url
+                showShareSheet = true
+                Haptics.success()
+            } catch {
+                Haptics.error()
+            }
+            isExporting = false
+        }
+    }
+}
+
+private struct CustomDateRangeRow: View {
+    @Binding var start: Date
+    @Binding var end: Date
+
+    private let dashColumnWidth: CGFloat = 28
+    private let pickerBottomInset: CGFloat = 7
+
+    var body: some View {
+        HStack(alignment: .bottom, spacing: 0) {
+            pickerColumn(title: "From") {
+                DatePicker(
+                    "From",
+                    selection: $start,
+                    in: ...end,
+                    displayedComponents: .date
+                )
+            }
+
+            Text("–")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.tertiary)
+                .frame(width: dashColumnWidth, alignment: .center)
+                .padding(.bottom, pickerBottomInset)
+
+            pickerColumn(title: "To") {
+                DatePicker(
+                    "To",
+                    selection: $end,
+                    in: start...Date(),
+                    displayedComponents: .date
+                )
+            }
+        }
+    }
+
+    private func pickerColumn<P: View>(
+        title: String,
+        @ViewBuilder picker: () -> P
+    ) -> some View {
+        VStack(spacing: 6) {
+            Text(title)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .center)
+
+            HStack(spacing: 0) {
+                Spacer(minLength: 0)
+                picker()
+                    .labelsHidden()
+                    .datePickerStyle(.compact)
+                Spacer(minLength: 0)
+            }
+        }
+        .frame(maxWidth: .infinity)
     }
 }
