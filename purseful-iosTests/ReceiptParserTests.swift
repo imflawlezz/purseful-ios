@@ -11,7 +11,7 @@ final class ReceiptParserTests: XCTestCase {
         SUMA            4,99
         """
         let result = ReceiptParser.parse(text: text)
-        XCTAssertEqual(result.total, 4.99)
+        XCTAssertEqual(result.total, Decimal(string: "4.99"))
         XCTAssertNotNil(result.merchant)
     }
 
