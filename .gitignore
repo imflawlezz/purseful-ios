@@ -1,0 +1,139 @@
+# --- Project-specific ---
+prompt.md
+
+# --- macOS ---
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# --- Xcode ---
+build/
+DerivedData/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xccheckout
+*.moved-aside
+*.xcuserstate
+*.xcscmblueprint
+*.hmap
+*.ipa
+*.dSYM
+*.dSYM.zip
+*.app.dSYM
+*.app.dSYM.zip
+*.bcsymbolmap
+timeline.xctimeline
+playground.xcworkspace
+*.playground
+
+# Xcode Patch
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/*.xcscheme
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcodeproj/project.xcworkspace/contents.xcworkspacedata
+!*.xcodeproj/project.xcworkspace/xcshareddata/
+
+# --- Swift Package Manager ---
+.build/
+.swiftpm/
+Packages/
+Package.pbxproj
+Package.resolved
+
+# --- CocoaPods ---
+Pods/
+*.xcworkspace
+!default.xcworkspace
+
+# --- Carthage ---
+Carthage/Build/
+Carthage/Checkouts
+
+# --- Accio ---
+Dependencies/
+.accio/
+
+# --- fastlane ---
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# --- Code injection / tooling ---
+iOSInjectionProject/
+
+# --- Secrets & local config ---
+.env
+.env.*
+*.pem
+*.p12
+*.mobileprovision
+secrets/
+credentials.json
+GoogleService-Info.plist
+
+# --- Logs & caches ---
+*.log
+*.tmp
+*.temp
+*.swp
+*~
+.cache/
+.npm/
+.nvm/
+
+# --- Test & coverage ---
+*.gcno
+*.gcda
+*.profdata
+coverage/
+*.lcov
+xcresult/
+TestResults/
+
+# --- Editors ---
+.idea/
+*.iml
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# --- Cursor (keep rules/skills if added later; ignore local state) ---
+.cursor/
+!.cursor/rules/
+!.cursor/skills/
+
+# --- Archives & exports ---
+*.xcarchive
+ExportOptions.plist
+export/
+
+# --- Misc ---
+*.orig
+*.rej
