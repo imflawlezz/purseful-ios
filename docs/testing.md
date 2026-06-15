@@ -47,6 +47,7 @@ Swift Testing (`@Test`) and XCTest (`XCTestCase`) are both used.
 | `BankTransactionDedupTests` | XCTest | Import dedup hash |
 | `ShoppingListParserTests` | XCTest | List text parsing |
 | `DailySpendCalculatorTests` | XCTest | Category-filtered daily spend |
+| `ReportPDFExportTests` | XCTest | Report summary builder, PDF generation, filename |
 
 ---
 
@@ -80,6 +81,7 @@ Used across import, goal, and debt tests.
 | Notification date math | `NotificationHelpersTests` |
 | Goal completion side effects | `GoalUseCaseTests` |
 | Debt linking | `DebtServiceTests` |
+| PDF report layout / summary | `ReportPDFExportTests` |
 
 ---
 
@@ -96,9 +98,3 @@ Minimal GitHub Actions job:
 ```
 
 Requires macOS runner with Xcode 26+.
-
----
-
-## Known flaky test
-
-`ReceiptParserTests.testParsesPolishTotalKeyword` — may be environment/locale sensitive; investigate if CI fails intermittently.

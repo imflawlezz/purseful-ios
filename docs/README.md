@@ -13,7 +13,7 @@ This folder describes **how the app is built today**, not only what was original
 | Work on widgets | [widgets.md](widgets.md) |
 | Run or add tests | [testing.md](testing.md) |
 | Understand a design choice | [decisions/](decisions/) |
-| Original product spec | [../prompt.md](../prompt.md) |
+| License terms | [../LICENSE](../LICENSE) |
 
 ## Maintenance
 
@@ -25,4 +25,4 @@ Update these docs when you change:
 - **notifications.md** — alert logic, triggers, dedup keys
 - **decisions/** — any non-obvious tradeoff (add a new ADR)
 
-Keep [prompt.md](../prompt.md) as historical product intent; don't rewrite it to match implementation — use **features.md** for the living status matrix.
+Use **features.md** as the living status matrix when the implementation diverges from earlier planning notes.

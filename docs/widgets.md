@@ -90,7 +90,7 @@ Handled in `MainTabView.handleDeepLink`.
 1. Run the **main app** at least once so snapshot exists.
 2. Widget previews use placeholder data in `PursefulProvider.placeholder`.
 3. Exchange rates for budget/today spend come from `ExchangeRateCache` at sync time.
-4. Widget bundle version must match app `MARKETING_VERSION` (1.0.0).
+4. Widget bundle version must match app `MARKETING_VERSION` (1.1.0).
 
 ---
 

@@ -3,8 +3,8 @@
 Native iOS personal finance app — SwiftUI, SwiftData, WidgetKit. Free, on-device first, no paywalls.
 
 **Bundle ID:** `dev.imflawlezz.purseful-ios`  
-**Version:** 1.0.0  
-**Minimum deployment:** iOS 26.0 (app), iOS 26.2 (widgets/tests target)  
+**Version:** 1.1.0  
+**Minimum deployment:** iOS 26.0  
 **App Group:** `group.dev.imflawlezz.purseful-ios`
 
 ---
@@ -52,7 +52,8 @@ purseful-ios/                 # Main app target
 PursefulWidgets/              # WidgetKit extension
 purseful-iosTests/            # Unit tests
 docs/                         # Project documentation (start here)
-prompt.md                     # Original product specification
+LICENSE                       # Source-available license
+CHANGELOG.md                  # Release history
 ```
 
 Canonical UI code lives under `purseful-ios/Models/Features/`. Ignore any stale duplicate paths if they appear locally.
@@ -63,7 +64,7 @@ Canonical UI code lives under `purseful-ios/Models/Features/`. Ignore any stale 
 
 - **Reads:** SwiftUI views use `@Query` against SwiftData.
 - **Writes:** Views call **use cases** via `@Environment(DependencyContainer.self)`.
-- **Services:** Stateless helpers (budget math, OCR, export JSON, notifications).
+- **Services:** Stateless helpers (budget math, OCR, JSON/PDF export, notifications).
 - **Persistence:** Single SwiftData store in the App Group container (shared with widgets).
 
 See [docs/architecture.md](docs/architecture.md) for diagrams and data flows.
@@ -78,13 +79,13 @@ See [docs/architecture.md](docs/architecture.md) for diagrams and data flows.
 | [docs/README.md](docs/README.md) | Documentation index |
 | [docs/architecture.md](docs/architecture.md) | Layers, DI, startup, sync hooks |
 | [docs/data-model.md](docs/data-model.md) | SwiftData entities & relationships |
-| [docs/features.md](docs/features.md) | Feature matrix (spec vs implemented) |
+| [docs/features.md](docs/features.md) | Feature matrix (implemented vs planned) |
 | [docs/notifications.md](docs/notifications.md) | Alert types, scheduling, dedup |
 | [docs/import-export.md](docs/import-export.md) | JSON backup format v2 |
 | [docs/widgets.md](docs/widgets.md) | WidgetKit extension & snapshot sync |
 | [docs/testing.md](docs/testing.md) | Test targets & coverage map |
 | [docs/decisions/](docs/decisions/) | Architecture decision records (ADRs) |
-| [prompt.md](prompt.md) | Original product vision & full spec |
+| [LICENSE](LICENSE) | Source-available license terms |
 
 ---
 
@@ -97,14 +98,13 @@ See [docs/architecture.md](docs/architecture.md) for diagrams and data flows.
 
 ---
 
-## Deferred (v1)
+## Deferred
 
 These are intentionally out of scope for the current release:
 
 - CloudKit / iCloud sync
 - Bank sync UI & Enable Banking production wiring
 - CSV import/export
-- PDF / full report export
 
 See [docs/features.md](docs/features.md) for the complete status table.
 
@@ -112,4 +112,6 @@ See [docs/features.md](docs/features.md) for the complete status table.
 
 ## License
 
-Private project. All rights reserved unless otherwise noted.
+Source-available — all rights reserved. See [LICENSE](LICENSE) for full terms.
+
+You may view the code and build or run it locally for personal, non-commercial use. Commercial use, redistribution, and publishing derivative works are not permitted without written permission. Contributions via pull request are welcome under the terms in `LICENSE`.

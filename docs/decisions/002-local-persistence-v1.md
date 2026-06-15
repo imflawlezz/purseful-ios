@@ -5,7 +5,7 @@
 
 ## Context
 
-The product spec ([prompt.md](../../prompt.md)) describes SwiftData + CloudKit sync across devices. v1 focused on core features, widgets, and import/export.
+The original product spec described SwiftData + CloudKit sync across devices. v1 focused on core features, widgets, and import/export.
 
 ## Decision
 

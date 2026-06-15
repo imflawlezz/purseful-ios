@@ -161,6 +161,7 @@ Views should **not** call `modelContext` directly except in legacy spots (e.g. `
 | `DebtService` | Debt categories, repayments, linked transactions |
 | `RecurrenceProcessor` | Auto transactions from planned payments |
 | `ExportService` / `ImportService` | JSON v2 |
+| `ReportSummaryBuilder` / `ReportPDFExportService` | Reports PDF export |
 | `NotificationService` / `NotificationScheduler` | Local notifications |
 | `ReceiptScanner` / `ReceiptParser` | On-device OCR |
 | `SpotlightService` | Core Spotlight indexing |

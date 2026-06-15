@@ -1,6 +1,6 @@
 # Features
 
-Status matrix comparing [prompt.md](../prompt.md) to the **current codebase** (v1.0.0).
+Status matrix for the **current codebase** (v1.1.0).
 
 Legend: ✅ Done · ⚠️ Partial · ❌ Not implemented · 🚫 Deferred by choice
 
@@ -81,7 +81,7 @@ Legend: ✅ Done · ⚠️ Partial · ❌ Not implemented · 🚫 Deferred by ch
 | Overdue indicator | ✅ | |
 | Debts | ✅ | Link txs, repayments, reminders |
 | Goals | ✅ | Progress, contributions |
-| Goal → transaction on completion | ✅ | Only if linked account set — [ADR 003](decisions/003-goal-transaction-on-completion.md) |
+| Goal → transaction on completion | ✅ | Only if linked account set — [ADR 006](decisions/006-goal-transaction-on-completion.md) |
 | Goal confetti | ❌ | Haptics only |
 | Estimated completion date | ✅ | Goal detail |
 
@@ -98,8 +98,7 @@ Legend: ✅ Done · ⚠️ Partial · ❌ Not implemented · 🚫 Deferred by ch
 | Top payees | ✅ | |
 | Daily average | ✅ | |
 | Period selector | ✅ | 7D–12M + custom |
-| Export PDF | 🚫 | Share partial image only |
-| Export report image | ⚠️ | Subset of report |
+| Export PDF | ✅ | A4 portrait report with period stats and transaction ledger |
 
 ---
 
@@ -189,5 +188,6 @@ See [notifications.md](notifications.md).
 | Bank dedup | `BankTransactionDedupTests` |
 | Shopping list parser | `ShoppingListParserTests` |
 | Daily spend | `DailySpendCalculatorTests` |
+| PDF report export | `ReportPDFExportTests` |
 
 Full list: [testing.md](testing.md).

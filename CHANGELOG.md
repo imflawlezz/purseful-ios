@@ -5,6 +5,22 @@ All notable changes to Purseful are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [1.1.0] - 2026-06-15
+
+### Added
+
+- A4 portrait PDF report export from Reports (period statistics, category breakdown with share percentages, paginated transaction ledger with split-line expansion)
+- `ReportPDFExportTests` for summary builder and PDF generation
+
+### Changed
+
+- Clarified source-available `LICENSE` (personal local use, contribution terms) and aligned README license section
+- Unified minimum deployment target to **iOS 26.0** across app, widgets, and test targets (was 26.2 on widgets/tests)
+- Removed broken references to gitignored `prompt.md` from public docs; use `docs/features.md` as the living status matrix
+- Added Keep a Changelog version comparison links at the bottom of `CHANGELOG.md`
+
 ## [1.0.0] - 2026-06-15
 
 Initial public release. Local-first personal finance for iOS with no subscription or paywall.
@@ -60,7 +76,7 @@ Initial public release. Local-first personal finance for iOS with no subscriptio
 
 - No iCloud / CloudKit sync — backup via JSON export
 - No bank connection UI (Enable Banking scaffold only)
-- No CSV or PDF export
+- No CSV export
 - Budget alerts require the app to open and sync; not full background monitoring
 - Widgets use the first visible account and first budget (no widget configuration UI)
 
@@ -68,5 +84,9 @@ Initial public release. Local-first personal finance for iOS with no subscriptio
 
 - CloudKit multi-device sync
 - Bank sync (Enable Banking)
-- CSV import/export and PDF reports
+- CSV import/export
 - Additional transaction filters (date range, amount range, swipe duplicate)
+
+[Unreleased]: https://github.com/imflawlezz/purseful-ios/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/imflawlezz/purseful-ios/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/imflawlezz/purseful-ios/releases/tag/v1.0.0
