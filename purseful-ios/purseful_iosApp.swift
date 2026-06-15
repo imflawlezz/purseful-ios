@@ -1,17 +1,33 @@
-//
-//  purseful_iosApp.swift
-//  purseful-ios
-//
-//  Created by Yahor Artsiomchyk on 24/05/2026.
-//
-
+import SwiftData
 import SwiftUI
 
 @main
 struct purseful_iosApp: App {
+    @State private var appState = AppState()
+    @State private var dependencies: DependencyContainer
+    private let modelContainer: ModelContainer
+
+    init() {
+        do {
+            modelContainer = try ModelContainerProvider.makeContainer()
+            _dependencies = State(initialValue: DependencyContainer(context: modelContainer.mainContext))
+        } catch {
+            fatalError("Failed to create ModelContainer: \(error)")
+        }
+    }
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainTabView(dependencies: dependencies)
+                .environment(appState)
+                .environment(dependencies)
+                .dismissKeyboardOnTap()
+                .task(priority: .utility) {
+                    await Task.yield()
+                    await dependencies.appBootstrap.runStartupTasks()
+                }
+                .background(WidgetSyncObserver(dependencies: dependencies))
         }
+        .modelContainer(modelContainer)
     }
 }
