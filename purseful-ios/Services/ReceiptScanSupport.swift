@@ -16,8 +16,9 @@ enum ReceiptScanSupport {
         attachmentData: Data?
     ) -> (amountText: String?, title: String?, date: Date?, category: Category?, attachmentData: Data?) {
         let category = result.suggestedCategory.flatMap { matchCategory(named: $0, in: categories) }
+        let amountText = result.total.map { NSDecimalNumber(decimal: $0).stringValue }
         return (
-            amountText: result.total.map { "\($0)" },
+            amountText: amountText,
             title: result.merchant,
             date: result.date,
             category: category,
