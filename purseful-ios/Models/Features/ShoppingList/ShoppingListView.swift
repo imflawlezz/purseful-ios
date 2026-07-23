@@ -43,7 +43,9 @@ struct ShoppingListView: View {
                     handleDraftChange(newValue)
                 }
         }
+        .accentListRows()
         .listStyle(.insetGrouped)
+        .accentTintedBackground()
         .scrollDismissesKeyboard(.interactively)
         .navigationTitle("Shopping List")
         .navigationBarTitleDisplayMode(.inline)

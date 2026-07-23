@@ -43,6 +43,7 @@ struct QuickAddFlowView: View {
         }
         .navigationTitle(stepTitle)
         .navigationBarTitleDisplayMode(.inline)
+        .accentTintedBackground()
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 if step == .account {
@@ -158,6 +159,7 @@ struct QuickAddFlowView: View {
                     categoryRow(item.category, depth: item.depth)
                 }
             }
+            .accentListRows()
         }
         .listStyle(.insetGrouped)
     }
@@ -175,6 +177,7 @@ struct QuickAddFlowView: View {
                     .buttonStyle(.plain)
                 }
             }
+            .accentListRows()
         }
         .listStyle(.insetGrouped)
         .onAppear {

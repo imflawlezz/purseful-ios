@@ -199,6 +199,7 @@ extension View {
             }
         } preview: {
             preview()
+                .background { AccentScreenBackground() }
         }
     }
 

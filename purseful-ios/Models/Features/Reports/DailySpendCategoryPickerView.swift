@@ -13,24 +13,30 @@ struct DailySpendCategoryPickerView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Trend window") {
+                Section {
                     Picker("Lookback", selection: $settings.dailySpendLookbackDays) {
                         ForEach(DailySpendLookback.allCases) { option in
                             Text(option.displayName).tag(option.rawValue)
                         }
                     }
+                } header: {
+                    AccentListSectionHeader(title: "Trend window")
                 }
+                .accentListRows()
 
                 if expenseGroups.isEmpty {
-                    Section("Categories") {
+                    Section {
                         Text("No expense categories available")
                             .foregroundStyle(.secondary)
+                    } header: {
+                        AccentListSectionHeader(title: "Categories")
                     }
+                    .accentListRows()
                 } else {
                     ForEach(expenseGroups) { group in
                         let children = expenseChildren(of: group)
                         if group.isUserSelectable || !children.isEmpty {
-                            Section(group.name) {
+                            Section {
                                 if group.isUserSelectable {
                                     categoryRow(group)
                                 }
@@ -38,13 +44,17 @@ struct DailySpendCategoryPickerView: View {
                                     categoryRow(child)
                                         .padding(.leading, 8)
                                 }
+                            } header: {
+                                AccentListSectionHeader(title: group.name)
                             }
+                            .accentListRows()
                         }
                     }
                 }
             }
             .navigationTitle("Daily Spend")
             .navigationBarTitleDisplayMode(.inline)
+            .accentTintedBackground()
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     ToolbarIcon.done { dismiss() }

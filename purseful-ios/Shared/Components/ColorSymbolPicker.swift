@@ -57,12 +57,18 @@ struct SymbolPickerGrid: View {
                 Image(systemName: symbol)
                     .font(.body)
                     .frame(width: 40, height: 40)
-                    .background(
-                        selectedSymbol == symbol
-                            ? Color.accentColor.opacity(0.18)
-                            : Color(.secondarySystemGroupedBackground),
-                        in: RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    )
+                    .background {
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(Color(.secondarySystemGroupedBackground))
+                            .overlay {
+                                if selectedSymbol == symbol {
+                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                        .fill(Color.accentColor.opacity(0.18))
+                                } else {
+                                    AppSettings.shared.accentColor.opacity(AccentTheme.surfaceOpacity)
+                                }
+                            }
+                    }
                     .overlay {
                         if selectedSymbol == symbol {
                             RoundedRectangle(cornerRadius: 10, style: .continuous)

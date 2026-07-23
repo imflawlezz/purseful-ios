@@ -12,6 +12,7 @@ struct EntityPreviewContainer<Content: View>: View {
             .padding(16)
         }
         .frame(maxWidth: 340, maxHeight: 460)
+        .background { AccentScreenBackground() }
     }
 }
 

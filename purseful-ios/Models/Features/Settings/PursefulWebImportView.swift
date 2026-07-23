@@ -40,6 +40,7 @@ struct PursefulWebImportView: View {
         }
         .navigationTitle("Purseful Web Import")
         .navigationBarTitleDisplayMode(.inline)
+        .accentTintedBackground()
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -82,6 +83,7 @@ struct PursefulWebImportView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
+            .accentListRows()
 
             Section {
                 Toggle("Merge with existing data", isOn: $mergeExisting)
@@ -91,6 +93,7 @@ struct PursefulWebImportView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            .accentListRows()
 
             Section {
                 Button("Choose Backup File") {
@@ -103,6 +106,7 @@ struct PursefulWebImportView: View {
                     LabeledContent("Transactions in backup", value: "\(backup.transactions?.count ?? 0)")
                 }
             }
+            .accentListRows()
 
             if backup != nil {
                 Section {
@@ -110,6 +114,7 @@ struct PursefulWebImportView: View {
                         step = .mapAccounts
                     }
                 }
+                .accentListRows()
             }
         }
     }
@@ -121,9 +126,10 @@ struct PursefulWebImportView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
+        .accentListRows()
 
         ForEach(backup?.accounts ?? []) { webAccount in
-            Section(webAccount.name) {
+            Section {
                 Picker("Import as", selection: accountBinding(for: webAccount.id)) {
                     Text("Create new account")
                         .tag(PursefulWebImportService.MappingTarget.createNew)
@@ -137,7 +143,10 @@ struct PursefulWebImportView: View {
 
                 LabeledContent("Legacy type", value: webAccount.type.capitalized)
                 LabeledContent("Currency", value: webAccount.currency)
+            } header: {
+                AccentListSectionHeader(title: webAccount.name)
             }
+            .accentListRows()
         }
     }
 
@@ -148,9 +157,10 @@ struct PursefulWebImportView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
+        .accentListRows()
 
         ForEach(backup?.categories ?? []) { webCategory in
-            Section(webCategory.name) {
+            Section {
                 Picker("Import as", selection: categoryBinding(for: webCategory.id)) {
                     Text("Create new category")
                         .tag(PursefulWebImportService.MappingTarget.createNew)
@@ -163,17 +173,23 @@ struct PursefulWebImportView: View {
                 .pickerStyle(.navigationLink)
 
                 LabeledContent("Type", value: webCategory.type.capitalized)
+            } header: {
+                AccentListSectionHeader(title: webCategory.name)
             }
+            .accentListRows()
         }
     }
 
     private var importSection: some View {
         Group {
-            Section("Summary") {
+            Section {
                 LabeledContent("Accounts mapped", value: "\(mappings.accounts.count)")
                 LabeledContent("Categories mapped", value: "\(mappings.categories.count)")
                 LabeledContent("Transactions to import", value: "\(backup?.transactions?.count ?? 0)")
+            } header: {
+                AccentListSectionHeader(title: "Summary")
             }
+            .accentListRows()
 
             Section {
                 FormActionButton(
@@ -184,9 +200,10 @@ struct PursefulWebImportView: View {
                 }
                 .disabled(isImporting || backup == nil || backupData == nil)
             }
+            .accentListRows()
 
             if let importResult {
-                Section("Last Import") {
+                Section {
                     LabeledContent("Accounts linked", value: "\(importResult.accounts)")
                     LabeledContent("Categories linked", value: "\(importResult.categories)")
                     LabeledContent("Transactions imported", value: "\(importResult.transactions)")
@@ -196,7 +213,10 @@ struct PursefulWebImportView: View {
                     if importResult.skippedInvalid > 0 {
                         LabeledContent("Skipped invalid rows", value: "\(importResult.skippedInvalid)")
                     }
+                } header: {
+                    AccentListSectionHeader(title: "Last Import")
                 }
+                .accentListRows()
             }
         }
     }

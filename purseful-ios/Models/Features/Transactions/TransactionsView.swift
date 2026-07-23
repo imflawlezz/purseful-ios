@@ -81,6 +81,7 @@ struct TransactionsView: View {
                                 ForEach(group.items) { transaction in
                                     transactionRow(transaction)
                                 }
+                                .accentListRows()
                             } header: {
                                 HStack {
                                     Text(DateFormatters.dayHeader.string(from: group.day))
@@ -88,6 +89,7 @@ struct TransactionsView: View {
                                     Text(CurrencyFormatter.format(group.total, currencyCode: AppSettings.shared.baseCurrency))
                                         .font(.caption)
                                 }
+                                .clearListSectionHeaderBackground()
                             }
                         }
                     }
@@ -95,6 +97,7 @@ struct TransactionsView: View {
                     .animation(nil, value: editMode)
                 }
             }
+            .accentTintedBackground()
             .navigationTitle("Transactions")
             .searchable(text: $searchText, prompt: "Search transactions")
             .toolbar {
@@ -143,7 +146,7 @@ struct TransactionsView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showFilters) {
+            .accentSheet(isPresented: $showFilters) {
                 TransactionFiltersView(
                     filterAccount: $filterAccount,
                     filterCategory: $filterCategory,
@@ -202,10 +205,13 @@ struct TransactionsView: View {
             Image(systemName: selectedIDs.contains(transaction.id) ? "checkmark.circle.fill" : "circle")
                 .font(.title3)
                 .foregroundStyle(selectedIDs.contains(transaction.id) ? Color.accentColor : Color.secondary)
+                .contentTransition(.identity)
                 .opacity(editMode == .active ? 1 : 0)
                 .frame(width: editMode == .active ? 24 : 0)
                 .clipped()
                 .allowsHitTesting(false)
+                .animation(nil, value: selectedIDs.contains(transaction.id))
+                .animation(nil, value: editMode)
 
             TransactionRowView(
                 transaction: transaction,
@@ -248,31 +254,35 @@ struct TransactionFiltersView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Picker("Account", selection: $filterAccount) {
-                    Text("All").tag(Optional<Account>.none)
-                    ForEach(AccountPreferences.visibleAccounts(accounts)) { account in
-                        Text(account.selectionLabel).tag(Optional(account))
+                Section {
+                    Picker("Account", selection: $filterAccount) {
+                        Text("All").tag(Optional<Account>.none)
+                        ForEach(AccountPreferences.visibleAccounts(accounts)) { account in
+                            Text(account.selectionLabel).tag(Optional(account))
+                        }
+                    }
+                    Picker("Category", selection: $filterCategory) {
+                        Text("All").tag(Optional<Category>.none)
+                        ForEach(Category.userSelectable(categories.filter { !$0.isHidden })) { category in
+                            CategoryNameLabel.picker(category: category).tag(Optional(category))
+                        }
+                    }
+                    Picker("Type", selection: $filterType) {
+                        Text("All").tag(Optional<TransactionType>.none)
+                        ForEach(TransactionType.allCases) { type in
+                            Text(type.displayName).tag(Optional(type))
+                        }
+                    }
+                    Picker("Sort", selection: $sortOption) {
+                        ForEach(TransactionSortOption.allCases) { option in
+                            Text(option.displayName).tag(option)
+                        }
                     }
                 }
-                Picker("Category", selection: $filterCategory) {
-                    Text("All").tag(Optional<Category>.none)
-                    ForEach(Category.userSelectable(categories.filter { !$0.isHidden })) { category in
-                        CategoryNameLabel.picker(category: category).tag(Optional(category))
-                    }
-                }
-                Picker("Type", selection: $filterType) {
-                    Text("All").tag(Optional<TransactionType>.none)
-                    ForEach(TransactionType.allCases) { type in
-                        Text(type.displayName).tag(Optional(type))
-                    }
-                }
-                Picker("Sort", selection: $sortOption) {
-                    ForEach(TransactionSortOption.allCases) { option in
-                        Text(option.displayName).tag(option)
-                    }
-                }
+                .accentListRows()
             }
             .navigationTitle("Filters")
+            .accentTintedBackground()
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     ToolbarIcon.done { dismiss() }

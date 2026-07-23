@@ -53,16 +53,17 @@ struct BudgetsView: View {
                     }
                 }
             }
+            .accentTintedBackground()
             .navigationTitle("Budgets")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     ToolbarIcon.add { showAddBudget = true }
                 }
             }
-            .sheet(isPresented: $showAddBudget) {
+            .accentSheet(isPresented: $showAddBudget) {
                 BudgetFormView()
             }
-            .sheet(item: $selectedBudget) { budget in
+            .accentSheet(item: $selectedBudget) { budget in
                 BudgetDetailView(budget: budget)
             }
         }
@@ -170,31 +171,35 @@ struct BudgetFormView: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Name", text: $name)
-                LabeledAmountField(label: "Budget Amount", amount: $amountText, currencyCode: AppSettings.shared.baseCurrency)
-                Picker("Period", selection: $period) {
-                    ForEach(BudgetPeriod.allCases) { p in
-                        Text(p.displayName).tag(p)
+                Section {
+                    TextField("Name", text: $name)
+                    LabeledAmountField(label: "Budget Amount", amount: $amountText, currencyCode: AppSettings.shared.baseCurrency)
+                    Picker("Period", selection: $period) {
+                        ForEach(BudgetPeriod.allCases) { p in
+                            Text(p.displayName).tag(p)
+                        }
+                    }
+                    if period == .custom {
+                        DatePicker("Start", selection: $customStart, displayedComponents: .date)
+                        DatePicker("End", selection: $customEnd, displayedComponents: .date)
+                    }
+                    Picker("Category", selection: $selectedCategory) {
+                        Text("All Spending").tag(Optional<Category>.none)
+                        ForEach(Category.userSelectable(categories, type: .expense)) { category in
+                            CategoryNameLabel.picker(category: category).tag(Optional(category))
+                        }
+                    }
+                    Toggle("Rollover Unused", isOn: $rollover)
+                    VStack(alignment: .leading) {
+                        Text("Alert at \(Int(alertThreshold * 100))%")
+                        Slider(value: $alertThreshold, in: 0.5...1.0, step: 0.05)
                     }
                 }
-                if period == .custom {
-                    DatePicker("Start", selection: $customStart, displayedComponents: .date)
-                    DatePicker("End", selection: $customEnd, displayedComponents: .date)
-                }
-                Picker("Category", selection: $selectedCategory) {
-                    Text("All Spending").tag(Optional<Category>.none)
-                    ForEach(Category.userSelectable(categories, type: .expense)) { category in
-                        CategoryNameLabel.picker(category: category).tag(Optional(category))
-                    }
-                }
-                Toggle("Rollover Unused", isOn: $rollover)
-                VStack(alignment: .leading) {
-                    Text("Alert at \(Int(alertThreshold * 100))%")
-                    Slider(value: $alertThreshold, in: 0.5...1.0, step: 0.05)
-                }
+                .accentListRows()
             }
             .dismissKeyboardOnTap()
             .navigationTitle(budget == nil ? "New Budget" : "Edit Budget")
+            .accentTintedBackground()
             .toolbar {
                 FormLeadingToolbar(
                     onCancel: { dismiss() },
@@ -263,7 +268,7 @@ struct BudgetDetailView: View {
                         .listRowInsets(EdgeInsets())
                         .listRowBackground(Color.clear)
                 }
-                Section("History") {
+                Section {
                     ForEach(BudgetService.monthlyHistory(
                         for: budget,
                         transactions: transactions,
@@ -286,9 +291,12 @@ struct BudgetDetailView: View {
                             TransactionRowView(transaction: transaction, baseCurrency: baseCurrency)
                         }
                     }
+                } header: {
+                    AccentListSectionHeader(title: "History")
                 }
             }
             .navigationTitle(budget.name)
+            .accentTintedBackground()
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     ToolbarIcon.edit { showEdit = true }
@@ -298,7 +306,7 @@ struct BudgetDetailView: View {
                     dismiss()
                 }
             }
-            .sheet(isPresented: $showEdit) {
+            .accentSheet(isPresented: $showEdit) {
                 BudgetFormView(budget: budget)
             }
         }

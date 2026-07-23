@@ -35,6 +35,7 @@ struct DashboardView: View {
                 }
                 .padding(.vertical)
             }
+            .accentTintedBackground()
             .navigationTitle("Dashboard")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -63,12 +64,12 @@ struct DashboardView: View {
                     .accessibilityLabel("Quick add")
                 }
             }
-            .sheet(isPresented: $showQuickAdd) {
+            .accentSheet(isPresented: $showQuickAdd) {
                 NavigationStack {
                     QuickAddFlowView()
                 }
             }
-            .sheet(isPresented: $showShoppingList) {
+            .accentSheet(isPresented: $showShoppingList) {
                 NavigationStack {
                     ShoppingListView()
                 }

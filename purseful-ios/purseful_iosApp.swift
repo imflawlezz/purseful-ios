@@ -11,6 +11,7 @@ struct purseful_iosApp: App {
         do {
             modelContainer = try ModelContainerProvider.makeContainer()
             _dependencies = State(initialValue: DependencyContainer(context: modelContainer.mainContext))
+            AccentTheme.prepareListChrome(accent: AppSettings.shared.accentColor)
         } catch {
             fatalError("Failed to create ModelContainer: \(error)")
         }
@@ -27,6 +28,7 @@ struct purseful_iosApp: App {
                     await dependencies.appBootstrap.runStartupTasks()
                 }
                 .background(WidgetSyncObserver(dependencies: dependencies))
+                .background { AccentScreenBackground() }
         }
         .modelContainer(modelContainer)
     }

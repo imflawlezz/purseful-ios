@@ -17,19 +17,22 @@ struct JSONImportView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
+            .accentListRows()
 
             Section {
                 Toggle("Merge with existing data", isOn: $mergeExisting)
             }
+            .accentListRows()
 
             Section {
                 Button("Choose JSON File") {
                     showImporter = true
                 }
             }
+            .accentListRows()
 
             if let importResult {
-                Section("Last Import") {
+                Section {
                     LabeledContent("Accounts", value: "\(importResult.accounts)")
                     LabeledContent("Categories", value: "\(importResult.categories)")
                     LabeledContent("Transactions", value: "\(importResult.transactions)")
@@ -42,11 +45,15 @@ struct JSONImportView: View {
                     if importResult.skippedDuplicates > 0 {
                         LabeledContent("Skipped duplicates", value: "\(importResult.skippedDuplicates)")
                     }
+                } header: {
+                    AccentListSectionHeader(title: "Last Import")
                 }
+                .accentListRows()
             }
         }
         .navigationTitle("Import JSON")
         .navigationBarTitleDisplayMode(.inline)
+        .accentTintedBackground()
         .fileImporter(isPresented: $showImporter, allowedContentTypes: [.json]) { result in
             switch result {
             case .success(let url):

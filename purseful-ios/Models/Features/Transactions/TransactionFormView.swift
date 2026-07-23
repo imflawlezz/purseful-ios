@@ -50,7 +50,7 @@ struct TransactionFormView: View {
 
     var body: some View {
         Form {
-                Section("Details") {
+                Section {
                     Picker("Type", selection: $type) {
                         ForEach(TransactionType.allCases) { t in
                             Text(t.displayName).tag(t)
@@ -91,7 +91,10 @@ struct TransactionFormView: View {
                             }
                         }
                     }
+                } header: {
+                    AccentListSectionHeader(title: "Details")
                 }
+                .accentListRows()
 
                 if type != .transfer, !isDebtLinkedTransaction {
                     Section {
@@ -116,11 +119,13 @@ struct TransactionFormView: View {
                             }
                         }
                     }
+                    .accentListRows()
                 }
         }
         .dismissKeyboardOnTap()
         .navigationTitle(transaction == nil ? "New Transaction" : "Edit Transaction")
         .navigationBarTitleDisplayMode(.inline)
+        .accentTintedBackground()
         .toolbar {
             if showsCancelButton {
                 ToolbarItem(placement: .cancellationAction) {

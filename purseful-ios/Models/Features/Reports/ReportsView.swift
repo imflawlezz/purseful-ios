@@ -52,6 +52,7 @@ struct ReportsView: View {
                 }
                 .padding()
             }
+            .accentTintedBackground()
             .navigationTitle("Reports")
             .task {
                 await appState.refreshExchangeRates()
@@ -75,7 +76,7 @@ struct ReportsView: View {
                     ShareSheet(items: [shareURL])
                 }
             }
-            .sheet(isPresented: $showDailySpendCategories) {
+            .accentSheet(isPresented: $showDailySpendCategories) {
                 DailySpendCategoryPickerView()
             }
             .overlay {

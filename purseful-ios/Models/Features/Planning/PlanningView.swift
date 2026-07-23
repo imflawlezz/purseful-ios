@@ -30,6 +30,7 @@ struct PlanningView: View {
                     GoalsView()
                 }
             }
+            .accentTintedBackground()
             .navigationTitle("Planned")
             .onAppear {
                 section = appState.planningSection
@@ -38,36 +39,32 @@ struct PlanningView: View {
                 section = newValue
             }
             .toolbar {
-                if section == 0 {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button { showPaymentCalendar = true } label: {
-                            Image(systemName: "calendar")
-                        }
-                        .accessibilityLabel("Calendar")
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { showPaymentCalendar = true } label: {
+                        Image(systemName: "calendar")
                     }
-                    ToolbarItem(placement: .confirmationAction) {
+                    .accessibilityLabel("Calendar")
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    if section == 0 {
                         ToolbarIcon.add { showAddPayment = true }
-                    }
-                } else if section == 1 {
-                    ToolbarItem(placement: .confirmationAction) {
+                    } else if section == 1 {
                         ToolbarIcon.add { showAddDebt = true }
-                    }
-                } else {
-                    ToolbarItem(placement: .confirmationAction) {
+                    } else {
                         ToolbarIcon.add { showAddGoal = true }
                     }
                 }
             }
-            .sheet(isPresented: $showAddPayment) {
+            .accentSheet(isPresented: $showAddPayment) {
                 PlannedPaymentFormView()
             }
-            .sheet(isPresented: $showAddDebt) {
+            .accentSheet(isPresented: $showAddDebt) {
                 DebtFormView()
             }
-            .sheet(isPresented: $showAddGoal) {
+            .accentSheet(isPresented: $showAddGoal) {
                 GoalFormView()
             }
-            .sheet(isPresented: $showPaymentCalendar) {
+            .accentSheet(isPresented: $showPaymentCalendar) {
                 PaymentCalendarSheet()
             }
         }
@@ -149,25 +146,32 @@ struct PlannedPaymentsView: View {
             } else {
                 List {
                     if !pendingPayments.isEmpty {
-                        Section("Pending") {
+                        Section {
                             ForEach(pendingPayments) { payment in
                                 plannedPaymentRow(payment, completed: false)
                             }
+                        } header: {
+                            AccentListSectionHeader(title: "Pending")
                         }
+                        .accentListRows()
                     }
 
                     if !paidThisPeriodPayments.isEmpty {
-                        Section("Paid This Period") {
+                        Section {
                             ForEach(paidThisPeriodPayments) { payment in
                                 plannedPaymentRow(payment, completed: true)
                             }
+                        } header: {
+                            AccentListSectionHeader(title: "Paid This Period")
                         }
+                        .accentListRows()
                     }
                 }
                 .listStyle(.insetGrouped)
+                .scrollContentBackground(.hidden)
             }
         }
-        .sheet(item: $selectedPayment) { payment in
+        .accentSheet(item: $selectedPayment) { payment in
             PlannedPaymentFormView(payment: payment)
         }
     }
@@ -343,10 +347,11 @@ struct PaymentCalendarView: View {
         }
         .navigationTitle("Payment Calendar")
         .navigationBarTitleDisplayMode(.inline)
+        .accentTintedBackground()
         .task {
             await appState.refreshExchangeRates()
         }
-        .sheet(isPresented: $showDailySpendCategories) {
+        .accentSheet(isPresented: $showDailySpendCategories) {
             DailySpendCategoryPickerView()
         }
     }
@@ -633,64 +638,68 @@ struct PlannedPaymentFormView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Picker("Type", selection: $type) {
-                    ForEach(TransactionType.allCases) { t in
-                        Text(t.displayName).tag(t)
-                    }
-                }
-                .onChange(of: type) { _, newType in
-                    if newType == .transfer {
-                        selectedCategory = nil
-                    } else {
-                        selectedToAccount = nil
-                        if let category = selectedCategory,
-                           category.type != (newType == .income ? CategoryType.income : .expense) {
-                            selectedCategory = nil
+                Section {
+                    Picker("Type", selection: $type) {
+                        ForEach(TransactionType.allCases) { t in
+                            Text(t.displayName).tag(t)
                         }
                     }
-                }
+                    .onChange(of: type) { _, newType in
+                        if newType == .transfer {
+                            selectedCategory = nil
+                        } else {
+                            selectedToAccount = nil
+                            if let category = selectedCategory,
+                               category.type != (newType == .income ? CategoryType.income : .expense) {
+                                selectedCategory = nil
+                            }
+                        }
+                    }
 
-                TextField("Name", text: $name)
-                TextField("Note", text: $note, axis: .vertical)
-                LabeledAmountField(
-                    label: "Amount",
-                    amount: $amountText,
-                    currencyCode: selectedAccount?.currency ?? AppSettings.shared.baseCurrency
-                )
-                Picker("Frequency", selection: $frequency) {
-                    ForEach(PaymentFrequency.allCases) { f in
-                        Text(f.displayName).tag(f)
+                    TextField("Name", text: $name)
+                    TextField("Note", text: $note, axis: .vertical)
+                    LabeledAmountField(
+                        label: "Amount",
+                        amount: $amountText,
+                        currencyCode: selectedAccount?.currency ?? AppSettings.shared.baseCurrency
+                    )
+                    Picker("Frequency", selection: $frequency) {
+                        ForEach(PaymentFrequency.allCases) { f in
+                            Text(f.displayName).tag(f)
+                        }
                     }
-                }
-                DatePicker("Next Due", selection: $nextDueDate, displayedComponents: .date)
-                Picker("Account", selection: $selectedAccount) {
-                    Text("Select account").tag(Optional<Account>.none)
-                    ForEach(AccountPreferences.visibleAccounts(accounts)) { account in
-                        Text(account.selectionLabel).tag(Optional(account))
-                    }
-                }
-                if type == .transfer {
-                    Picker("To Account", selection: $selectedToAccount) {
+                    DatePicker("Next Due", selection: $nextDueDate, displayedComponents: .date)
+                    Picker("Account", selection: $selectedAccount) {
                         Text("Select account").tag(Optional<Account>.none)
-                        ForEach(AccountPreferences.visibleAccounts(accounts).filter { $0.id != selectedAccount?.id }) { account in
+                        ForEach(AccountPreferences.visibleAccounts(accounts)) { account in
                             Text(account.selectionLabel).tag(Optional(account))
                         }
                     }
-                }
-                if type != .transfer {
-                    Picker("Category", selection: $selectedCategory) {
-                        Text("None").tag(Optional<Category>.none)
-                        ForEach(filteredCategories) { category in
-                            CategoryNameLabel.picker(category: category).tag(Optional(category))
+                    if type == .transfer {
+                        Picker("To Account", selection: $selectedToAccount) {
+                            Text("Select account").tag(Optional<Account>.none)
+                            ForEach(AccountPreferences.visibleAccounts(accounts).filter { $0.id != selectedAccount?.id }) { account in
+                                Text(account.selectionLabel).tag(Optional(account))
+                            }
                         }
                     }
+                    if type != .transfer {
+                        Picker("Category", selection: $selectedCategory) {
+                            Text("None").tag(Optional<Category>.none)
+                            ForEach(filteredCategories) { category in
+                                CategoryNameLabel.picker(category: category).tag(Optional(category))
+                            }
+                        }
+                    }
+                    Toggle("Active", isOn: $isActive)
+                    Toggle("Auto-create on due date", isOn: $autoCategorize)
+                    Stepper("Remind \(reminderDays) day(s) before", value: $reminderDays, in: 1...14)
                 }
-                Toggle("Active", isOn: $isActive)
-                Toggle("Auto-create on due date", isOn: $autoCategorize)
-                Stepper("Remind \(reminderDays) day(s) before", value: $reminderDays, in: 1...14)
+                .accentListRows()
             }
             .dismissKeyboardOnTap()
             .navigationTitle(payment == nil ? "New Payment" : "Edit Payment")
+            .accentTintedBackground()
             .toolbar {
                 if let payment, !PlannedPaymentSchedule.isPaidInCurrentPeriod(payment) {
                     ToolbarItem(placement: .topBarTrailing) {
@@ -830,14 +839,16 @@ struct DebtsView: View {
                             DebtDetailPreviewView(debt: debt)
                         }, actions: debtRowActions(debt))
                     }
+                    .accentListRows()
                 }
                 .listStyle(.insetGrouped)
+                .scrollContentBackground(.hidden)
             }
         }
-        .sheet(item: $selectedDebt) { debt in
+        .accentSheet(item: $selectedDebt) { debt in
             DebtFormView(debt: debt)
         }
-        .sheet(item: $detailDebt) { debt in
+        .accentSheet(item: $detailDebt) { debt in
             NavigationStack {
                 DebtDetailView(debt: debt)
                     .toolbar {
@@ -921,40 +932,44 @@ struct DebtFormView: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Name", text: $name)
-                TextField("Counterparty", text: $counterparty)
-                Picker("Direction", selection: $direction) {
-                    ForEach(DebtDirection.allCases) { d in
-                        Text(d.displayName).tag(d)
-                    }
-                }
-                DatePicker(openingDateLabel, selection: $openingDate, displayedComponents: [.date, .hourAndMinute])
-                Picker("Currency", selection: $currency) {
-                    ForEach(CommonCurrencies.codes, id: \.self) { Text($0).tag($0) }
-                }
-                LabeledAmountField(label: "Original Amount", amount: $amountText, currencyCode: currency)
-                if debt != nil {
-                    LabeledContent(
-                        "Remaining Balance",
-                        value: CurrencyFormatter.format(debt?.remainingAmount ?? 0, currencyCode: currency)
-                    )
-                } else if createsLinkedTransactions {
-                    Picker("Account", selection: $selectedAccount) {
-                        Text("Select").tag(Optional<Account>.none)
-                        ForEach(AccountPreferences.visibleAccounts(accounts)) { account in
-                            Text(account.selectionLabel).tag(Optional(account))
+                Section {
+                    TextField("Name", text: $name)
+                    TextField("Counterparty", text: $counterparty)
+                    Picker("Direction", selection: $direction) {
+                        ForEach(DebtDirection.allCases) { d in
+                            Text(d.displayName).tag(d)
                         }
                     }
+                    DatePicker(openingDateLabel, selection: $openingDate, displayedComponents: [.date, .hourAndMinute])
+                    Picker("Currency", selection: $currency) {
+                        ForEach(CommonCurrencies.codes, id: \.self) { Text($0).tag($0) }
+                    }
+                    LabeledAmountField(label: "Original Amount", amount: $amountText, currencyCode: currency)
+                    if debt != nil {
+                        LabeledContent(
+                            "Remaining Balance",
+                            value: CurrencyFormatter.format(debt?.remainingAmount ?? 0, currencyCode: currency)
+                        )
+                    } else if createsLinkedTransactions {
+                        Picker("Account", selection: $selectedAccount) {
+                            Text("Select").tag(Optional<Account>.none)
+                            ForEach(AccountPreferences.visibleAccounts(accounts)) { account in
+                                Text(account.selectionLabel).tag(Optional(account))
+                            }
+                        }
+                    }
+                    Toggle("Create linked transaction", isOn: $createsLinkedTransactions)
+                    Toggle("Due Date", isOn: $hasDueDate)
+                    if hasDueDate {
+                        DatePicker("Due", selection: $dueDate, displayedComponents: .date)
+                    }
+                    TextField("Note", text: $note)
                 }
-                Toggle("Create linked transaction", isOn: $createsLinkedTransactions)
-                Toggle("Due Date", isOn: $hasDueDate)
-                if hasDueDate {
-                    DatePicker("Due", selection: $dueDate, displayedComponents: .date)
-                }
-                TextField("Note", text: $note)
+                .accentListRows()
             }
             .dismissKeyboardOnTap()
             .navigationTitle(debt == nil ? "New Debt" : "Edit Debt")
+            .accentTintedBackground()
             .toolbar {
                 FormLeadingToolbar(
                     onCancel: { dismiss() },
@@ -1084,7 +1099,7 @@ struct DebtDetailView: View {
                 LabeledContent("Linked transactions", value: debt.createsLinkedTransactions ? "On" : "Off")
             }
 
-            Section("Record Repayment") {
+            Section {
                 if isSettled {
                     Label("Fully repaid", systemImage: "checkmark.seal.fill")
                         .foregroundStyle(.secondary)
@@ -1108,9 +1123,11 @@ struct DebtDetailView: View {
                         applyRepayment()
                     }
                 }
+            } header: {
+                AccentListSectionHeader(title: "Record Repayment")
             }
 
-            Section("Linked Transactions") {
+            Section {
                 if debt.createsLinkedTransactions {
                     if !sortedLinkedTransactions.isEmpty {
                         ForEach(sortedLinkedTransactions) { transaction in
@@ -1125,9 +1142,12 @@ struct DebtDetailView: View {
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
+            } header: {
+                AccentListSectionHeader(title: "Linked Transactions")
             }
         }
         .navigationTitle(debt.name)
+        .accentTintedBackground()
         .onAppear {
             DebtService.recalculateRemaining(for: debt)
             if selectedAccount == nil {
@@ -1217,14 +1237,16 @@ struct GoalsView: View {
                             GoalDetailPreviewView(goal: goal)
                         }, actions: goalRowActions(goal))
                     }
+                    .accentListRows()
                 }
                 .listStyle(.insetGrouped)
+                .scrollContentBackground(.hidden)
             }
         }
-        .sheet(item: $selectedGoal) { goal in
+        .accentSheet(item: $selectedGoal) { goal in
             GoalFormView(goal: goal)
         }
-        .sheet(item: $detailGoal) { goal in
+        .accentSheet(item: $detailGoal) { goal in
             NavigationStack {
                 GoalDetailView(goal: goal)
                     .toolbar {
@@ -1318,35 +1340,39 @@ struct GoalFormView: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Name", text: $name)
-                LabeledAmountField(
-                    label: "Target Amount",
-                    amount: $targetText,
-                    currencyCode: AppSettings.shared.baseCurrency
-                )
-                if goal != nil {
+                Section {
+                    TextField("Name", text: $name)
                     LabeledAmountField(
-                        label: "Current Saved",
-                        amount: $currentText,
+                        label: "Target Amount",
+                        amount: $targetText,
                         currencyCode: AppSettings.shared.baseCurrency
                     )
-                }
-                TextField("Note", text: $note, axis: .vertical)
-                Picker("Credit to Account", selection: $linkedAccount) {
-                    Text("None").tag(Optional<Account>.none)
-                    ForEach(accounts) { account in
-                        Text(account.selectionLabel).tag(Optional(account))
+                    if goal != nil {
+                        LabeledAmountField(
+                            label: "Current Saved",
+                            amount: $currentText,
+                            currencyCode: AppSettings.shared.baseCurrency
+                        )
+                    }
+                    TextField("Note", text: $note, axis: .vertical)
+                    Picker("Credit to Account", selection: $linkedAccount) {
+                        Text("None").tag(Optional<Account>.none)
+                        ForEach(accounts) { account in
+                            Text(account.selectionLabel).tag(Optional(account))
+                        }
+                    }
+                    SymbolPickerGrid(selectedSymbol: $icon)
+                    ColorPickerGrid(selectedHex: $colorHex)
+                    Toggle("Target Date", isOn: $hasTargetDate)
+                    if hasTargetDate {
+                        DatePicker("Date", selection: $targetDate, displayedComponents: .date)
                     }
                 }
-                SymbolPickerGrid(selectedSymbol: $icon)
-                ColorPickerGrid(selectedHex: $colorHex)
-                Toggle("Target Date", isOn: $hasTargetDate)
-                if hasTargetDate {
-                    DatePicker("Date", selection: $targetDate, displayedComponents: .date)
-                }
+                .accentListRows()
             }
             .dismissKeyboardOnTap()
             .navigationTitle(goal == nil ? "New Goal" : "Edit Goal")
+            .accentTintedBackground()
             .toolbar {
                 FormLeadingToolbar(
                     onCancel: { dismiss() },
@@ -1448,7 +1474,7 @@ struct GoalDetailView: View {
                 }
             }
 
-            Section("Add Contribution") {
+            Section {
                 if goal.isCompleted {
                     Label("Goal completed", systemImage: "checkmark.seal.fill")
                         .foregroundStyle(.secondary)
@@ -1467,9 +1493,12 @@ struct GoalDetailView: View {
                         contribute()
                     }
                 }
+            } header: {
+                AccentListSectionHeader(title: "Add Contribution")
             }
         }
         .navigationTitle(goal.name)
+        .accentTintedBackground()
         .toolbar {
             if !goal.isCompleted {
                 ToolbarItem(placement: .topBarTrailing) {

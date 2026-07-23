@@ -26,32 +26,76 @@ struct SettingsView: View {
 
     var body: some View {
         List {
-            Section("Management") {
-                NavigationLink("Accounts") { AccountsListView() }
-                NavigationLink("Categories") { CategoriesListView() }
+            Section {
+                NavigationLink {
+                    AccountsListView()
+                } label: {
+                    settingsLabel("Accounts", systemImage: "creditcard.fill", tint: .blue)
+                }
+                NavigationLink {
+                    CategoriesListView()
+                } label: {
+                    settingsLabel("Categories", systemImage: "tag.fill", tint: .orange)
+                }
+            } header: {
+                AccentListSectionHeader(title: "Management")
             }
+            .accentListRows()
 
-            Section("Preferences") {
-                NavigationLink("Appearance") { AppearanceSettingsView() }
-                NavigationLink("Currency") { CurrencySettingsView() }
-                NavigationLink("Notifications") { NotificationSettingsView() }
+            Section {
+                NavigationLink {
+                    AppearanceSettingsView()
+                } label: {
+                    settingsLabel("Appearance", systemImage: "paintbrush.fill", tint: .purple)
+                }
+                NavigationLink {
+                    CurrencySettingsView()
+                } label: {
+                    settingsLabel("Currency", systemImage: "dollarsign.circle.fill", tint: .green)
+                }
+                NavigationLink {
+                    NotificationSettingsView()
+                } label: {
+                    settingsLabel("Notifications", systemImage: "bell.badge.fill", tint: .red)
+                }
+            } header: {
+                AccentListSectionHeader(title: "Preferences")
             }
+            .accentListRows()
 
-            Section("Data") {
-                Button("Export JSON") { exportJSON() }
-                NavigationLink("Import JSON") {
+            Section {
+                Button {
+                    exportJSON()
+                } label: {
+                    settingsLabel("Export JSON", systemImage: "square.and.arrow.up.fill", tint: .indigo)
+                }
+                .foregroundStyle(.primary)
+                NavigationLink {
                     JSONImportView()
+                } label: {
+                    settingsLabel("Import JSON", systemImage: "square.and.arrow.down.fill", tint: .teal)
                 }
-                NavigationLink("Import Purseful Web Backup") {
+                NavigationLink {
                     PursefulWebImportView()
+                } label: {
+                    settingsLabel("Import Purseful Web Backup", systemImage: "globe", tint: .cyan)
                 }
-                Button("Clear All Data", role: .destructive) {
+                Button(role: .destructive) {
                     showClearDataAlert = true
+                } label: {
+                    settingsLabel("Clear All Data", systemImage: "trash.fill", tint: .red)
                 }
+            } header: {
+                AccentListSectionHeader(title: "Data")
             }
+            .accentListRows()
 
-            Section("About") {
-                LabeledContent("Version", value: appVersionLabel)
+            Section {
+                LabeledContent {
+                    Text(appVersionLabel)
+                } label: {
+                    settingsLabel("Version", systemImage: "info.circle.fill", tint: .gray)
+                }
                 HStack(spacing: 4) {
                     Text("Made with")
                     Image(systemName: "heart.fill")
@@ -60,8 +104,12 @@ struct SettingsView: View {
                     Link("imflawlezz", destination: URL(string: "https://github.com/imflawlezz")!)
                 }
                 .font(.subheadline)
+            } header: {
+                AccentListSectionHeader(title: "About")
             }
+            .accentListRows()
         }
+        .accentTintedBackground()
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.large)
         .fileExporter(
@@ -103,6 +151,21 @@ struct SettingsView: View {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"
         let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "—"
         return "\(version) (Build \(build))"
+    }
+
+    private func settingsLabel(_ title: String, systemImage: String, tint: Color) -> some View {
+        Label {
+            Text(title)
+        } icon: {
+            ZStack {
+                Circle()
+                    .fill(tint.opacity(0.18))
+                    .frame(width: 28, height: 28)
+                Image(systemName: systemImage)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(tint)
+            }
+        }
     }
 
     private func clearAllData() {
@@ -153,18 +216,22 @@ struct CurrencySettingsView: View {
 
     var body: some View {
         Form {
-            Picker("Base Currency", selection: $baseCurrency) {
-                ForEach(CommonCurrencies.codes, id: \.self) { code in
-                    Text(code).tag(code)
+            Section {
+                Picker("Base Currency", selection: $baseCurrency) {
+                    ForEach(CommonCurrencies.codes, id: \.self) { code in
+                        Text(code).tag(code)
+                    }
                 }
+                .onChange(of: baseCurrency) { _, newValue in
+                    AppSettings.shared.baseCurrency = newValue
+                }
+                Text("All totals and reports use the base currency with live conversion rates.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
-            .onChange(of: baseCurrency) { _, newValue in
-                AppSettings.shared.baseCurrency = newValue
-            }
-            Text("All totals and reports use the base currency with live conversion rates.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            .accentListRows()
         }
+        .accentTintedBackground()
         .navigationTitle("Currency")
     }
 }
@@ -175,16 +242,22 @@ struct AppearanceSettingsView: View {
     var body: some View {
         Form {
             Section {
-                Text("Accent color is used for buttons, tab highlights, checkmarks, and other interactive elements.")
+                Text("Accent color tints interactive controls, screen backgrounds, and solid surfaces.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+            .accentListRows()
 
-            Section("Accent Color") {
+            Section {
                 ColorPickerGrid(selectedHex: $settings.accentColorHex)
                     .padding(.vertical, 4)
+            } header: {
+                AccentListSectionHeader(title: "Accent Color")
             }
+            .accentListRows()
         }
+        .accentTintedBackground()
+        .id(settings.accentColorHex)
         .navigationTitle("Appearance")
     }
 }
@@ -206,6 +279,7 @@ struct NotificationSettingsView: View {
                     }
                 }
             }
+            .accentListRows()
 
             Section {
                 Toggle("Weekly Summary", isOn: $weeklySummary)
@@ -223,7 +297,9 @@ struct NotificationSettingsView: View {
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
+            .accentListRows()
         }
+        .accentTintedBackground()
         .navigationTitle("Notifications")
         .task {
             await refreshAuthorizationStatus()
@@ -281,7 +357,9 @@ struct AccountsListView: View {
                     ])
             }
             .onMove(perform: moveAccounts)
+            .accentListRows()
         }
+        .accentTintedBackground()
         .navigationTitle("Accounts")
         .environment(\.editMode, $editMode)
         .onAppear {
@@ -302,10 +380,10 @@ struct AccountsListView: View {
                 ToolbarIcon.add { showAdd = true }
             }
         }
-        .sheet(isPresented: $showAdd) {
+        .accentSheet(isPresented: $showAdd) {
             AccountFormView()
         }
-        .sheet(item: $selectedAccount) { account in
+        .accentSheet(item: $selectedAccount) { account in
             AccountFormView(account: account)
         }
     }
@@ -399,22 +477,26 @@ struct AccountFormView: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Name", text: $name)
-                Picker("Type", selection: $type) {
-                    ForEach(AccountType.allCases) { t in
-                        Text(t.displayName).tag(t)
+                Section {
+                    TextField("Name", text: $name)
+                    Picker("Type", selection: $type) {
+                        ForEach(AccountType.allCases) { t in
+                            Text(t.displayName).tag(t)
+                        }
                     }
+                    Picker("Currency", selection: $currency) {
+                        ForEach(CommonCurrencies.codes, id: \.self) { Text($0).tag($0) }
+                    }
+                    LabeledAmountField(label: "Initial Balance", amount: $initialBalanceText, currencyCode: currency)
+                    Toggle("Include in Net Worth", isOn: $includeInTotal)
+                    SymbolPickerGrid(selectedSymbol: $icon)
+                    ColorPickerGrid(selectedHex: $colorHex)
                 }
-                Picker("Currency", selection: $currency) {
-                    ForEach(CommonCurrencies.codes, id: \.self) { Text($0).tag($0) }
-                }
-                LabeledAmountField(label: "Initial Balance", amount: $initialBalanceText, currencyCode: currency)
-                Toggle("Include in Net Worth", isOn: $includeInTotal)
-                SymbolPickerGrid(selectedSymbol: $icon)
-                ColorPickerGrid(selectedHex: $colorHex)
+                .accentListRows()
             }
             .dismissKeyboardOnTap()
             .navigationTitle(account == nil ? "New Account" : "Edit Account")
+            .accentTintedBackground()
             .toolbar {
                 FormLeadingToolbar(
                     onCancel: { dismiss() },
@@ -484,32 +566,39 @@ struct CategoriesListView: View {
     var body: some View {
         List {
             if hiddenCategoryCount > 0 {
-                Toggle("Show Hidden", isOn: $showHiddenCategories)
+                Section {
+                    Toggle("Show Hidden", isOn: $showHiddenCategories)
+                }
+                .accentListRows()
             }
 
             ForEach(listedCategories) { category in
-                Section(category.name) {
+                Section {
                     categoryRow(category)
                     ForEach(category.children?.filter { showHiddenCategories || !$0.isHidden } ?? []) { child in
                         categoryRow(child)
                             .padding(.leading, 8)
                     }
+                } header: {
+                    AccentListSectionHeader(title: category.name)
                 }
+                .accentListRows()
             }
         }
+        .accentTintedBackground()
         .navigationTitle("Categories")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 ToolbarIcon.add { showAdd = true }
             }
         }
-        .sheet(isPresented: $showAdd) {
+        .accentSheet(isPresented: $showAdd) {
             CategoryFormView()
         }
-        .sheet(item: $selectedCategory) { category in
+        .accentSheet(item: $selectedCategory) { category in
             CategoryEditView(category: category)
         }
-        .sheet(item: $mergeSource) { source in
+        .accentSheet(item: $mergeSource) { source in
             CategoryMergeView(source: source, categories: categories)
         }
     }
@@ -636,22 +725,26 @@ struct CategoryFormView: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Name", text: $name)
-                Picker("Type", selection: $type) {
-                    Text("Expense").tag(CategoryType.expense)
-                    Text("Income").tag(CategoryType.income)
-                }
-                Picker("Parent", selection: $parent) {
-                    Text("None").tag(Optional<Category>.none)
-                    ForEach(categories.filter { $0.parent == nil && !$0.isHidden }) { category in
-                        CategoryNameLabel.picker(category: category).tag(Optional(category))
+                Section {
+                    TextField("Name", text: $name)
+                    Picker("Type", selection: $type) {
+                        Text("Expense").tag(CategoryType.expense)
+                        Text("Income").tag(CategoryType.income)
                     }
+                    Picker("Parent", selection: $parent) {
+                        Text("None").tag(Optional<Category>.none)
+                        ForEach(categories.filter { $0.parent == nil && !$0.isHidden }) { category in
+                            CategoryNameLabel.picker(category: category).tag(Optional(category))
+                        }
+                    }
+                    SymbolPickerGrid(selectedSymbol: $icon)
+                    ColorPickerGrid(selectedHex: $colorHex)
                 }
-                SymbolPickerGrid(selectedSymbol: $icon)
-                ColorPickerGrid(selectedHex: $colorHex)
+                .accentListRows()
             }
             .dismissKeyboardOnTap()
             .navigationTitle("New Category")
+            .accentTintedBackground()
             .toolbar {
                 FormLeadingToolbar(
                     onCancel: { dismiss() },
@@ -686,23 +779,27 @@ struct CategoryEditView: View {
     var body: some View {
         NavigationStack {
             Form {
-                if category.isSystem {
-                    LabeledContent("Name", value: category.name)
-                    LabeledContent("Type", value: category.type == .income ? "Income" : "Expense")
-                    Text("System categories keep their name and type, but you can customize the icon and color.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                } else {
-                    TextField("Name", text: $name)
-                    Picker("Type", selection: $type) {
-                        Text("Expense").tag(CategoryType.expense)
-                        Text("Income").tag(CategoryType.income)
+                Section {
+                    if category.isSystem {
+                        LabeledContent("Name", value: category.name)
+                        LabeledContent("Type", value: category.type == .income ? "Income" : "Expense")
+                        Text("System categories keep their name and type, but you can customize the icon and color.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        TextField("Name", text: $name)
+                        Picker("Type", selection: $type) {
+                            Text("Expense").tag(CategoryType.expense)
+                            Text("Income").tag(CategoryType.income)
+                        }
                     }
+                    SymbolPickerGrid(selectedSymbol: $icon)
+                    ColorPickerGrid(selectedHex: $colorHex)
                 }
-                SymbolPickerGrid(selectedSymbol: $icon)
-                ColorPickerGrid(selectedHex: $colorHex)
+                .accentListRows()
             }
             .navigationTitle("Edit Category")
+            .accentTintedBackground()
             .toolbar {
                 FormLeadingToolbar(
                     onCancel: { dismiss() },
@@ -747,14 +844,18 @@ struct CategoryMergeView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Text("Merge \"\(source.name)\" into:")
-                Picker("Target Category", selection: $target) {
-                    ForEach(categories.filter { $0.id != source.id && !$0.isHidden }) { category in
-                        CategoryNameLabel.picker(category: category).tag(Optional(category))
+                Section {
+                    Text("Merge \"\(source.name)\" into:")
+                    Picker("Target Category", selection: $target) {
+                        ForEach(categories.filter { $0.id != source.id && !$0.isHidden }) { category in
+                            CategoryNameLabel.picker(category: category).tag(Optional(category))
+                        }
                     }
                 }
+                .accentListRows()
             }
             .navigationTitle("Merge Category")
+            .accentTintedBackground()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     ToolbarIcon.cancel { dismiss() }
