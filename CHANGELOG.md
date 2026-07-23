@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Accent-tinted page washes and Form/List surfaces (Liquid Glass unchanged)
+- Tinted circular icons on Settings rows
+- Payment calendar toolbar entry on Debts and Goals segments
+
+### Fixed
+
+- Polish fiscal receipt OCR: reading order, total vs VAT/tender, Pepco/VIVE-style NIP and merchants
+- PDF report ledger omitted the parent remainder on split transactions
+- Transaction multi-select checkbox no longer fades on toggle
+
 ## [1.1.0] - 2026-06-15
 
 ### Added

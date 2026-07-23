@@ -39,7 +39,7 @@ Swift Testing (`@Test`) and XCTest (`XCTestCase`) are both used.
 | `BudgetServiceTests` | XCTest | Progress, effective limit, **rollover processing** |
 | `BalanceCalculatorTests` | XCTest | Currency conversion, split category totals, stored exchange rate |
 | `ImportExportTests` | Swift Testing | JSON v2 round-trip, v1 backward compat |
-| `ReceiptParserTests` | XCTest | Polish/English totals, dates, merchants |
+| `ReceiptParserTests` | XCTest | Polish fiscal totals (incl. VIVE/Pepco fixtures), dates, merchants, NIP |
 | `DebtServiceTests` | Swift Testing | Opening/repayment txs, remaining balance |
 | `GoalUseCaseTests` | Swift Testing | Completion transaction when linked account set |
 | `NotificationHelpersTests` | XCTest | Budget dedup keys, next Monday |
@@ -77,7 +77,7 @@ Used across import, goal, and debt tests.
 | Budget spent/rollover | `BudgetServiceTests` |
 | Currency conversion | `BalanceCalculatorTests` |
 | Export schema | `ImportExportTests` |
-| Receipt keywords | `ReceiptParserTests` |
+| Receipt fiscal totals | `ReceiptParserTests` |
 | Notification date math | `NotificationHelpersTests` |
 | Goal completion side effects | `GoalUseCaseTests` |
 | Debt linking | `DebtServiceTests` |

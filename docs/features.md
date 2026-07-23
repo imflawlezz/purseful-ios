@@ -40,7 +40,7 @@ Legend: ✅ Done · ⚠️ Partial · ❌ Not implemented · 🚫 Deferred by ch
 | Batch edit | ❌ | |
 | Recurring toggle on transaction | ❌ | Use planned payments instead |
 | Photo attachment (picker) | ❌ | Receipt scan stores JPEG |
-| Receipt OCR | ⚠️ | Vision + parser; merchant/title, attachment, low-confidence alert |
+| Receipt OCR | ✅ | Vision + Polish fiscal parser; merchant/title, attachment, low-confidence alert |
 
 ---
 
@@ -74,7 +74,7 @@ Legend: ✅ Done · ⚠️ Partial · ❌ Not implemented · 🚫 Deferred by ch
 | Feature | Status | Notes |
 |---------|--------|-------|
 | Planned payments list | ✅ | |
-| Calendar month grid | ✅ | |
+| Calendar month grid | ✅ | Toolbar on Payments, Debts, and Goals |
 | Mark as paid → transaction | ✅ | |
 | Auto-create on due date | ✅ | `RecurrenceProcessor` |
 | Payment reminders | ✅ | Configurable days before |
@@ -106,7 +106,7 @@ Legend: ✅ Done · ⚠️ Partial · ❌ Not implemented · 🚫 Deferred by ch
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Appearance (accent) | ✅ | |
+| Appearance (accent) | ✅ | Page wash + solid Form/List surfaces; glass effects untinted |
 | App icon picker | ❌ | |
 | Currency & base currency | ✅ | |
 | Notifications settings | ✅ | Permission + weekly summary |

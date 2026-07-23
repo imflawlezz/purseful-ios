@@ -163,7 +163,8 @@ Views should **not** call `modelContext` directly except in legacy spots (e.g. `
 | `ExportService` / `ImportService` | JSON v2 |
 | `ReportSummaryBuilder` / `ReportPDFExportService` | Reports PDF export |
 | `NotificationService` / `NotificationScheduler` | Local notifications |
-| `ReceiptScanner` / `ReceiptParser` | On-device OCR |
+| `ReceiptScanner` / `ReceiptParser` | On-device OCR (PL fiscal heuristics) |
+| `AccentTheme` | Accent page wash and solid list/form surfaces |
 | `SpotlightService` | Core Spotlight indexing |
 | `WidgetDataSync` | App Group JSON for widgets |
 | `PursefulWebImportService` | Import from web app backup |
