@@ -108,10 +108,11 @@ enum ReportSummaryBuilder {
         baseCurrency: String,
         exchangeRates: [String: Decimal]
     ) -> [ReportPDFLine] {
-        let childrenByParent = Dictionary(
-            grouping: transactions.filter(\.isSplitChild),
-            by: { $0.parentTransactionID }
-        )
+        var childrenByParent: [UUID: [Transaction]] = [:]
+        for child in transactions where child.isSplitChild {
+            guard let parentID = child.parentTransactionID else { continue }
+            childrenByParent[parentID, default: []].append(child)
+        }
 
         var lines: [ReportPDFLine] = []
         for parent in parentsInPeriod {
@@ -121,21 +122,38 @@ enum ReportSummaryBuilder {
                     makeLine(
                         parent: parent,
                         amountSource: parent,
+                        amount: parent.amount,
                         baseCurrency: baseCurrency,
                         exchangeRates: exchangeRates
                     )
                 )
-            } else {
-                for child in children {
-                    lines.append(
-                        makeLine(
-                            parent: parent,
-                            amountSource: child,
-                            baseCurrency: baseCurrency,
-                            exchangeRates: exchangeRates
-                        )
+                continue
+            }
+
+            for child in children {
+                lines.append(
+                    makeLine(
+                        parent: parent,
+                        amountSource: child,
+                        amount: child.amount,
+                        baseCurrency: baseCurrency,
+                        exchangeRates: exchangeRates
                     )
-                }
+                )
+            }
+
+            let childTotal = children.reduce(Decimal.zero) { $0 + $1.amount }
+            let remainder = parent.amount - childTotal
+            if remainder > 0 {
+                lines.append(
+                    makeLine(
+                        parent: parent,
+                        amountSource: parent,
+                        amount: remainder,
+                        baseCurrency: baseCurrency,
+                        exchangeRates: exchangeRates
+                    )
+                )
             }
         }
 
@@ -145,11 +163,12 @@ enum ReportSummaryBuilder {
     private static func makeLine(
         parent: Transaction,
         amountSource: Transaction,
+        amount: Decimal,
         baseCurrency: String,
         exchangeRates: [String: Decimal]
     ) -> ReportPDFLine {
         let converted = BalanceCalculator.convertedAmount(
-            amountSource.amount,
+            amount,
             for: amountSource,
             baseCurrency: baseCurrency,
             exchangeRates: exchangeRates

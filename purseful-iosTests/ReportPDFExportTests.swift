@@ -15,18 +15,16 @@ final class ReportPDFExportTests: XCTestCase {
         let food = Category(name: "Food", type: .expense)
         let drinks = Category(name: "Drinks", type: .expense)
 
-        let parent = Transaction(title: "Dinner", amount: 100, type: .expense, date: Date(), account: account)
-        parent.id = UUID()
-
-        let foodChild = Transaction(
+        let parent = Transaction(
             title: "Dinner",
-            amount: 60,
+            amount: 100,
             type: .expense,
             date: Date(),
             account: account,
-            category: food,
-            parentTransactionID: parent.id
+            category: food
         )
+        parent.id = UUID()
+
         let drinksChild = Transaction(
             title: "Dinner",
             amount: 40,
@@ -38,7 +36,7 @@ final class ReportPDFExportTests: XCTestCase {
         )
 
         let result = ReportSummaryBuilder.build(
-            transactions: [parent, foodChild, drinksChild],
+            transactions: [parent, drinksChild],
             from: Date.distantPast,
             through: Date.distantFuture,
             baseCurrency: "PLN",
@@ -47,6 +45,13 @@ final class ReportPDFExportTests: XCTestCase {
 
         XCTAssertEqual(result.lines.count, 2)
         XCTAssertEqual(Set(result.lines.map(\.categoryName)), Set(["Food", "Drinks"]))
+
+        let foodLine = result.lines.first { $0.categoryName == "Food" }
+        let drinksLine = result.lines.first { $0.categoryName == "Drinks" }
+        XCTAssertNotNil(foodLine)
+        XCTAssertNotNil(drinksLine)
+        XCTAssertTrue(foodLine?.amountLabel.contains("60") == true, "Food remainder should be 60, got \(foodLine?.amountLabel ?? "nil")")
+        XCTAssertTrue(drinksLine?.amountLabel.contains("40") == true, "Drinks split should be 40, got \(drinksLine?.amountLabel ?? "nil")")
         XCTAssertFalse(result.lines.contains { $0.categoryName == "Other Expense" })
     }
 
