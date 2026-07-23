@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-07-23
+
 ### Added
 
 - Accent-tinted page washes and Form/List surfaces (Liquid Glass unchanged)
