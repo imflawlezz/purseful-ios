@@ -1,8 +1,8 @@
 # Features
 
-Status matrix for the **current codebase** (v1.1.0).
+Status for **v1.1.0**.
 
-Legend: ✅ Done · ⚠️ Partial · ❌ Not implemented · 🚫 Deferred by choice
+Legend: ✅ Done · ⚠️ Partial · ❌ Not implemented · 🚫 Deferred
 
 ---
 
@@ -92,8 +92,8 @@ Legend: ✅ Done · ⚠️ Partial · ❌ Not implemented · 🚫 Deferred by ch
 | Feature | Status | Notes |
 |---------|--------|-------|
 | Spending by category (chart) | ✅ | Swift Charts |
-| Cash flow over time | ⚠️ | Weekly buckets only |
-| Net worth trend | ✅ | |
+| Cash flow over time | ✅ | Day / week / month buckets by period length |
+| Net worth trend | ✅ | Adaptive sampling + thinned axis labels |
 | Spending vs prior period | ✅ | |
 | Top payees | ✅ | |
 | Daily average | ✅ | |
@@ -110,6 +110,9 @@ Legend: ✅ Done · ⚠️ Partial · ❌ Not implemented · 🚫 Deferred by ch
 | App icon picker | ❌ | |
 | Currency & base currency | ✅ | |
 | Notifications settings | ✅ | Permission + weekly summary |
+| App language | ✅ | Opens iOS Settings (per-app language) |
+| Donate / Buy Me a Coffee | ✅ | About → external BMC link |
+| Localization (String Catalogs) | ✅ | en + pl, ru, uk, de, es, fr |
 | JSON export/import | ✅ | Format v2, merge mode |
 | Purseful Web backup import | ✅ | Extra |
 | CSV export/import | 🚫 | |
@@ -135,11 +138,11 @@ Legend: ✅ Done · ⚠️ Partial · ❌ Not implemented · 🚫 Deferred by ch
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Small — account balance | ✅ | First visible account |
-| Medium — budget progress | ✅ | First budget by name sort |
-| Large — recent transactions | ✅ | |
-| Lock screen — today spend | ✅ | |
-| Widget configuration (pick account) | ❌ | |
+| Balances (small/medium) | ✅ | Primary + 4 secondary accounts; medium adds spent today + upcoming payments |
+| Budget (medium) | ✅ | Configurable; remaining + ring |
+| Recent transactions (large) | ✅ | Last 6 + spent today + next due |
+| Lock Screen — spent today | ✅ | Inline / rectangular (no circular) |
+| Widget configuration | ✅ | Account (Balances), budget |
 | Deep links | ✅ | `purseful://` |
 
 See [widgets.md](widgets.md).

@@ -166,7 +166,7 @@ Views should **not** call `modelContext` directly except in legacy spots (e.g. `
 | `ReceiptScanner` / `ReceiptParser` | On-device OCR (PL fiscal heuristics) |
 | `AccentTheme` | Accent page wash and solid list/form surfaces |
 | `SpotlightService` | Core Spotlight indexing |
-| `WidgetDataSync` | App Group JSON for widgets |
+| `WidgetDataSync` | App Group JSON snapshot for WidgetKit (accounts, budgets, goals, accent) |
 | `PursefulWebImportService` | Import from web app backup |
 | `BankSyncService` / `EnableBankingService` | Prepared, disabled in v1 |
 
@@ -185,6 +185,8 @@ Views should **not** call `modelContext` directly except in legacy spots (e.g. `
 | 4 Reports | `ReportsView` |
 
 Settings is reached from the Dashboard toolbar. Deep links: URL scheme `purseful://`, widget links, Spotlight via `AppState.handleSpotlightIdentifier`.
+
+User-facing copy lives in String Catalogs — see [i18n.md](i18n.md).
 
 ---
 

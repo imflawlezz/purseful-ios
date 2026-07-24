@@ -1,7 +1,5 @@
 # Purseful documentation
 
-This folder describes **how the app is built today**, not only what was originally planned.
-
 | If you want to… | Read |
 |-----------------|------|
 | Set up the project | [../README.md](../README.md) |
@@ -11,6 +9,7 @@ This folder describes **how the app is built today**, not only what was original
 | Debug notifications | [notifications.md](notifications.md) |
 | Backup/restore JSON | [import-export.md](import-export.md) |
 | Work on widgets | [widgets.md](widgets.md) |
+| Localize UI copy | [i18n.md](i18n.md) |
 | Run or add tests | [testing.md](testing.md) |
 | Understand a design choice | [decisions/](decisions/) |
 | License terms | [../LICENSE](../LICENSE) |
@@ -23,6 +22,6 @@ Update these docs when you change:
 - **data-model.md** — SwiftData schema or export format version
 - **features.md** — ship or defer a feature
 - **notifications.md** — alert logic, triggers, dedup keys
-- **decisions/** — any non-obvious tradeoff (add a new ADR)
-
-Use **features.md** as the living status matrix when the implementation diverges from earlier planning notes.
+- **widgets.md** — widget kinds, snapshot payload, App Group sync
+- **i18n.md** — String Catalogs, locales, display helpers
+- **decisions/** — non-obvious tradeoffs (new ADR)

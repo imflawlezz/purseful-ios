@@ -56,7 +56,7 @@ LICENSE                       # Source-available license
 CHANGELOG.md                  # Release history
 ```
 
-Canonical UI code lives under `purseful-ios/Models/Features/`. Ignore any stale duplicate paths if they appear locally.
+Canonical UI code lives under `purseful-ios/Models/Features/`.
 
 ---
 
@@ -83,6 +83,7 @@ See [docs/architecture.md](docs/architecture.md) for diagrams and data flows.
 | [docs/notifications.md](docs/notifications.md) | Alert types, scheduling, dedup |
 | [docs/import-export.md](docs/import-export.md) | JSON backup format v2 |
 | [docs/widgets.md](docs/widgets.md) | WidgetKit extension & snapshot sync |
+| [docs/i18n.md](docs/i18n.md) | String Catalogs & locales |
 | [docs/testing.md](docs/testing.md) | Test targets & coverage map |
 | [docs/decisions/](docs/decisions/) | Architecture decision records (ADRs) |
 | [LICENSE](LICENSE) | Source-available license terms |
@@ -100,7 +101,7 @@ See [docs/architecture.md](docs/architecture.md) for diagrams and data flows.
 
 ## Deferred
 
-These are intentionally out of scope for the current release:
+Out of scope for the current release:
 
 - CloudKit / iCloud sync
 - Bank sync UI & Enable Banking production wiring
