@@ -3,9 +3,24 @@
 Native iOS personal finance app — SwiftUI, SwiftData, WidgetKit. Free, on-device first, no paywalls.
 
 **Bundle ID:** `dev.imflawlezz.purseful-ios`  
-**Version:** 1.1.0  
+**Version:** 1.2.0  
 **Minimum deployment:** iOS 26.0  
-**App Group:** `group.dev.imflawlezz.purseful-ios`
+**App Group:** `group.dev.imflawlezz.purseful-ios`  
+**Locales:** English (source) · Polish · Russian · Ukrainian · German · Spanish · French
+
+---
+
+## What’s in 1.2.0
+
+- Five-tab app: Dashboard, Transactions, Budgets, Planning, Reports
+- Accounts, categories, budgets, planned payments, debts, goals, shopping list
+- Multi-currency with cached Frankfurter rates
+- Receipt OCR (Vision + Polish fiscal parser) and PDF report export
+- WidgetKit suite: Balances, Budget, Recent transactions, Lock Screen spent today
+- String Catalogs for app and widgets; per-app language via Settings
+- JSON backup (format v2) and Purseful Web import
+
+Full matrix: [docs/features.md](docs/features.md). Release notes: [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
@@ -40,18 +55,19 @@ Or use **Product → Test** in Xcode (`⌘U`).
 
 ```
 purseful-ios/                 # Main app target
-├── App/                      # Entry, DI, settings, bootstrap
+├── App/                      # Entry, DI, settings, bootstrap, widget sync
 ├── Core/
 │   ├── Domain/UseCases/      # Write paths & orchestration
 │   └── Persistence/          # SwiftData repository
 ├── Models/                   # SwiftData @Model types
 │   └── Features/             # SwiftUI screens (by tab/feature)
-├── Services/                 # Pure logic, calculators, I/O
-└── Shared/                     # UI components, formatters, extensions
+├── Services/                 # Pure logic, calculators, I/O, widget snapshot
+├── Shared/                   # UI, formatters, theme, localization helpers
+└── Localizable.xcstrings     # App String Catalog
 
-PursefulWidgets/              # WidgetKit extension
+PursefulWidgets/              # WidgetKit extension + Localizable.xcstrings
 purseful-iosTests/            # Unit tests
-docs/                         # Project documentation (start here)
+docs/                         # Project documentation (start at docs/README.md)
 LICENSE                       # Source-available license
 CHANGELOG.md                  # Release history
 ```
@@ -64,8 +80,9 @@ Canonical UI code lives under `purseful-ios/Models/Features/`.
 
 - **Reads:** SwiftUI views use `@Query` against SwiftData.
 - **Writes:** Views call **use cases** via `@Environment(DependencyContainer.self)`.
-- **Services:** Stateless helpers (budget math, OCR, JSON/PDF export, notifications).
+- **Services:** Stateless helpers (budget math, OCR, JSON/PDF export, notifications, widget snapshot).
 - **Persistence:** Single SwiftData store in the App Group container (shared with widgets).
+- **Localization:** English keys in String Catalogs; stored system names use `localizedDisplayName`.
 
 See [docs/architecture.md](docs/architecture.md) for diagrams and data flows.
 
@@ -96,6 +113,7 @@ See [docs/architecture.md](docs/architecture.md) for diagrams and data flows.
 - Pass `DependencyContainer` explicitly to background helpers (e.g. `WidgetSyncObserver`) that miss SwiftUI environment.
 - Do not store secrets in SwiftData — use Keychain (`KeychainService`) for future bank tokens.
 - Recurring bills use **Planned Payments** + `RecurrenceProcessor`, not standalone recurring transactions.
+- UI copy uses English catalog keys; do not localize SF Symbol names, URLs, App Group IDs, or user-entered text.
 
 ---
 
