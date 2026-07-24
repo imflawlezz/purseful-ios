@@ -26,7 +26,7 @@ struct DailySpendCategoryPickerView: View {
 
                 if expenseGroups.isEmpty {
                     Section {
-                        Text("No expense categories available")
+                        Text("No expense categories yet")
                             .foregroundStyle(.secondary)
                     } header: {
                         AccentListSectionHeader(title: "Categories")
@@ -142,7 +142,7 @@ enum NetWorthProjectionCalculator {
 
         let categorySummary: String
         if selectedCategoryIDs.isEmpty {
-            categorySummary = "No daily spend categories selected"
+            categorySummary = String(localized: "No categories selected yet")
         } else {
             categorySummary = DailySpendCalculator.selectedCategoryNames(categories, selectedIDs: selectedCategoryIDs)
                 .joined(separator: ", ")

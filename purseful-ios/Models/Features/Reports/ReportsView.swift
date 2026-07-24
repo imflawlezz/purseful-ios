@@ -87,7 +87,7 @@ struct ReportsView: View {
                         VStack(spacing: 14) {
                             ProgressView()
                                 .controlSize(.large)
-                            Text("Generating PDF…")
+                            Text("Making PDF…")
                                 .font(.subheadline.weight(.semibold))
                         }
                         .padding(.horizontal, 28)
@@ -174,10 +174,10 @@ struct ReportsView: View {
     private var categoryChart: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Spending by Category")
+                Text("Spending by category")
                     .font(.headline)
                 if categorySpending.isEmpty {
-                    Text("No expense data")
+                    Text("No spending yet")
                         .foregroundStyle(.secondary)
                 } else {
                     Chart(categorySpending, id: \.name) { item in
@@ -198,7 +198,7 @@ struct ReportsView: View {
                             HStack(spacing: 8) {
                                 if let category = category(named: item.name) {
                                     CategoryIconView(category: category, size: 16)
-                                    Text(item.name)
+                                    Text(item.name.localizedDisplayName)
                                         .foregroundStyle(Color(hex: category.colorHex))
                                         .lineLimit(1)
                                         .truncationMode(.tail)
@@ -207,7 +207,7 @@ struct ReportsView: View {
                                     Circle()
                                         .fill(categoryColor(for: item.name, fallbackIndex: index))
                                         .frame(width: 8, height: 8)
-                                    Text(item.name)
+                                    Text(item.name.localizedDisplayName)
                                         .lineLimit(1)
                                         .truncationMode(.tail)
                                         .layoutPriority(0)
@@ -244,13 +244,18 @@ struct ReportsView: View {
         return chartColors[fallbackIndex % chartColors.count]
     }
 
-    private var cashFlowBuckets: [(label: String, income: Double, expense: Double)] {
+    private var chartGranularity: ReportChartGranularity {
+        ReportChartGranularity.preferred(from: dateRange.start, to: dateRange.end)
+    }
+
+    private var cashFlowBuckets: [(start: Date, income: Double, expense: Double)] {
         let calendar = Calendar.current
-        let grouped = Dictionary(grouping: filteredTransactions) {
-            calendar.component(.weekOfYear, from: $0.date)
-        }
-        return grouped.keys.sorted().map { week in
-            let items = grouped[week] ?? []
+        let granularity = chartGranularity
+        let starts = granularity.bucketStarts(from: dateRange.start, to: dateRange.end, calendar: calendar)
+
+        return starts.map { start in
+            let end = granularity.bucketEnd(after: start, calendar: calendar)
+            let items = filteredTransactions.filter { $0.date >= start && $0.date < end }
             let income = items
                 .filter { $0.type == .income }
                 .reduce(0.0) {
@@ -275,21 +280,40 @@ struct ReportsView: View {
                         )
                     ).doubleValue
                 }
-            return (label: "W\(week)", income: income, expense: expense)
+            return (start: start, income: income, expense: expense)
         }
     }
 
     private var cashFlowChart: some View {
-        GlassCard {
+        let unit = chartGranularity.calendarComponent
+        return GlassCard {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Cash Flow")
+                Text("Cash flow")
                     .font(.headline)
                 Chart {
-                    ForEach(cashFlowBuckets, id: \.label) { bucket in
-                        BarMark(x: .value("Period", bucket.label), y: .value("Income", bucket.income))
-                            .foregroundStyle(.green)
-                        BarMark(x: .value("Period", bucket.label), y: .value("Expense", -bucket.expense))
-                            .foregroundStyle(.red)
+                    ForEach(cashFlowBuckets, id: \.start) { bucket in
+                        BarMark(
+                            x: .value("Period", bucket.start, unit: unit),
+                            y: .value("Income", bucket.income)
+                        )
+                        .foregroundStyle(.green)
+                        BarMark(
+                            x: .value("Period", bucket.start, unit: unit),
+                            y: .value("Expense", -bucket.expense)
+                        )
+                        .foregroundStyle(.red)
+                    }
+                }
+                .chartXAxis {
+                    AxisMarks(values: .automatic(desiredCount: 6)) { value in
+                        AxisGridLine()
+                        AxisTick()
+                        AxisValueLabel {
+                            if let date = value.as(Date.self) {
+                                Text(chartGranularity.axisLabel(for: date))
+                                    .font(.caption2)
+                            }
+                        }
                     }
                 }
                 .frame(height: 200)
@@ -299,9 +323,9 @@ struct ReportsView: View {
 
     private var netWorthPoints: [(date: Date, value: Double)] {
         let calendar = Calendar.current
-        var points: [(Date, Double)] = []
-        var day = dateRange.start
-        while day <= dateRange.end {
+        let granularity = chartGranularity
+        let sampleDates = granularity.sampleDates(from: dateRange.start, to: dateRange.end, calendar: calendar)
+        return sampleDates.map { day in
             let dayTransactions = transactions.filter { !$0.isSplitChild && $0.date <= day }
             let worth = BalanceCalculator.netWorth(
                 accounts: accounts,
@@ -309,23 +333,33 @@ struct ReportsView: View {
                 baseCurrency: baseCurrency,
                 exchangeRates: exchangeRates
             )
-            points.append((day, NSDecimalNumber(decimal: worth).doubleValue))
-            day = calendar.date(byAdding: .day, value: 7, to: day) ?? dateRange.end.addingTimeInterval(1)
+            return (day, NSDecimalNumber(decimal: worth).doubleValue)
         }
-        return points
     }
 
     private var netWorthChart: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Net Worth Trend")
+                Text("Net worth")
                     .font(.headline)
                 Chart(netWorthPoints, id: \.date) { point in
                     LineMark(
                         x: .value("Date", point.date),
-                        y: .value("Net Worth", point.value)
+                        y: .value("Net worth", point.value)
                     )
                     .interpolationMethod(.catmullRom)
+                }
+                .chartXAxis {
+                    AxisMarks(values: .automatic(desiredCount: 5)) { value in
+                        AxisGridLine()
+                        AxisTick()
+                        AxisValueLabel {
+                            if let date = value.as(Date.self) {
+                                Text(chartGranularity.axisLabel(for: date))
+                                    .font(.caption2)
+                            }
+                        }
+                    }
                 }
                 .frame(height: 180)
             }
@@ -343,7 +377,7 @@ struct ReportsView: View {
 
         guard let previousEnd = calendar.date(byAdding: .day, value: -1, to: periodStart),
               let previousStart = calendar.date(byAdding: .day, value: -(dayCount - 1), to: previousEnd) else {
-            return ("vs previous period: —", .secondary)
+            return (String(localized: "vs last period: —"), .secondary)
         }
 
         let current = BalanceCalculator.totalExpenses(
@@ -358,16 +392,16 @@ struct ReportsView: View {
 
         guard previous > 0 else {
             if current > 0 {
-                return ("vs previous period: no prior spending", .secondary)
+                return (String(localized: "vs last period: nothing to compare"), .secondary)
             }
-            return ("vs previous period: 0%", .secondary)
+            return (String(localized: "vs last period: 0%"), .secondary)
         }
 
         let percent = (delta / previous) * 100
         let value = NSDecimalNumber(decimal: percent).doubleValue
         let formatted = String(format: "%+.0f%%", value)
         let color: Color = delta > 0 ? .red : (delta < 0 ? .green : .secondary)
-        return ("vs previous period: \(formatted)", color)
+        return (String(localized: "vs previous period: \(formatted)"), color)
     }
 
     private func expenseTotal(from start: Date, through end: Date) -> Decimal {
@@ -385,7 +419,7 @@ struct ReportsView: View {
 
         return GlassCard {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Spending Trend")
+                Text("Spending trend")
                     .font(.headline)
                 Text(trend.label)
                     .foregroundStyle(trend.color)
@@ -405,11 +439,11 @@ struct ReportsView: View {
     private var topPayeesSection: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Top Payees")
+                Text("Top payees")
                     .font(.headline)
                 ForEach(topPayees, id: \.name) { payee in
                     HStack {
-                        Text(payee.name.isEmpty ? "Untitled" : payee.name)
+                        Text(payee.name.isEmpty ? String(localized: "Untitled") : payee.name)
                         Spacer()
                         Text("\(payee.count)")
                             .foregroundStyle(.secondary)
@@ -428,14 +462,14 @@ struct ReportsView: View {
             exchangeRates: exchangeRates
         )
         let categorySummary = settings.dailySpendCategoryIDs.isEmpty
-            ? "Choose categories such as Food or Entertainment"
+            ? String(localized: "Pick categories like Food or Entertainment")
             : DailySpendCalculator.selectedCategoryNames(categories, selectedIDs: settings.dailySpendCategoryIDs)
                 .joined(separator: ", ")
 
         return GlassCard {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    Text("Daily Discretionary Spend")
+                    Text("Daily discretionary spend")
                         .font(.headline)
                     Spacer()
                     Button("Edit") {
@@ -505,7 +539,7 @@ private struct CustomDateRangeRow: View {
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 0) {
-            pickerColumn(title: "From") {
+            pickerColumn(title: String(localized: "From")) {
                 DatePicker(
                     "From",
                     selection: $start,
@@ -520,7 +554,7 @@ private struct CustomDateRangeRow: View {
                 .frame(width: dashColumnWidth, alignment: .center)
                 .padding(.bottom, pickerBottomInset)
 
-            pickerColumn(title: "To") {
+            pickerColumn(title: String(localized: "To")) {
                 DatePicker(
                     "To",
                     selection: $end,
