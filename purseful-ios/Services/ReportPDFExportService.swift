@@ -49,9 +49,10 @@ enum ReportPDFExportService {
                 .font: UIFont.systemFont(ofSize: 8),
                 .foregroundColor: PDFColors.textSecondary
             ]
-            let pageText = "Page \(pageNumber)" as NSString
+            let pageText = String(localized: "Page \(pageNumber)") as NSString
             pageText.draw(at: CGPoint(x: printableRect.minX, y: footerY), withAttributes: attrs)
-            let generatedText = "Generated \(DateFormatters.reportPDFDateTime.string(from: generatedAt))" as NSString
+            let generatedDate = DateFormatters.reportPDFDateTime.string(from: generatedAt)
+            let generatedText = String(localized: "Generated \(generatedDate)") as NSString
             let generatedSize = generatedText.size(withAttributes: attrs)
             generatedText.draw(
                 at: CGPoint(x: printableRect.maxX - generatedSize.width, y: footerY),
@@ -252,24 +253,26 @@ enum ReportPDFExportService {
             )
             layout.fillPageBackground()
 
-            layout.drawReportHeader(title: "Purseful Report", version: appVersionLabel())
-            layout.drawLine("Period: \(summary.periodLabel)", font: .systemFont(ofSize: 10), color: PDFColors.textSecondary)
-            layout.drawLine("Currency: \(summary.baseCurrency)", font: .systemFont(ofSize: 9), color: PDFColors.textSecondary)
+            layout.drawReportHeader(title: String(localized: "Purseful report"), version: appVersionLabel())
+            let periodLabel = summary.periodLabel
+            layout.drawLine(String(localized: "Period: \(periodLabel)"), font: .systemFont(ofSize: 10), color: PDFColors.textSecondary)
+            let currency = summary.baseCurrency
+            layout.drawLine(String(localized: "Currency: \(currency)"), font: .systemFont(ofSize: 9), color: PDFColors.textSecondary)
             layout.y += 6
 
             layout.drawStatCards([
-                ("Total Income", CurrencyFormatter.format(summary.totalIncome, currencyCode: summary.baseCurrency)),
-                ("Total Expenses", CurrencyFormatter.format(summary.totalExpenses, currencyCode: summary.baseCurrency)),
-                ("Net Cash Flow", CurrencyFormatter.format(summary.netCashFlow, currencyCode: summary.baseCurrency)),
-                ("Transactions", "\(summary.transactionCount)")
+                (String(localized: "Total income"), CurrencyFormatter.format(summary.totalIncome, currencyCode: summary.baseCurrency)),
+                (String(localized: "Total expenses"), CurrencyFormatter.format(summary.totalExpenses, currencyCode: summary.baseCurrency)),
+                (String(localized: "Net cash flow"), CurrencyFormatter.format(summary.netCashFlow, currencyCode: summary.baseCurrency)),
+                (String(localized: "Transactions"), "\(summary.transactionCount)")
             ])
             layout.y += 4
 
             drawLedger(lines: lines, layout: &layout)
 
-            layout.drawSectionTitle("Spending by Category")
+            layout.drawSectionTitle(String(localized: "Spending by category"))
             if summary.categories.isEmpty {
-                layout.drawLine("No expense data", font: .systemFont(ofSize: 9), color: PDFColors.textSecondary)
+                layout.drawLine(String(localized: "No spending yet"), font: .systemFont(ofSize: 9), color: PDFColors.textSecondary)
             } else {
                 for category in summary.categories {
                     layout.drawCategoryRow(
@@ -292,7 +295,7 @@ enum ReportPDFExportService {
     private static func appVersionLabel() -> String {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"
         let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "—"
-        return "Purseful \(version) (Build \(build))"
+        return String(localized: "Purseful \(version) (Build \(build))")
     }
 
     private static func formatSharePercent(_ value: Double) -> String {
@@ -318,11 +321,11 @@ enum ReportPDFExportService {
         let amountWidth = tableWidth - dateWidth - titleWidth - accountWidth - categoryWidth
 
         let columns: [(title: String, width: CGFloat, alignment: NSTextAlignment)] = [
-            ("Date & Time", dateWidth, .left),
-            ("Title", titleWidth, .left),
-            ("Account", accountWidth, .left),
-            ("Category", categoryWidth, .left),
-            ("Amount", amountWidth, .right)
+            (String(localized: "Date & time"), dateWidth, .left),
+            (String(localized: "Title"), titleWidth, .left),
+            (String(localized: "Account"), accountWidth, .left),
+            (String(localized: "Category"), categoryWidth, .left),
+            (String(localized: "Amount"), amountWidth, .right)
         ]
 
         func drawHeader() {
@@ -349,10 +352,11 @@ enum ReportPDFExportService {
             layout.drawHorizontalRule(color: PDFColors.headerRule)
         }
 
-        layout.drawSectionTitle("Transactions (\(lines.count))")
+        let transactionCount = lines.count
+        layout.drawSectionTitle(String(localized: "Transactions (\(transactionCount))"))
 
         if lines.isEmpty {
-            layout.drawLine("No transactions in this period", font: .systemFont(ofSize: 9), color: PDFColors.textSecondary)
+            layout.drawLine(String(localized: "No transactions in this period"), font: .systemFont(ofSize: 9), color: PDFColors.textSecondary)
             return
         }
 

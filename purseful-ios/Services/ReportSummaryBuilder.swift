@@ -66,7 +66,7 @@ enum ReportSummaryBuilder {
             } else {
                 sharePercent = 0
             }
-            return ReportCategoryRow(name: name, amount: amount, sharePercent: sharePercent)
+            return ReportCategoryRow(name: name.localizedDisplayName, amount: amount, sharePercent: sharePercent)
         }
         .sorted { $0.amount > $1.amount }
 
@@ -185,15 +185,38 @@ enum ReportSummaryBuilder {
             dateTimeLabel: DateFormatters.reportPDFDateTime.string(from: parent.date),
             title: displayTitle(parent: parent, amountSource: amountSource),
             accountLabel: accountLabel(for: parent),
-            categoryName: amountSource.category?.name ?? categoryFallback(for: amountSource.type),
+            categoryName: displayCategoryName(for: amountSource),
             amountLabel: amountLabel
         )
     }
 
+    private static func displayCategoryName(for amountSource: Transaction) -> String {
+        if let name = amountSource.category?.name {
+            return name.localizedDisplayName
+        }
+        return categoryFallback(for: amountSource.type).localizedDisplayName
+    }
+
     private static func displayTitle(parent: Transaction, amountSource: Transaction) -> String {
-        if !parent.title.isEmpty { return parent.title }
-        if parent.id != amountSource.id, !amountSource.title.isEmpty { return amountSource.title }
-        return amountSource.category?.name ?? "Transaction"
+        let parentTitle = parent.title.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !parentTitle.isEmpty {
+            if let categoryName = amountSource.category?.name,
+               parentTitle.localizedCaseInsensitiveCompare(categoryName) == .orderedSame {
+                return categoryName.localizedDisplayName
+            }
+            return parentTitle
+        }
+        if parent.id != amountSource.id {
+            let childTitle = amountSource.title.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !childTitle.isEmpty {
+                if let categoryName = amountSource.category?.name,
+                   childTitle.localizedCaseInsensitiveCompare(categoryName) == .orderedSame {
+                    return categoryName.localizedDisplayName
+                }
+                return childTitle
+            }
+        }
+        return amountSource.category?.name.localizedDisplayName ?? String(localized: "Transaction")
     }
 
     private static func accountLabel(for transaction: Transaction) -> String {
@@ -246,7 +269,7 @@ enum ReportSummaryBuilder {
 
         guard let previousEnd = calendar.date(byAdding: .day, value: -1, to: start),
               let previousStart = calendar.date(byAdding: .day, value: -(dayCount - 1), to: previousEnd) else {
-            return "vs previous period: —"
+            return String(localized: "vs last period: —")
         }
 
         let current = BalanceCalculator.totalExpenses(
@@ -267,13 +290,14 @@ enum ReportSummaryBuilder {
 
         guard previous > 0 else {
             if current > 0 {
-                return "vs previous period: no prior spending"
+                return String(localized: "vs last period: nothing to compare")
             }
-            return "vs previous period: 0%"
+            return String(localized: "vs last period: 0%")
         }
 
         let percent = (delta / previous) * 100
         let value = NSDecimalNumber(decimal: percent).doubleValue
-        return String(format: "vs previous period: %+.0f%%", value)
+        let formatted = String(format: "%+.0f%%", value)
+        return String(localized: "vs previous period: \(formatted)")
     }
 }

@@ -149,13 +149,13 @@ struct CategoryIconView: View {
                 .font(.system(size: size * 0.4))
                 .foregroundStyle(Color(hex: category?.colorHex ?? "#8E8E93"))
         }
-        .accessibilityLabel(category?.name ?? "Category")
+        .accessibilityLabel(category?.name.localizedDisplayName ?? String(localized: "Category"))
     }
 }
 
 struct CategoryNameLabel: View {
     let category: Category?
-    var placeholder: String = "Select"
+    var placeholder: String = String(localized: "Select")
     var iconSize: CGFloat = 24
     var spacing: CGFloat = 8
     var font: Font = .body
@@ -163,16 +163,15 @@ struct CategoryNameLabel: View {
     var body: some View {
         HStack(spacing: spacing) {
             CategoryIconView(category: category, size: iconSize)
-            Text(category?.name ?? placeholder)
+            Text(category?.name.localizedDisplayName ?? placeholder)
                 .font(font)
                 .foregroundStyle(category.map { Color(hex: $0.colorHex) } ?? Color.secondary)
         }
     }
 
-    /// Extra spacing for SwiftUI `Picker` rows, where the default layout compresses icon and title.
     static func picker(
         category: Category?,
-        placeholder: String = "Select",
+        placeholder: String = String(localized: "Select"),
         iconSize: CGFloat = 24,
         font: Font = .body
     ) -> CategoryNameLabel {
@@ -199,7 +198,7 @@ struct AccountIconView: View {
                 .font(.system(size: size * 0.4))
                 .foregroundStyle(Color(hex: account?.colorHex ?? "#007AFF"))
         }
-        .accessibilityLabel(account?.name ?? "Account")
+        .accessibilityLabel(account?.name ?? String(localized: "Account"))
     }
 }
 

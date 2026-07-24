@@ -14,9 +14,9 @@ struct BudgetsView: View {
             Group {
                 if budgets.isEmpty {
                     EmptyStateView(
-                        title: "No Budgets",
+                        title: String(localized: "No budgets"),
                         systemImage: "chart.bar",
-                        message: "Create a budget to track your spending."
+                        message: String(localized: "Add one to keep spending in check.")
                     )
                 } else {
                     ScrollView {
@@ -40,10 +40,10 @@ struct BudgetsView: View {
                                         exchangeRates: appState.resolvedExchangeRates()
                                     )
                                 }, actions: [
-                                    RowAction(id: "edit", title: "Edit", systemImage: "pencil") {
+                                    RowAction(id: "edit", title: String(localized: "Edit"), systemImage: "pencil") {
                                         selectedBudget = budget
                                     },
-                                    RowAction(id: "delete", title: "Delete", systemImage: "trash", role: .destructive) {
+                                    RowAction(id: "delete", title: String(localized: "Delete"), systemImage: "trash", role: .destructive) {
                                         deleteBudget(budget)
                                     }
                                 ])
@@ -110,7 +110,7 @@ struct BudgetCardView: View {
                     if let category = budget.category {
                         CategoryIconView(category: category, size: 20)
                     }
-                    Text(budget.name)
+                    Text(budget.name.localizedDisplayName)
                         .font(.headline)
                         .foregroundStyle(budget.category.map { Color(hex: $0.colorHex) } ?? Color.primary)
                     Spacer()
@@ -173,7 +173,7 @@ struct BudgetFormView: View {
             Form {
                 Section {
                     TextField("Name", text: $name)
-                    LabeledAmountField(label: "Budget Amount", amount: $amountText, currencyCode: AppSettings.shared.baseCurrency)
+                    LabeledAmountField(label: String(localized: "Budget Amount"), amount: $amountText, currencyCode: AppSettings.shared.baseCurrency)
                     Picker("Period", selection: $period) {
                         ForEach(BudgetPeriod.allCases) { p in
                             Text(p.displayName).tag(p)
@@ -184,12 +184,12 @@ struct BudgetFormView: View {
                         DatePicker("End", selection: $customEnd, displayedComponents: .date)
                     }
                     Picker("Category", selection: $selectedCategory) {
-                        Text("All Spending").tag(Optional<Category>.none)
+                        Text("All spending").tag(Optional<Category>.none)
                         ForEach(Category.userSelectable(categories, type: .expense)) { category in
                             CategoryNameLabel.picker(category: category).tag(Optional(category))
                         }
                     }
-                    Toggle("Rollover Unused", isOn: $rollover)
+                    Toggle("Roll over unused", isOn: $rollover)
                     VStack(alignment: .leading) {
                         Text("Alert at \(Int(alertThreshold * 100))%")
                         Slider(value: $alertThreshold, in: 0.5...1.0, step: 0.05)
@@ -295,7 +295,7 @@ struct BudgetDetailView: View {
                     AccentListSectionHeader(title: "History")
                 }
             }
-            .navigationTitle(budget.name)
+            .navigationTitle(budget.name.localizedDisplayName)
             .accentTintedBackground()
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

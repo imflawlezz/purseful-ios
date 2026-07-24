@@ -95,7 +95,6 @@ enum DateFormatters {
         return f
     }()
 
-    /// Compact single-line timestamp for PDF ledger columns.
     static let reportPDFDateTime: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "dd.MM.yy HH:mm"
@@ -114,9 +113,14 @@ enum DateFormatters {
 
     static let monthYear: DateFormatter = {
         let f = DateFormatter()
-        f.dateFormat = "MMMM yyyy"
+        // LLLL = standalone month name (not MMMM format/genitive).
+        f.dateFormat = "LLLL yyyy"
         return f
     }()
+
+    static func monthYearString(from date: Date) -> String {
+        monthYear.string(from: date).localizedCapitalized
+    }
 
     static let reportRange: Date.FormatStyle = .dateTime
         .day()

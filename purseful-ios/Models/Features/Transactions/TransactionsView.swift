@@ -70,9 +70,9 @@ struct TransactionsView: View {
             Group {
                 if transactions.isEmpty {
                     EmptyStateView(
-                        title: "No Transactions",
+                        title: String(localized: "No transactions"),
                         systemImage: "list.bullet.rectangle",
-                        message: "Add your first transaction with the + button."
+                        message: String(localized: "Tap + to add one.")
                     )
                 } else {
                     List {
@@ -108,7 +108,7 @@ struct TransactionsView: View {
                     } label: {
                         Image(systemName: editMode == .active ? "checkmark.circle.badge.xmark" : "checkmark.circle.dotted")
                     }
-                    .accessibilityLabel(editMode == .active ? "Done" : "Select")
+                    .accessibilityLabel(editMode == .active ? String(localized: "Done") : String(localized: "Select"))
                 }
                 if editMode == .active && !selectedIDs.isEmpty {
                     ToolbarItem(placement: .topBarLeading) {
@@ -117,14 +117,14 @@ struct TransactionsView: View {
                         } label: {
                             Image(systemName: "trash")
                         }
-                        .accessibilityLabel("Delete selected")
+                        .accessibilityLabel(String(localized: "Delete selected"))
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showFilters = true } label: {
                         Image(systemName: "line.3.horizontal.decrease")
                     }
-                    .accessibilityLabel("Filters")
+                    .accessibilityLabel(String(localized: "Filters"))
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
@@ -133,7 +133,7 @@ struct TransactionsView: View {
                         Image(systemName: "plus")
                     }
                     .buttonStyle(.borderedProminent)
-                    .accessibilityLabel("Add transaction")
+                    .accessibilityLabel(String(localized: "Add transaction"))
                 }
             }
             .navigationDestination(for: TransactionRoute.self) { route in
@@ -190,10 +190,10 @@ struct TransactionsView: View {
             .rowContextMenu(preview: {
                 TransactionDetailPreviewView(transaction: transaction)
             }, actions: [
-                RowAction(id: "edit", title: "Edit", systemImage: "pencil") {
+                RowAction(id: "edit", title: String(localized: "Edit"), systemImage: "pencil") {
                     navigationPath.append(TransactionRoute.detail(transaction.id))
                 },
-                RowAction(id: "delete", title: "Delete", systemImage: "trash", role: .destructive) {
+                RowAction(id: "delete", title: String(localized: "Delete"), systemImage: "trash", role: .destructive) {
                     delete(transaction)
                 }
             ])
@@ -267,7 +267,7 @@ struct TransactionFiltersView: View {
                             CategoryNameLabel.picker(category: category).tag(Optional(category))
                         }
                     }
-                    Picker("Type", selection: $filterType) {
+                    Picker("field.type", selection: $filterType) {
                         Text("All").tag(Optional<TransactionType>.none)
                         ForEach(TransactionType.allCases) { type in
                             Text(type.displayName).tag(Optional(type))

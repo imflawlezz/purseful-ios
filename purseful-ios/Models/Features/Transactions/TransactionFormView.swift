@@ -51,13 +51,13 @@ struct TransactionFormView: View {
     var body: some View {
         Form {
                 Section {
-                    Picker("Type", selection: $type) {
+                    Picker("field.type", selection: $type) {
                         ForEach(TransactionType.allCases) { t in
                             Text(t.displayName).tag(t)
                         }
                     }
                     TextField("Title", text: $title)
-                    LabeledAmountField(label: "Amount", amount: $amountText, currencyCode: currencyCode)
+                    LabeledAmountField(label: String(localized: "Amount"), amount: $amountText, currencyCode: currencyCode)
                     .onChange(of: amountText) { _, _ in
                         clampAllSplitAmounts()
                     }
@@ -111,7 +111,7 @@ struct TransactionFormView: View {
                             }
 
                             FormActionButton(
-                                title: "Add Split Line",
+                                title: String(localized: "Add split"),
                                 systemImage: "plus",
                                 disabled: !canAddSplitLine
                             ) {
@@ -141,7 +141,7 @@ struct TransactionFormView: View {
                 Button { showScanner = true } label: {
                     Image(systemName: "doc.text.viewfinder")
                 }
-                .accessibilityLabel("Scan receipt")
+                .accessibilityLabel(String(localized: "Scan receipt"))
             }
             ToolbarItem(placement: .confirmationAction) {
                 ToolbarIcon.save({ save() }, disabled: !canSave)
@@ -164,7 +164,7 @@ struct TransactionFormView: View {
                 Task { await processReceipt(image) }
             }
         }
-        .alert("Receipt Scan", isPresented: Binding(
+        .alert("Receipt scan", isPresented: Binding(
             get: { receiptScanMessage != nil },
             set: { if !$0 { receiptScanMessage = nil } }
         )) {
@@ -186,7 +186,7 @@ struct TransactionFormView: View {
 
     private var primarySplitRow: some View {
         HStack {
-            CategoryNameLabel(category: selectedCategory, placeholder: "Select")
+            CategoryNameLabel(category: selectedCategory)
             Spacer(minLength: 12)
             splitAmountDisplay(primarySplitAmount)
         }
@@ -250,7 +250,6 @@ struct TransactionFormView: View {
             HStack(spacing: 6) {
                 CategoryNameLabel.picker(
                     category: selection.wrappedValue,
-                    placeholder: "Select",
                     iconSize: 20
                 )
                 Image(systemName: "chevron.up.chevron.down")
@@ -421,12 +420,12 @@ struct TransactionFormView: View {
                     pendingAttachmentData = attachment
                 }
                 if result.confidence < 0.5 {
-                    receiptScanMessage = "Some receipt details may be inaccurate. Review the amount and title before saving."
+                    receiptScanMessage = String(localized: "Double-check the amount and title — scans aren’t always perfect.")
                 }
             }
         } catch {
             await MainActor.run {
-                receiptScanMessage = "Couldn't read the receipt. Try again with better lighting or enter details manually."
+                receiptScanMessage = String(localized: "Couldn’t read that receipt. Try better light, or type it in.")
             }
         }
     }

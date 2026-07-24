@@ -22,7 +22,7 @@ struct PreviewSection<Content: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title)
+            Text(title.localizedDisplayName)
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .textCase(.uppercase)
@@ -47,7 +47,7 @@ struct PreviewLabeledRow: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(label)
+            Text(label.localizedDisplayName)
                 .foregroundStyle(.secondary)
             Spacer(minLength: 12)
             Text(value)
@@ -94,7 +94,7 @@ struct BudgetDetailPreviewView: View {
                 }
 
                 if periodTransactions.isEmpty {
-                    Text("No matching transactions this period")
+                    Text("Nothing matches this period")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 } else {
@@ -112,7 +112,7 @@ struct DebtDetailPreviewView: View {
     let debt: Debt
 
     private var openingDateLabel: String {
-        debt.direction == .iOwe ? "Borrowed On" : "Lent On"
+        debt.direction == .iOwe ? String(localized: "Borrowed On") : String(localized: "Lent On")
     }
 
     private var openingDate: Date {
@@ -128,7 +128,7 @@ struct DebtDetailPreviewView: View {
             PreviewSection(title: debt.name) {
                 PreviewLabeledRow(
                     label: "Counterparty",
-                    value: debt.counterparty.isEmpty ? "—" : debt.counterparty
+                    value: debt.counterparty.isEmpty ? String(localized: "—") : debt.counterparty
                 )
                 PreviewLabeledRow(
                     label: "Remaining",
@@ -154,7 +154,7 @@ struct DebtDetailPreviewView: View {
                 }
                 PreviewLabeledRow(
                     label: "Linked transactions",
-                    value: debt.createsLinkedTransactions ? "On" : "Off"
+                    value: debt.createsLinkedTransactions ? String(localized: "On") : String(localized: "Off")
                 )
             }
 
@@ -243,7 +243,7 @@ struct PlannedPaymentPreviewView: View {
     var body: some View {
         EntityPreviewContainer {
             PreviewSection(title: payment.name) {
-                PreviewLabeledRow(label: "Type", value: payment.type.displayName)
+                PreviewLabeledRow(label: "field.type", value: payment.type.displayName)
                 PreviewLabeledRow(
                     label: "Amount",
                     value: CurrencyFormatter.format(
@@ -265,27 +265,27 @@ struct PlannedPaymentPreviewView: View {
                 }
                 PreviewLabeledRow(
                     label: "Account",
-                    value: payment.account?.selectionLabel ?? "—"
+                    value: payment.account?.selectionLabel ?? String(localized: "—")
                 )
                 if payment.type == .transfer {
                     PreviewLabeledRow(
                         label: "To Account",
-                        value: payment.toAccount?.selectionLabel ?? "—"
+                        value: payment.toAccount?.selectionLabel ?? String(localized: "—")
                     )
                 } else {
                     PreviewLabeledRow(
                         label: "Category",
-                        value: payment.category?.name ?? "None"
+                        value: payment.category?.name.localizedDisplayName ?? String(localized: "None")
                     )
                 }
-                PreviewLabeledRow(label: "Active", value: payment.isActive ? "Yes" : "No")
+                PreviewLabeledRow(label: "Active", value: payment.isActive ? String(localized: "Yes") : String(localized: "No"))
                 PreviewLabeledRow(
                     label: "Auto-create",
-                    value: payment.autoCategorize ? "Yes" : "No"
+                    value: payment.autoCategorize ? String(localized: "Yes") : String(localized: "No")
                 )
                 PreviewLabeledRow(
                     label: "Reminder",
-                    value: "\(payment.reminderDaysBefore) day(s) before"
+                    value: String(localized: "\(payment.reminderDaysBefore) day(s) before")
                 )
                 if !payment.note.isEmpty {
                     PreviewLabeledRow(label: "Note", value: payment.note)
@@ -302,8 +302,8 @@ struct TransactionDetailPreviewView: View {
 
     var body: some View {
         EntityPreviewContainer {
-            PreviewSection(title: transaction.title.isEmpty ? "Transaction" : transaction.title) {
-                PreviewLabeledRow(label: "Type", value: transaction.type.displayName)
+            PreviewSection(title: transaction.title.isEmpty ? String(localized: "Transaction") : transaction.title) {
+                PreviewLabeledRow(label: "field.type", value: transaction.type.displayName)
                 PreviewLabeledRow(
                     label: "Amount",
                     value: CurrencyFormatter.format(
@@ -317,17 +317,17 @@ struct TransactionDetailPreviewView: View {
                 )
                 PreviewLabeledRow(
                     label: "Account",
-                    value: transaction.account?.selectionLabel ?? "—"
+                    value: transaction.account?.selectionLabel ?? String(localized: "—")
                 )
                 if transaction.type == .transfer {
                     PreviewLabeledRow(
                         label: "To Account",
-                        value: transaction.toAccount?.selectionLabel ?? "—"
+                        value: transaction.toAccount?.selectionLabel ?? String(localized: "—")
                     )
                 } else {
                     PreviewLabeledRow(
                         label: "Category",
-                        value: transaction.category?.name ?? "—"
+                        value: transaction.category?.name.localizedDisplayName ?? String(localized: "—")
                     )
                 }
                 if !transaction.note.isEmpty {
@@ -362,8 +362,8 @@ struct AccountDetailPreviewView: View {
                     value: CurrencyFormatter.format(account.initialBalance, currencyCode: account.currency)
                 )
                 PreviewLabeledRow(
-                    label: "Include in Net Worth",
-                    value: account.includeInTotal ? "Yes" : "No"
+                    label: "Include in net worth",
+                    value: account.includeInTotal ? String(localized: "Yes") : String(localized: "No")
                 )
             }
         }
@@ -379,7 +379,7 @@ struct CategoryDetailPreviewView: View {
                 HStack(spacing: 12) {
                     CategoryIconView(category: category, size: 36)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(category.type == .income ? "Income" : "Expense")
+                        Text(category.type == .income ? String(localized: "Income") : String(localized: "Expense"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         if category.isSystem {
@@ -391,9 +391,9 @@ struct CategoryDetailPreviewView: View {
                 }
 
                 if let parent = category.parent {
-                    PreviewLabeledRow(label: "Parent", value: parent.name)
+                    PreviewLabeledRow(label: "Parent", value: parent.name.localizedDisplayName)
                 }
-                PreviewLabeledRow(label: "Hidden", value: category.isHidden ? "Yes" : "No")
+                PreviewLabeledRow(label: "Hidden", value: category.isHidden ? String(localized: "Yes") : String(localized: "No"))
             }
         }
     }

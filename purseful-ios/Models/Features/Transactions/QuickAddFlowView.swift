@@ -57,7 +57,7 @@ struct QuickAddFlowView: View {
                     Button { showScanner = true } label: {
                         Image(systemName: "doc.text.viewfinder")
                     }
-                    .accessibilityLabel("Scan receipt")
+                    .accessibilityLabel(String(localized: "Scan receipt"))
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
@@ -67,7 +67,7 @@ struct QuickAddFlowView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(!amountIsValid)
-                    .accessibilityLabel("Continue")
+                    .accessibilityLabel(String(localized: "Continue"))
                 }
             }
         }
@@ -84,7 +84,7 @@ struct QuickAddFlowView: View {
                 Task { await processReceipt(image) }
             }
         }
-        .alert("Receipt Scan", isPresented: Binding(
+        .alert("Receipt scan", isPresented: Binding(
             get: { receiptScanMessage != nil },
             set: { if !$0 { receiptScanMessage = nil } }
         )) {
@@ -96,9 +96,9 @@ struct QuickAddFlowView: View {
 
     private var stepTitle: String {
         switch step {
-        case .account: "Quick Add"
-        case .amount: "Quick Add"
-        case .category: "Category"
+        case .account: String(localized: "Quick add")
+        case .amount: String(localized: "Quick add")
+        case .category: String(localized: "Category")
         }
     }
 
@@ -112,7 +112,7 @@ struct QuickAddFlowView: View {
 
     private var amountStep: some View {
         VStack(spacing: 16) {
-            Picker("Type", selection: $type) {
+            Picker("field.type", selection: $type) {
                 Text("Expense").tag(TransactionType.expense)
                 Text("Income").tag(TransactionType.income)
             }
@@ -280,12 +280,12 @@ struct QuickAddFlowView: View {
                 if let attachment = applied.attachmentData { pendingAttachmentData = attachment }
                 type = .expense
                 if result.confidence < 0.5 {
-                    receiptScanMessage = "Some receipt details may be inaccurate. Review the amount before saving."
+                    receiptScanMessage = String(localized: "Double-check the amount — scans aren’t always perfect.")
                 }
             }
         } catch {
             await MainActor.run {
-                receiptScanMessage = "Couldn't read the receipt. Try again with better lighting or enter details manually."
+                receiptScanMessage = String(localized: "Couldn’t read that receipt. Try better light, or type it in.")
             }
         }
     }

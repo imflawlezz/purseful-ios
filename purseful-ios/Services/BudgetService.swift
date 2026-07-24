@@ -90,7 +90,6 @@ enum BudgetService {
         budget.amount + (budget.rollover ? budget.rolloverAmount : 0)
     }
 
-    /// Advances rollover state when the calendar period changes. Returns true if any budget was updated.
     static func processRollovers(
         budgets: [Budget],
         transactions: [Transaction],
@@ -154,7 +153,7 @@ enum BudgetService {
         return "#34C759"
     }
 
-    /// True when transaction category is the budget category, a descendant, or an ancestor.
+    /// Budget category, ancestor, or descendant.
     static func categoriesMatch(_ transactionCategory: Category?, budgetCategory: Category) -> Bool {
         guard let transactionCategory else { return false }
 
@@ -224,7 +223,7 @@ enum BudgetService {
                 baseCurrency: baseCurrency,
                 exchangeRates: exchangeRates
             )
-            return (DateFormatters.monthYear.string(from: range.start), spent)
+            return (DateFormatters.monthYearString(from: range.start), spent)
         }
     }
 }

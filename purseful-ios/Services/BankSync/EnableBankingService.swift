@@ -6,7 +6,7 @@ final class EnableBankingService: NSObject, BankSyncService, ASWebAuthentication
     static let shared = EnableBankingService()
 
     private let redirectURI = "purseful://bank-oauth"
-    private let baseURL = "" // Production endpoint configured when access is granted
+    private let baseURL = "" // Set when bank sync access is granted
 
     var isEnabled: Bool {
         AppSettings.shared.bankSyncBetaEnabled && !baseURL.isEmpty
@@ -50,7 +50,7 @@ final class EnableBankingService: NSObject, BankSyncService, ASWebAuthentication
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
         let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
         guard let scene = scenes.first(where: { $0.activationState == .foregroundActive }) ?? scenes.first else {
-            fatalError("No UIWindowScene available for bank authentication presentation")
+            fatalError("Can’t open bank login right now.")
         }
         return ASPresentationAnchor(windowScene: scene)
     }
@@ -62,8 +62,8 @@ enum BankSyncError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .notAvailable: "Bank sync is not available yet."
-        case .authFailed: "Bank authentication failed."
+        case .notAvailable: String(localized: "Bank sync isn’t ready yet.")
+        case .authFailed: String(localized: "Couldn’t sign in to your bank.")
         }
     }
 }

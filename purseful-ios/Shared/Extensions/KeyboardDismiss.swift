@@ -8,8 +8,7 @@ extension View {
     }
 }
 
-/// Installs a non-cancelling tap gesture on the parent view so taps outside text fields
-/// dismiss the keyboard without stealing touches from buttons, pickers, or fields.
+/// Background tap dismisses keyboard without stealing control touches.
 private struct KeyboardDismissInstaller: UIViewRepresentable {
     func makeCoordinator() -> Coordinator { Coordinator() }
 

@@ -100,7 +100,7 @@ struct CategoryPickerRow: View {
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(tint)
             }
-            Text(category.name)
+            Text(category.name.localizedDisplayName)
                 .foregroundStyle(tint)
                 .font(depth == 0 ? .body.weight(.semibold) : .body)
             Spacer()

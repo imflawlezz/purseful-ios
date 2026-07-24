@@ -44,7 +44,7 @@ struct DashboardView: View {
                     } label: {
                         Image(systemName: "gearshape")
                     }
-                    .accessibilityLabel("Settings")
+                    .accessibilityLabel(String(localized: "Settings"))
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -52,7 +52,7 @@ struct DashboardView: View {
                     } label: {
                         Image(systemName: "checklist")
                     }
-                    .accessibilityLabel("Shopping list")
+                    .accessibilityLabel(String(localized: "Shopping list"))
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
@@ -61,7 +61,7 @@ struct DashboardView: View {
                         Image(systemName: "plus")
                     }
                     .buttonStyle(.borderedProminent)
-                    .accessibilityLabel("Quick add")
+                    .accessibilityLabel(String(localized: "Quick add"))
                 }
             }
             .accentSheet(isPresented: $showQuickAdd) {
@@ -106,7 +106,7 @@ struct DashboardView: View {
                 Text("Accounts")
                     .font(.headline)
                 Spacer()
-                Button("See All") { navigateToAccounts = true }
+                Button("See all") { navigateToAccounts = true }
                     .font(.subheadline)
             }
             .padding(.horizontal, 16)
@@ -162,7 +162,7 @@ struct DashboardView: View {
     private var netWorthCard: some View {
         dashboardCard(action: { navigateToAccounts = true }) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Net Worth")
+                    Text("Net worth")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                     Text(CurrencyFormatter.format(netWorth, currencyCode: baseCurrency))
@@ -175,7 +175,7 @@ struct DashboardView: View {
     private var cashFlowCard: some View {
         dashboardCard(action: { appState.navigateToTab(4) }) {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Cash Flow (30 days)")
+                    Text("Cash flow (30 days)")
                         .font(.headline)
                         .foregroundStyle(.primary)
                     HStack {
@@ -216,7 +216,7 @@ struct DashboardView: View {
                         let progress = BudgetService.progress(spent: spent, limit: limit)
                         VStack(alignment: .leading, spacing: 4) {
                             HStack {
-                                Text(budget.name)
+                                Text(budget.name.localizedDisplayName)
                                     .foregroundStyle(.primary)
                                 Spacer()
                                 Text("\(Int(progress * 100))%")
@@ -238,7 +238,7 @@ struct DashboardView: View {
     private var upcomingPaymentsCard: some View {
         dashboardCard(action: { appState.navigateToTab(3, planningSection: 0) }) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Upcoming Payments")
+                    Text("Upcoming payments")
                         .font(.headline)
                         .foregroundStyle(.primary)
                     ForEach(upcomingPayments.prefix(5)) { payment in
@@ -262,7 +262,7 @@ struct DashboardView: View {
     private var debtsCard: some View {
         dashboardCard(action: { appState.navigateToTab(3, planningSection: 1) }) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Active Debts")
+                    Text("Active debts")
                         .font(.headline)
                         .foregroundStyle(.primary)
                     ForEach(debts.prefix(3)) { debt in
@@ -300,10 +300,10 @@ struct DashboardView: View {
         GlassCard {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text("Recent Transactions")
+                    Text("Recent transactions")
                         .font(.headline)
                     Spacer()
-                    Button("See All") {
+                    Button("See all") {
                         appState.navigateToTab(1)
                     }
                     .font(.subheadline)
@@ -362,7 +362,7 @@ struct TransactionRowView: View {
         HStack(spacing: 12) {
             CategoryIconView(category: transaction.category)
             VStack(alignment: .leading, spacing: 2) {
-                Text(transaction.title.isEmpty ? (transaction.category?.name ?? "Transaction") : transaction.title)
+                Text(displayTitle)
                     .lineLimit(1)
                     .foregroundStyle(titleColor)
                 Text(DateFormatters.short.string(from: transaction.date))
@@ -377,6 +377,18 @@ struct TransactionRowView: View {
         .accessibilityElement(children: .combine)
     }
 
+    private var displayTitle: String {
+        let title = transaction.title.trimmingCharacters(in: .whitespacesAndNewlines)
+        let categoryName = transaction.category?.name
+        if title.isEmpty {
+            return categoryName?.localizedDisplayName ?? String(localized: "Transaction")
+        }
+        if let categoryName,
+           title.localizedCaseInsensitiveCompare(categoryName) == .orderedSame {
+            return categoryName.localizedDisplayName
+        }
+        return title
+    }
     private var formattedAmount: String {
         let prefix: String
         switch transaction.type {
@@ -399,7 +411,11 @@ struct TransactionRowView: View {
     }
 
     private var titleColor: Color {
-        if !transaction.title.isEmpty { return .primary }
+        let title = transaction.title.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !title.isEmpty,
+           transaction.category?.name.localizedCaseInsensitiveCompare(title) != .orderedSame {
+            return .primary
+        }
         if let category = transaction.category { return Color(hex: category.colorHex) }
         return .primary
     }

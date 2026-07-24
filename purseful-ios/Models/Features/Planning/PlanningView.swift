@@ -43,7 +43,7 @@ struct PlanningView: View {
                     Button { showPaymentCalendar = true } label: {
                         Image(systemName: "calendar")
                     }
-                    .accessibilityLabel("Calendar")
+                    .accessibilityLabel(String(localized: "Calendar"))
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     if section == 0 {
@@ -100,11 +100,11 @@ private func plannedPaymentColor(_ payment: PlannedPayment) -> Color {
 private func plannedPaymentSubtitle(_ payment: PlannedPayment) -> String {
     switch payment.type {
     case .transfer:
-        let from = payment.account?.name ?? "Account"
-        let to = payment.toAccount?.name ?? "Account"
-        return "Transfer · \(from) → \(to)"
+        let from = payment.account?.name ?? String(localized: "Account")
+        let to = payment.toAccount?.name ?? String(localized: "Account")
+        return String(localized: "Transfer · \(from) → \(to)")
     case .income, .expense:
-        return payment.category?.name ?? payment.type.displayName
+        return payment.category?.name.localizedDisplayName ?? payment.type.displayName
     }
 }
 
@@ -142,7 +142,11 @@ struct PlannedPaymentsView: View {
     var body: some View {
         Group {
             if payments.isEmpty {
-                EmptyStateView(title: "No Planned Payments", systemImage: "calendar", message: "Add recurring expenses, income, and transfers.")
+                EmptyStateView(
+                    title: String(localized: "No planned payments"),
+                    systemImage: "calendar",
+                    message: String(localized: "Rent, salary, subscriptions — whatever repeats.")
+                )
             } else {
                 List {
                     if !pendingPayments.isEmpty {
@@ -162,7 +166,7 @@ struct PlannedPaymentsView: View {
                                 plannedPaymentRow(payment, completed: true)
                             }
                         } header: {
-                            AccentListSectionHeader(title: "Paid This Period")
+                            AccentListSectionHeader(title: "Paid this period")
                         }
                         .accentListRows()
                     }
@@ -231,14 +235,14 @@ struct PlannedPaymentsView: View {
     private func plannedPaymentActions(_ payment: PlannedPayment, completed: Bool) -> [RowAction] {
         var actions: [RowAction] = []
         if !completed {
-            actions.append(RowAction(id: "paid", title: "Mark Paid", systemImage: "checkmark.circle") {
+            actions.append(RowAction(id: "paid", title: String(localized: "Mark paid"), systemImage: "checkmark.circle") {
                 markPaid(payment)
             })
         }
-        actions.append(RowAction(id: "edit", title: "Edit", systemImage: "pencil") {
+        actions.append(RowAction(id: "edit", title: String(localized: "Edit"), systemImage: "pencil") {
             selectedPayment = payment
         })
-        actions.append(RowAction(id: "delete", title: "Delete", systemImage: "trash", role: .destructive) {
+        actions.append(RowAction(id: "delete", title: String(localized: "Delete"), systemImage: "trash", role: .destructive) {
             delete(payment)
         })
         return actions
@@ -345,7 +349,7 @@ struct PaymentCalendarView: View {
             }
             .padding()
         }
-        .navigationTitle("Payment Calendar")
+        .navigationTitle("Payment calendar")
         .navigationBarTitleDisplayMode(.inline)
         .accentTintedBackground()
         .task {
@@ -364,7 +368,7 @@ struct PaymentCalendarView: View {
                 Image(systemName: "chevron.left")
             }
             Spacer()
-            Text(DateFormatters.monthYear.string(from: displayedMonth))
+            Text(DateFormatters.monthYearString(from: displayedMonth))
                 .font(.headline)
             Spacer()
             Button {
@@ -456,12 +460,12 @@ struct PaymentCalendarView: View {
                 .font(.headline)
 
             VStack(spacing: 8) {
-                projectionRow("Current net worth", amount: breakdown.current, currencyCode: currencyCode)
+                projectionRow(String(localized: "Current net worth"), amount: breakdown.current, currencyCode: currencyCode)
 
                 if isFutureOrToday {
                     if breakdown.plannedImpact != 0 {
                         projectionRow(
-                            "Planned payments",
+                            String(localized: "Planned payments"),
                             amount: -breakdown.plannedImpact,
                             currencyCode: currencyCode,
                             tint: .secondary
@@ -470,7 +474,7 @@ struct PaymentCalendarView: View {
 
                     if breakdown.debtImpact != 0 {
                         projectionRow(
-                            "Debts due",
+                            String(localized: "Debts due"),
                             amount: -breakdown.debtImpact,
                             currencyCode: currencyCode,
                             tint: .secondary
@@ -478,8 +482,9 @@ struct PaymentCalendarView: View {
                     }
 
                     if breakdown.variableSpend > 0 {
+                        let dayCount = breakdown.variableDayCount
                         projectionRow(
-                            "Daily spend trend (\(breakdown.variableDayCount)d)",
+                            String(localized: "Daily spend trend (\(dayCount)d)"),
                             amount: -breakdown.variableSpend,
                             currencyCode: currencyCode,
                             tint: .secondary
@@ -503,7 +508,7 @@ struct PaymentCalendarView: View {
                     Divider()
 
                     projectionRow(
-                        "Expected net worth",
+                        String(localized: "Expected net worth"),
                         amount: breakdown.projected,
                         currencyCode: currencyCode,
                         emphasized: true
@@ -519,7 +524,7 @@ struct PaymentCalendarView: View {
             }
 
             if selectedDayPayments.isEmpty && selectedDayDebts.isEmpty {
-                Text("No planned payments or debts due on this day")
+                Text("Nothing due this day")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             } else {
@@ -552,7 +557,7 @@ struct PaymentCalendarView: View {
                                 Text(debt.name)
                                     .font(.subheadline.weight(.medium))
                                     .foregroundStyle(debt.direction.tintColor)
-                                Text(debt.direction == .iOwe ? "Repayment due" : "Payment expected")
+                                Text(debt.direction == .iOwe ? String(localized: "Repayment due") : String(localized: "Payment expected"))
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
@@ -639,7 +644,7 @@ struct PlannedPaymentFormView: View {
         NavigationStack {
             Form {
                 Section {
-                    Picker("Type", selection: $type) {
+                    Picker("field.type", selection: $type) {
                         ForEach(TransactionType.allCases) { t in
                             Text(t.displayName).tag(t)
                         }
@@ -659,7 +664,7 @@ struct PlannedPaymentFormView: View {
                     TextField("Name", text: $name)
                     TextField("Note", text: $note, axis: .vertical)
                     LabeledAmountField(
-                        label: "Amount",
+                        label: String(localized: "Amount"),
                         amount: $amountText,
                         currencyCode: selectedAccount?.currency ?? AppSettings.shared.baseCurrency
                     )
@@ -692,7 +697,7 @@ struct PlannedPaymentFormView: View {
                         }
                     }
                     Toggle("Active", isOn: $isActive)
-                    Toggle("Auto-create on due date", isOn: $autoCategorize)
+                    Toggle("Create transaction when due", isOn: $autoCategorize)
                     Stepper("Remind \(reminderDays) day(s) before", value: $reminderDays, in: 1...14)
                 }
                 .accentListRows()
@@ -708,7 +713,7 @@ struct PlannedPaymentFormView: View {
                         } label: {
                             Image(systemName: "checkmark.circle")
                         }
-                        .accessibilityLabel("Mark Paid")
+                        .accessibilityLabel(String(localized: "Mark paid"))
                     }
                 }
                 FormLeadingToolbar(
@@ -805,7 +810,11 @@ struct DebtsView: View {
     var body: some View {
         Group {
             if debts.isEmpty {
-                EmptyStateView(title: "No Debts", systemImage: "person.2", message: "Track money you owe or are owed.")
+                EmptyStateView(
+                    title: String(localized: "No debts"),
+                    systemImage: "person.2",
+                    message: String(localized: "Money you owe, or that’s owed to you.")
+                )
             } else {
                 List {
                     ForEach(debts) { debt in
@@ -871,14 +880,14 @@ struct DebtsView: View {
     private func debtRowActions(_ debt: Debt) -> [RowAction] {
         var actions: [RowAction] = []
         if debt.remainingAmount > 0 {
-            actions.append(RowAction(id: "paid", title: "Mark Paid", systemImage: "checkmark.circle") {
+            actions.append(RowAction(id: "paid", title: String(localized: "Mark paid"), systemImage: "checkmark.circle") {
                 markDebtPaid(debt)
             })
         }
-        actions.append(RowAction(id: "edit", title: "Edit", systemImage: "pencil") {
+        actions.append(RowAction(id: "edit", title: String(localized: "Edit"), systemImage: "pencil") {
             selectedDebt = debt
         })
-        actions.append(RowAction(id: "delete", title: "Delete", systemImage: "trash", role: .destructive) {
+        actions.append(RowAction(id: "delete", title: String(localized: "Delete"), systemImage: "trash", role: .destructive) {
             delete(debt)
         })
         return actions
@@ -926,7 +935,7 @@ struct DebtFormView: View {
     }
 
     private var openingDateLabel: String {
-        direction == .iOwe ? "Borrowed On" : "Lent On"
+        direction == .iOwe ? String(localized: "Borrowed On") : String(localized: "Lent On")
     }
 
     var body: some View {
@@ -944,7 +953,7 @@ struct DebtFormView: View {
                     Picker("Currency", selection: $currency) {
                         ForEach(CommonCurrencies.codes, id: \.self) { Text($0).tag($0) }
                     }
-                    LabeledAmountField(label: "Original Amount", amount: $amountText, currencyCode: currency)
+                    LabeledAmountField(label: String(localized: "Original Amount"), amount: $amountText, currencyCode: currency)
                     if debt != nil {
                         LabeledContent(
                             "Remaining Balance",
@@ -958,7 +967,7 @@ struct DebtFormView: View {
                             }
                         }
                     }
-                    Toggle("Create linked transaction", isOn: $createsLinkedTransactions)
+                    Toggle("Create a linked transaction", isOn: $createsLinkedTransactions)
                     Toggle("Due Date", isOn: $hasDueDate)
                     if hasDueDate {
                         DatePicker("Due", selection: $dueDate, displayedComponents: .date)
@@ -1075,7 +1084,7 @@ struct DebtDetailView: View {
     }
 
     private var openingDateLabel: String {
-        debt.direction == .iOwe ? "Borrowed On" : "Lent On"
+        debt.direction == .iOwe ? String(localized: "Borrowed On") : String(localized: "Lent On")
     }
 
     private var openingDate: Date {
@@ -1096,7 +1105,7 @@ struct DebtDetailView: View {
                 if !debt.note.isEmpty {
                     LabeledContent("Note", value: debt.note)
                 }
-                LabeledContent("Linked transactions", value: debt.createsLinkedTransactions ? "On" : "Off")
+                LabeledContent("Linked transactions", value: debt.createsLinkedTransactions ? String(localized: "On") : String(localized: "Off"))
             }
 
             Section {
@@ -1114,9 +1123,9 @@ struct DebtDetailView: View {
                         }
                     }
                     DatePicker("Repayment Date", selection: $repaymentDate, displayedComponents: [.date, .hourAndMinute])
-                    LabeledAmountField(label: "Repayment Amount", amount: $repaymentText, currencyCode: debt.currency)
+                    LabeledAmountField(label: String(localized: "Repayment Amount"), amount: $repaymentText, currencyCode: debt.currency)
                     FormActionButton(
-                        title: "Apply Repayment",
+                        title: String(localized: "Apply repayment"),
                         systemImage: "checkmark.circle",
                         disabled: !canApplyRepayment
                     ) {
@@ -1124,7 +1133,7 @@ struct DebtDetailView: View {
                     }
                 }
             } header: {
-                AccentListSectionHeader(title: "Record Repayment")
+                AccentListSectionHeader(title: "Record repayment")
             }
 
             Section {
@@ -1138,7 +1147,7 @@ struct DebtDetailView: View {
                             .foregroundStyle(.secondary)
                     }
                 } else {
-                    Text("This debt tracks balance without creating transactions.")
+                    Text("Balance only — no linked transactions.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -1165,7 +1174,7 @@ struct DebtDetailView: View {
                     } label: {
                         Image(systemName: "checkmark.circle")
                     }
-                    .accessibilityLabel("Mark Paid")
+                    .accessibilityLabel(String(localized: "Mark paid"))
                 }
             }
             DeleteLeadingToolbar {
@@ -1216,7 +1225,11 @@ struct GoalsView: View {
     var body: some View {
         Group {
             if goals.isEmpty {
-                EmptyStateView(title: "No Goals", systemImage: "star", message: "Set savings goals to stay motivated.")
+                EmptyStateView(
+                    title: String(localized: "No goals"),
+                    systemImage: "star",
+                    message: String(localized: "Something to save toward.")
+                )
             } else {
                 List {
                     ForEach(goals) { goal in
@@ -1269,14 +1282,14 @@ struct GoalsView: View {
     private func goalRowActions(_ goal: Goal) -> [RowAction] {
         var actions: [RowAction] = []
         if !goal.isCompleted {
-            actions.append(RowAction(id: "complete", title: "Mark Complete", systemImage: "checkmark.circle") {
+            actions.append(RowAction(id: "complete", title: String(localized: "Mark done"), systemImage: "checkmark.circle") {
                 markGoalComplete(goal)
             })
         }
-        actions.append(RowAction(id: "edit", title: "Edit", systemImage: "pencil") {
+        actions.append(RowAction(id: "edit", title: String(localized: "Edit"), systemImage: "pencil") {
             selectedGoal = goal
         })
-        actions.append(RowAction(id: "delete", title: "Delete", systemImage: "trash", role: .destructive) {
+        actions.append(RowAction(id: "delete", title: String(localized: "Delete"), systemImage: "trash", role: .destructive) {
             delete(goal)
         })
         return actions
@@ -1343,19 +1356,19 @@ struct GoalFormView: View {
                 Section {
                     TextField("Name", text: $name)
                     LabeledAmountField(
-                        label: "Target Amount",
+                        label: String(localized: "Target Amount"),
                         amount: $targetText,
                         currencyCode: AppSettings.shared.baseCurrency
                     )
                     if goal != nil {
                         LabeledAmountField(
-                            label: "Current Saved",
+                            label: String(localized: "Current Saved"),
                             amount: $currentText,
                             currencyCode: AppSettings.shared.baseCurrency
                         )
                     }
                     TextField("Note", text: $note, axis: .vertical)
-                    Picker("Credit to Account", selection: $linkedAccount) {
+                    Picker("Credit to account", selection: $linkedAccount) {
                         Text("None").tag(Optional<Account>.none)
                         ForEach(accounts) { account in
                             Text(account.selectionLabel).tag(Optional(account))
@@ -1481,12 +1494,12 @@ struct GoalDetailView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 } else {
                     LabeledAmountField(
-                        label: "Contribution",
+                        label: String(localized: "Contribution"),
                         amount: $contributionText,
                         currencyCode: AppSettings.shared.baseCurrency
                     )
                     FormActionButton(
-                        title: "Apply Contribution",
+                        title: String(localized: "Apply contribution"),
                         systemImage: "checkmark.circle",
                         disabled: CurrencyFormatter.parse(contributionText) == nil
                     ) {
@@ -1494,7 +1507,7 @@ struct GoalDetailView: View {
                     }
                 }
             } header: {
-                AccentListSectionHeader(title: "Add Contribution")
+                AccentListSectionHeader(title: "Add contribution")
             }
         }
         .navigationTitle(goal.name)
@@ -1507,7 +1520,7 @@ struct GoalDetailView: View {
                     } label: {
                         Image(systemName: "checkmark.circle")
                     }
-                    .accessibilityLabel("Mark Complete")
+                    .accessibilityLabel(String(localized: "Mark done"))
                 }
             }
             DeleteLeadingToolbar {

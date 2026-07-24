@@ -78,8 +78,17 @@ enum DebtService {
         ensureDebtCategories(context: context)
         let category = openingCategory(for: debt.direction, context: context)
         let type: TransactionType = debt.direction == .iOwe ? .income : .expense
-        let title = debt.direction == .iOwe ? "Borrowed: \(debt.name)" : "Lent: \(debt.name)"
-        let note = debt.counterparty.isEmpty ? debt.note : "Counterparty: \(debt.counterparty)"
+        let debtName = debt.name
+        let title = debt.direction == .iOwe
+            ? String(localized: "Borrowed: \(debtName)")
+            : String(localized: "Lent: \(debtName)")
+        let note: String
+        if debt.counterparty.isEmpty {
+            note = debt.note
+        } else {
+            let counterparty = debt.counterparty
+            note = String(localized: "Counterparty: \(counterparty)")
+        }
 
         let transaction = Transaction(
             title: title,
@@ -122,8 +131,17 @@ enum DebtService {
         ensureDebtCategories(context: context)
         let category = repaymentCategory(for: debt.direction, context: context)
         let type: TransactionType = debt.direction == .iOwe ? .expense : .income
-        let title = debt.direction == .iOwe ? "Repayment: \(debt.name)" : "Received: \(debt.name)"
-        let note = debt.counterparty.isEmpty ? debt.note : "Counterparty: \(debt.counterparty)"
+        let debtName = debt.name
+        let title = debt.direction == .iOwe
+            ? String(localized: "Repayment: \(debtName)")
+            : String(localized: "Received: \(debtName)")
+        let note: String
+        if debt.counterparty.isEmpty {
+            note = debt.note
+        } else {
+            let counterparty = debt.counterparty
+            note = String(localized: "Counterparty: \(counterparty)")
+        }
 
         let transaction = Transaction(
             title: title,
@@ -196,8 +214,16 @@ enum DebtService {
         guard debt.createsLinkedTransactions, let opening = openingTransaction(for: debt) else { return }
         opening.amount = debt.originalAmount
         opening.date = debt.createdAt
-        opening.title = debt.direction == .iOwe ? "Borrowed: \(debt.name)" : "Lent: \(debt.name)"
-        opening.note = debt.counterparty.isEmpty ? debt.note : "Counterparty: \(debt.counterparty)"
+        let debtName = debt.name
+        opening.title = debt.direction == .iOwe
+            ? String(localized: "Borrowed: \(debtName)")
+            : String(localized: "Lent: \(debtName)")
+        if debt.counterparty.isEmpty {
+            opening.note = debt.note
+        } else {
+            let counterparty = debt.counterparty
+            opening.note = String(localized: "Counterparty: \(counterparty)")
+        }
         opening.transactionCurrency = opening.account?.currency == debt.currency ? nil : debt.currency
         recalculateRemaining(for: debt)
     }

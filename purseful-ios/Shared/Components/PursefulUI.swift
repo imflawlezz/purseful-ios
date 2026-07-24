@@ -78,14 +78,14 @@ enum ToolbarIcon {
         Button(action: action) {
             Image(systemName: "xmark")
         }
-        .accessibilityLabel("Cancel")
+        .accessibilityLabel(String(localized: "Cancel"))
     }
 
     static func back(_ action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: "chevron.left")
         }
-        .accessibilityLabel("Back")
+        .accessibilityLabel(String(localized: "Back"))
     }
 
     static func done(_ action: @escaping () -> Void, disabled: Bool = false) -> some View {
@@ -94,7 +94,7 @@ enum ToolbarIcon {
         }
         .buttonStyle(.borderedProminent)
         .disabled(disabled)
-        .accessibilityLabel("Done")
+        .accessibilityLabel(String(localized: "Done"))
     }
 
     static func save(_ action: @escaping () -> Void, disabled: Bool = false) -> some View {
@@ -103,13 +103,13 @@ enum ToolbarIcon {
         }
         .buttonStyle(.borderedProminent)
         .disabled(disabled)
-        .accessibilityLabel("Save")
+        .accessibilityLabel(String(localized: "Save"))
     }
 
     static func confirm(
         _ action: @escaping () -> Void,
         systemImage: String = "checkmark",
-        label: String = "Confirm",
+        label: String = String(localized: "Confirm"),
         disabled: Bool = false
     ) -> some View {
         Button(action: action) {
@@ -124,14 +124,14 @@ enum ToolbarIcon {
         Button(action: action) {
             Image(systemName: "pencil")
         }
-        .accessibilityLabel("Edit")
+        .accessibilityLabel(String(localized: "Edit"))
     }
 
     static func delete(_ action: @escaping () -> Void) -> some View {
         Button(role: .destructive, action: action) {
             Image(systemName: "trash")
         }
-        .accessibilityLabel("Delete")
+        .accessibilityLabel(String(localized: "Delete"))
     }
 
     static func add(_ action: @escaping () -> Void) -> some View {
@@ -139,7 +139,7 @@ enum ToolbarIcon {
             Image(systemName: "plus")
         }
         .buttonStyle(.borderedProminent)
-        .accessibilityLabel("Add")
+        .accessibilityLabel(String(localized: "Add"))
     }
 }
 
@@ -209,13 +209,13 @@ extension View {
                 Image(systemName: "pencil")
             }
             .tint(.blue)
-            .accessibilityLabel("Edit")
+            .accessibilityLabel(String(localized: "Edit"))
 
             Button(role: .destructive, action: onDelete) {
                 Image(systemName: "trash")
             }
             .tint(.red)
-            .accessibilityLabel("Delete")
+            .accessibilityLabel(String(localized: "Delete"))
         }
     }
 
@@ -225,7 +225,7 @@ extension View {
                 Image(systemName: systemImage)
             }
             .tint(.green)
-            .accessibilityLabel("Complete")
+            .accessibilityLabel(String(localized: "Complete"))
         }
     }
 }

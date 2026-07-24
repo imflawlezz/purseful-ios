@@ -135,7 +135,6 @@ enum BalanceCalculator {
             }
     }
 
-    /// Split-aware category totals in the base currency.
     static func categorySpending(
         transactions: [Transaction],
         from start: Date,

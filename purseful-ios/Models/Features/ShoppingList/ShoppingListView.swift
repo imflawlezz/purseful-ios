@@ -47,7 +47,7 @@ struct ShoppingListView: View {
         .listStyle(.insetGrouped)
         .accentTintedBackground()
         .scrollDismissesKeyboard(.interactively)
-        .navigationTitle("Shopping List")
+        .navigationTitle("Shopping list")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -57,7 +57,7 @@ struct ShoppingListView: View {
                     Image(systemName: "trash")
                 }
                 .disabled(items.isEmpty)
-                .accessibilityLabel("Clear list")
+                .accessibilityLabel(String(localized: "Clear list"))
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -166,7 +166,7 @@ struct ShoppingListView: View {
                 .foregroundStyle(item.isChecked ? Color.accentColor : Color.secondary)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(item.isChecked ? "Checked" : "Unchecked")
+        .accessibilityLabel(item.isChecked ? String(localized: "Checked") : String(localized: "Unchecked"))
     }
 
     private func applyFocusRequest(for field: FocusField) {

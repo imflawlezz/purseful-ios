@@ -1,0 +1,421 @@
+%1$@ of %2$@
+%1$@ · %2$@
+%@
+%@ (Build %@)
+%@ has exceeded your limit.
+%@ is at %lld%% of your limit.
+%@ is due on %@.
+%@ of %@
+%@ target date is %@.
+%@ went over your limit.
+%@ with %@ is due soon.
+%@ · %@
+%@/day · %@
+%@’s target date is %@.
+%lld
+%lld day(s) before
+%lld%%
+%lld%% of %@
+0
+0.00
+12M
+30 days
+30D
+3M
+6M
+7 days
+7D
+90 days
+About
+Accent color
+Account
+Accounts
+Accounts in backup
+Accounts linked
+Accounts mapped
+Active
+Active debts
+Add
+Add contribution
+Add daily spend categories
+Add one to keep spending in check.
+Add split
+Add transaction
+Alert at %lld%%
+All
+All spending
+Allow notifications
+Allowed
+Amount
+Amount (High)
+Amount (Low)
+App Language
+Appearance
+Apply contribution
+Apply repayment
+Auto-create
+Back
+Balance only — no linked transactions.
+Balances
+Bank sync isn’t ready yet.
+Base currency
+Based on the last %lld days
+Biweekly
+Books
+Borrowed On
+Borrowed: %@
+Budget
+Budget alert
+Budget Amount
+Budgets
+Buy Me a Coffee
+by
+Calendar
+Cancel
+Can’t open bank login right now.
+Cash
+Cash flow
+Cash flow (30 days)
+Categories
+Categories in backup
+Categories linked
+Categories mapped
+Category
+Change the app language in iOS Settings.
+Checked
+Choose Backup File
+Choose JSON File
+Clear All
+Clear All Data
+Clear everything?
+Clear list
+Clothing
+Coffee
+Complete
+Confirm
+Continue
+Continue to accounts
+Contribution
+Couldn’t clear data
+Couldn’t export
+Couldn’t open that file.
+Couldn’t read that receipt. Try better light, or type it in.
+Couldn’t sign in to your bank.
+Counterparty
+Counterparty: %@
+Courses
+Create a linked transaction
+Create new account
+Create new category
+Create transaction when due
+Credit Card
+Credit to account
+Currency
+Currency: %@
+Current
+Current net worth
+Current Saved
+Custom
+Daily
+Daily discretionary spend
+Daily Spend
+Daily spend trend (%lldd)
+Dashboard
+Data
+Date
+Date & time
+Date (Newest)
+Date (Oldest)
+Debit Card
+Debt Borrowed
+Debt due
+Debt Lent
+Debt Received
+Debt Repayment
+Debts
+Debts due
+Default account
+Delete
+Delete selected
+Denied
+Details
+Direction
+Doctor
+Done
+Double-check the amount and title — scans aren’t always perfect.
+Double-check the amount — scans aren’t always perfect.
+Due
+Due Date
+Duplicates are skipped when merging. Turn this off to start clean.
+Edit
+Edit Account
+Edit Budget
+Edit Category
+Edit Debt
+Edit Goal
+Edit Payment
+Edit Transaction
+Education
+Electronics
+End
+Entertainment
+Ephemeral
+Estimated completion
+Expected net worth
+Expense
+Expenses
+Export JSON
+field.type
+Filters
+Flights
+Food
+For each account in the backup, pick which of yours it should become.
+Freelance
+Frequency
+From
+Fuel
+Fully repaid
+Games
+Generated %@
+Generating PDF…
+Gifts & Donations
+Goal completed
+Goal reminder
+Goal: %@
+Goals
+Groceries
+Haircut
+Health
+Hidden
+Hide
+History
+Hotels
+Housing
+I Owe
+imflawlezz
+Import a backup from the old Purseful website. Match each account and category to yours, or create new ones. Balances come from the file.
+Import as
+Import backup
+Import failed
+Import JSON
+Import web backup
+Importing…
+Inactive
+Include in net worth
+Includes %@ rolled over
+Income
+Initial Balance
+Investments
+Keep my existing data
+Last import
+Latest activity.
+Lent On
+Lent: %@
+Like the app? You can buy me a coffee.
+Limit %@
+Linked Transactions
+Linked transactions
+List total
+Loan
+Lookback
+love
+Made with
+Main account for Balances.
+Making PDF…
+Management
+Mark done
+Mark paid
+Match each category from the backup to one of yours. Only the same type is shown—income or expense.
+Merge
+Merge "%@" into:
+Merge category
+Money you owe, or that’s owed to you.
+Monthly
+Name
+Name and type stay fixed; you can still change the icon and color.
+Net cash flow
+Net worth
+New Account
+New Budget
+New Category
+New Debt
+New Goal
+New Payment
+New Transaction
+Next
+Next Due
+No
+No budgets
+No budgets yet
+No categories selected yet
+No debts
+No expense categories yet
+No goals
+No linked transactions
+No planned payments
+No spending yet
+No transactions
+No transactions in this period
+No transactions yet
+No upcoming payments
+None
+Not asked yet
+Not Requested
+Note
+Nothing due this day
+Nothing matches this period
+Nothing upcoming
+Notifications
+of %@
+Off
+OK
+Old type
+On
+Once
+Open Purseful to update
+Original
+Original Amount
+Other
+Other Expense
+Other Income
+Overdue
+Page %lld
+Paid
+Paid %@
+Paid this period
+Parent
+Parking
+Payment calendar
+Payment expected
+Payments
+Pending
+Period
+Period: %@
+Permission
+Permissions
+Personal Care
+Pets
+Pharmacy
+Pick categories like Food or Entertainment
+Planned
+Planned payments
+Preferences
+Primary and other account balances; medium also shows spent today and upcoming payments.
+Provisional
+Public Transit
+Purseful %@ (Build %@)
+Purseful report
+Quick add
+Receipt scan
+Received: %@
+Recent
+Recent transactions
+Record repayment
+Recurring rules
+Refunds
+Remaining
+remaining
+Remaining Balance
+Remind %lld day(s) before
+Reminder
+Rent
+Rent, salary, subscriptions — whatever repeats.
+Reorder
+Repayment Amount
+Repayment Date
+Repayment due
+Repayment: %@
+Reports
+Restaurants
+Restore a Purseful backup—accounts, transactions, budgets, goals, and more. Merge keeps your current settings; otherwise the file’s settings are used.
+Roll over unused
+Salary
+Salon & Spa
+Save
+Savings
+Savings goal done
+Scan receipt
+Search transactions
+Section
+See all
+Select
+Select account
+Selected Period
+Selected total
+Set as default
+Settings
+Shopping
+Shopping list
+Show
+Show hidden
+Skipped bad rows
+Skipped duplicates
+Something to save toward.
+Sort
+Spending by category
+Spending trend
+Spent %@
+SPENT TODAY
+Spent today
+Spent today %@
+Split transaction
+Start
+Start typing…
+Streaming
+Summary
+System
+System category
+Tap + to add one.
+Target
+Target Amount
+Target category
+Target Date
+They Owe Me
+This deletes everything — accounts, transactions, budgets, goals, payments, debts, the shopping list, and more. Default categories come back.
+This isn’t a Purseful export. For old website backups, use Web backup import.
+Title
+To
+To Account
+Today’s spend
+Today’s spending on the Lock Screen.
+Top payees
+Total expenses
+Total income
+Totals and reports convert into this currency.
+Transaction
+Transactions
+Transactions (%lld)
+Transactions imported
+Transactions in backup
+Transactions to import
+Transfer
+Transfer · %1$@ → %2$@
+Transfer · %@ → %@
+Transport
+Travel
+Trend window
+Unchecked
+Unknown
+Untitled
+UPCOMING
+Upcoming payment
+Upcoming payments
+Used for buttons, backgrounds, and lists.
+Utilities
+Version
+vs last period: %@
+vs last period: 0%
+vs last period: nothing to compare
+vs last period: —
+vs previous period: %@
+Web backup import
+Weekly
+Weekly summary
+What’s left in a budget.
+Which budget to show.
+Yearly
+Yes
+Your account balances. The larger size also shows today’s spend and what’s coming up.
+·
+–
+—

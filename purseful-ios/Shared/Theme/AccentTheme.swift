@@ -183,7 +183,7 @@ struct AccentListSectionHeader: View {
     let title: String
 
     var body: some View {
-        Text(title)
+        Text(title.localizedDisplayName)
             .font(.footnote)
             .foregroundStyle(.secondary)
             .textCase(.uppercase)

@@ -10,9 +10,9 @@ enum DailySpendLookback: Int, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .sevenDays: "7 days"
-        case .thirtyDays: "30 days"
-        case .ninetyDays: "90 days"
+        case .sevenDays: String(localized: "7 days")
+        case .thirtyDays: String(localized: "30 days")
+        case .ninetyDays: String(localized: "90 days")
         }
     }
 }
@@ -36,10 +36,10 @@ enum DailySpendCalculator {
         var names: [String] = []
         for root in expenseRootCategories(from: categories) {
             if selectedIDs.contains(root.id), root.isUserSelectable {
-                names.append(root.name)
+                names.append(root.name.localizedDisplayName)
             }
             for child in expenseChildCategories(of: root) where selectedIDs.contains(child.id) {
-                names.append(child.name)
+                names.append(child.name.localizedDisplayName)
             }
         }
         return names
