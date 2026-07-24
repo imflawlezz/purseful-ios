@@ -1,18 +1,46 @@
 {
   "fill" : {
-    "automatic-gradient" : "srgb:0.00000,0.58980,1.00000,1.00000"
+    "linear-gradient" : [
+      "display-p3:0.97255,0.97647,0.98039,1.00000",
+      "srgb:0.88627,0.88627,0.90980,1.00000"
+    ],
+    "orientation" : {
+      "start" : {
+        "x" : 0.5,
+        "y" : 1
+      },
+      "stop" : {
+        "x" : 0.5,
+        "y" : 0.3
+      }
+    }
   },
   "groups" : [
     {
+      "blur-material" : 0.5,
       "layers" : [
         {
           "fill" : {
-            "automatic-gradient" : "srgb:1.00000,0.83235,0.47321,1.00000"
+            "linear-gradient" : [
+              "srgb:0.00000,0.77647,1.00000,1.00000",
+              "srgb:0.94902,0.44314,0.12941,1.00000"
+            ],
+            "orientation" : {
+              "start" : {
+                "x" : 0.26869630813598633,
+                "y" : 0
+              },
+              "stop" : {
+                "x" : 0.5,
+                "y" : 1
+              }
+            }
           },
-          "image-name" : "wallet.svg",
-          "name" : "wallet",
+          "glass" : true,
+          "image-name" : "wallet-solid-full.svg",
+          "name" : "wallet-solid-full",
           "position" : {
-            "scale" : 6,
+            "scale" : 1.2,
             "translation-in-points" : [
               0,
               0
@@ -22,8 +50,9 @@
       ],
       "shadow" : {
         "kind" : "neutral",
-        "opacity" : 0.5
+        "opacity" : 1
       },
+      "specular" : true,
       "translucency" : {
         "enabled" : true,
         "value" : 0.5
