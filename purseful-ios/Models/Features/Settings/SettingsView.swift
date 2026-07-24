@@ -1,5 +1,6 @@
 import SwiftData
 import SwiftUI
+import UIKit
 import UniformTypeIdentifiers
 import UserNotifications
 
@@ -65,6 +66,28 @@ struct SettingsView: View {
 
             Section {
                 Button {
+                    openAppSettings()
+                } label: {
+                    HStack {
+                        settingsLabel(
+                            "App Language",
+                            subtitle: "Change the app language in iOS Settings.",
+                            systemImage: "gear",
+                            tint: .gray
+                        )
+                        Spacer(minLength: 8)
+                        Image(systemName: "arrow.up.forward")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                .foregroundStyle(.primary)
+            }
+            .listSectionSpacing(16)
+            .accentListRows()
+
+            Section {
+                Button {
                     exportJSON()
                 } label: {
                     settingsLabel("Export JSON", systemImage: "square.and.arrow.up.fill", tint: .indigo)
@@ -78,7 +101,7 @@ struct SettingsView: View {
                 NavigationLink {
                     PursefulWebImportView()
                 } label: {
-                    settingsLabel("Import Purseful Web Backup", systemImage: "globe", tint: .cyan)
+                    settingsLabel("Import web backup", systemImage: "globe", tint: .cyan)
                 }
                 Button(role: .destructive) {
                     showClearDataAlert = true
@@ -93,17 +116,65 @@ struct SettingsView: View {
             Section {
                 LabeledContent {
                     Text(appVersionLabel)
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
                 } label: {
                     settingsLabel("Version", systemImage: "info.circle.fill", tint: .gray)
                 }
-                HStack(spacing: 4) {
-                    Text("Made with")
-                    Image(systemName: "heart.fill")
-                        .foregroundStyle(.red)
-                    Text("by")
-                    Link("imflawlezz", destination: URL(string: "https://github.com/imflawlezz")!)
+                Link(destination: URL(string: "https://buymeacoffee.com/imflawlezz")!) {
+                    HStack(alignment: .center) {
+                        settingsLabel(
+                            "Buy Me a Coffee",
+                            subtitle: "Like the app? You can buy me a coffee.",
+                            systemImage: "cup.and.saucer.fill",
+                            tint: .orange
+                        )
+                        Spacer(minLength: 8)
+                        Image(systemName: "arrow.up.forward")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.tertiary)
+                    }
                 }
-                .font(.subheadline)
+                .foregroundStyle(.primary)
+                Link(destination: URL(string: "https://github.com/imflawlezz")!) {
+                    HStack(alignment: .center) {
+                        Label {
+                            HStack(spacing: 5) {
+                                Text("Made with")
+                                Image(systemName: "heart.fill")
+                                    .foregroundStyle(.pink)
+                                    .accessibilityLabel("love")
+                                Text("by")
+                                Text("imflawlezz")
+                                    .fontWeight(.regular)
+                                    .foregroundStyle(
+                                        LinearGradient(
+                                            colors: [
+                                                Color(red: 0.00000, green: 0.77647, blue: 1.00000),
+                                                Color(red: 0.94902, green: 0.44314, blue: 0.12941)
+                                            ],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+                            }
+                        } icon: {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.indigo.opacity(0.18))
+                                    .frame(width: 28, height: 28)
+                                Image(systemName: "chevron.left.forwardslash.chevron.right")
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundStyle(.indigo)
+                            }
+                        }
+                        Spacer(minLength: 8)
+                        Image(systemName: "arrow.up.forward")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                .foregroundStyle(.primary)
             } header: {
                 AccentListSectionHeader(title: "About")
             }
@@ -121,15 +192,15 @@ struct SettingsView: View {
         .onAppear {
             SpotlightService.indexAll(transactions: transactions, accounts: accounts, categories: categories)
         }
-        .alert("Clear All Data?", isPresented: $showClearDataAlert) {
+        .alert("Clear everything?", isPresented: $showClearDataAlert) {
             Button("Clear All", role: .destructive) {
                 clearAllData()
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This permanently deletes all accounts, transactions, budgets, goals, planned payments, debts, shopping list items, and other saved data. Default categories will be restored.")
+            Text("This deletes everything — accounts, transactions, budgets, goals, payments, debts, the shopping list, and more. Default categories come back.")
         }
-        .alert("Could Not Export", isPresented: .init(
+        .alert("Couldn’t export", isPresented: .init(
             get: { exportError != nil },
             set: { if !$0 { exportError = nil } }
         )) {
@@ -137,7 +208,7 @@ struct SettingsView: View {
         } message: {
             Text(exportError ?? "")
         }
-        .alert("Could Not Clear Data", isPresented: .init(
+        .alert("Couldn’t clear data", isPresented: .init(
             get: { clearDataError != nil },
             set: { if !$0 { clearDataError = nil } }
         )) {
@@ -150,12 +221,29 @@ struct SettingsView: View {
     private var appVersionLabel: String {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"
         let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "—"
-        return "\(version) (Build \(build))"
+        return String(localized: "\(version) (Build \(build))")
     }
 
     private func settingsLabel(_ title: String, systemImage: String, tint: Color) -> some View {
+        settingsLabel(title, subtitle: nil, systemImage: systemImage, tint: tint)
+    }
+
+    private func settingsLabel(
+        _ title: String,
+        subtitle: String?,
+        systemImage: String,
+        tint: Color
+    ) -> some View {
         Label {
-            Text(title)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title.localizedDisplayName)
+                if let subtitle {
+                    Text(subtitle.localizedDisplayName)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
         } icon: {
             ZStack {
                 Circle()
@@ -166,6 +254,11 @@ struct SettingsView: View {
                     .foregroundStyle(tint)
             }
         }
+    }
+
+    private func openAppSettings() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(url)
     }
 
     private func clearAllData() {
@@ -217,7 +310,7 @@ struct CurrencySettingsView: View {
     var body: some View {
         Form {
             Section {
-                Picker("Base Currency", selection: $baseCurrency) {
+                Picker("Base currency", selection: $baseCurrency) {
                     ForEach(CommonCurrencies.codes, id: \.self) { code in
                         Text(code).tag(code)
                     }
@@ -225,7 +318,7 @@ struct CurrencySettingsView: View {
                 .onChange(of: baseCurrency) { _, newValue in
                     AppSettings.shared.baseCurrency = newValue
                 }
-                Text("All totals and reports use the base currency with live conversion rates.")
+                Text("Totals and reports convert into this currency.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -242,7 +335,7 @@ struct AppearanceSettingsView: View {
     var body: some View {
         Form {
             Section {
-                Text("Accent color tints interactive controls, screen backgrounds, and solid surfaces.")
+                Text("Used for buttons, backgrounds, and lists.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -252,7 +345,7 @@ struct AppearanceSettingsView: View {
                 ColorPickerGrid(selectedHex: $settings.accentColorHex)
                     .padding(.vertical, 4)
             } header: {
-                AccentListSectionHeader(title: "Accent Color")
+                AccentListSectionHeader(title: "Accent color")
             }
             .accentListRows()
         }
@@ -271,7 +364,7 @@ struct NotificationSettingsView: View {
         Form {
             Section {
                 LabeledContent("Permission", value: authorizationLabel)
-                Button("Request Notification Permission") {
+                Button("Allow notifications") {
                     Task {
                         _ = await NotificationService.shared.requestAuthorization()
                         await refreshAuthorizationStatus()
@@ -282,7 +375,7 @@ struct NotificationSettingsView: View {
             .accentListRows()
 
             Section {
-                Toggle("Weekly Summary", isOn: $weeklySummary)
+                Toggle("Weekly summary", isOn: $weeklySummary)
                     .onChange(of: weeklySummary) { _, newValue in
                         AppSettings.shared.weeklySummaryEnabled = newValue
                         Task {
@@ -293,9 +386,6 @@ struct NotificationSettingsView: View {
                             await NotificationScheduler.syncAll(context: dependencies.repository.context)
                         }
                     }
-                Text("Every Monday at 9:00 AM, receive a summary of spending from the previous 7 days.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
             }
             .accentListRows()
         }
@@ -308,12 +398,12 @@ struct NotificationSettingsView: View {
 
     private var authorizationLabel: String {
         switch authorizationStatus {
-        case .authorized: "Allowed"
-        case .denied: "Denied"
-        case .notDetermined: "Not Requested"
-        case .provisional: "Provisional"
-        case .ephemeral: "Ephemeral"
-        @unknown default: "Unknown"
+        case .authorized: String(localized: "Allowed")
+        case .denied: String(localized: "Denied")
+        case .notDetermined: String(localized: "Not asked yet")
+        case .provisional: String(localized: "Provisional")
+        case .ephemeral: String(localized: "Ephemeral")
+        @unknown default: String(localized: "Unknown")
         }
     }
 
@@ -348,10 +438,10 @@ struct AccountsListView: View {
                             balance: BalanceCalculator.currentBalance(for: account, transactions: transactions)
                         )
                     }, actions: [
-                        RowAction(id: "edit", title: "Edit", systemImage: "pencil") {
+                        RowAction(id: "edit", title: String(localized: "Edit"), systemImage: "pencil") {
                             selectedAccount = account
                         },
-                        RowAction(id: "delete", title: "Delete", systemImage: "trash", role: .destructive) {
+                        RowAction(id: "delete", title: String(localized: "Delete"), systemImage: "trash", role: .destructive) {
                             delete(account)
                         }
                     ])
@@ -374,7 +464,7 @@ struct AccountsListView: View {
                 } label: {
                     Image(systemName: editMode == .active ? "checkmark" : "line.3.horizontal")
                 }
-                .accessibilityLabel(editMode == .active ? "Done" : "Reorder")
+                .accessibilityLabel(editMode == .active ? String(localized: "Done") : String(localized: "Reorder"))
             }
             ToolbarItem(placement: .topBarTrailing) {
                 ToolbarIcon.add { showAdd = true }
@@ -410,7 +500,7 @@ struct AccountsListView: View {
                         .foregroundStyle(isDefaultAccount(account) ? Color(hex: account.colorHex) : Color.secondary)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(isDefaultAccount(account) ? "Default account" : "Set as default account")
+                .accessibilityLabel(isDefaultAccount(account) ? String(localized: "Default account") : String(localized: "Set as default"))
             } else {
                 Text(CurrencyFormatter.format(
                     BalanceCalculator.currentBalance(for: account, transactions: transactions),
@@ -479,7 +569,7 @@ struct AccountFormView: View {
             Form {
                 Section {
                     TextField("Name", text: $name)
-                    Picker("Type", selection: $type) {
+                    Picker("field.type", selection: $type) {
                         ForEach(AccountType.allCases) { t in
                             Text(t.displayName).tag(t)
                         }
@@ -488,7 +578,7 @@ struct AccountFormView: View {
                         ForEach(CommonCurrencies.codes, id: \.self) { Text($0).tag($0) }
                     }
                     LabeledAmountField(label: "Initial Balance", amount: $initialBalanceText, currencyCode: currency)
-                    Toggle("Include in Net Worth", isOn: $includeInTotal)
+                    Toggle("Include in net worth", isOn: $includeInTotal)
                     SymbolPickerGrid(selectedSymbol: $icon)
                     ColorPickerGrid(selectedHex: $colorHex)
                 }
@@ -567,7 +657,7 @@ struct CategoriesListView: View {
         List {
             if hiddenCategoryCount > 0 {
                 Section {
-                    Toggle("Show Hidden", isOn: $showHiddenCategories)
+                    Toggle("Show hidden", isOn: $showHiddenCategories)
                 }
                 .accentListRows()
             }
@@ -607,7 +697,7 @@ struct CategoriesListView: View {
     private func categoryRow(_ category: Category) -> some View {
         HStack {
             CategoryIconView(category: category)
-            Text(category.name)
+            Text(category.name.localizedDisplayName)
                 .foregroundStyle(Color(hex: category.colorHex))
             if category.isHidden {
                 Text("Hidden")
@@ -642,7 +732,7 @@ struct CategoriesListView: View {
                 Image(systemName: category.isHidden ? "eye" : "eye.slash")
             }
             .tint(.orange)
-            .accessibilityLabel(category.isHidden ? "Show" : "Hide")
+            .accessibilityLabel(category.isHidden ? String(localized: "Show") : String(localized: "Hide"))
         }
         .swipeActions(edge: .trailing) {
             Button {
@@ -651,7 +741,7 @@ struct CategoriesListView: View {
                 Image(systemName: "pencil")
             }
             .tint(.blue)
-            .accessibilityLabel("Edit")
+            .accessibilityLabel(String(localized: "Edit"))
 
             if !category.isSystem {
                 Button {
@@ -660,7 +750,7 @@ struct CategoriesListView: View {
                     Image(systemName: "arrow.triangle.merge")
                 }
                 .tint(.indigo)
-                .accessibilityLabel("Merge")
+                .accessibilityLabel(String(localized: "Merge"))
 
                 Button(role: .destructive) {
                     deleteCategory(category)
@@ -668,19 +758,19 @@ struct CategoriesListView: View {
                     Image(systemName: "trash")
                 }
                 .tint(.red)
-                .accessibilityLabel("Delete")
+                .accessibilityLabel(String(localized: "Delete"))
             }
         }
     }
 
     private func categoryRowActions(_ category: Category) -> [RowAction] {
         var actions: [RowAction] = [
-            RowAction(id: "edit", title: "Edit", systemImage: "pencil") {
+            RowAction(id: "edit", title: String(localized: "Edit"), systemImage: "pencil") {
                 selectedCategory = category
             },
             RowAction(
                 id: "hide",
-                title: category.isHidden ? "Show" : "Hide",
+                title: category.isHidden ? String(localized: "Show") : String(localized: "Hide"),
                 systemImage: category.isHidden ? "eye" : "eye.slash"
             ) {
                 category.isHidden.toggle()
@@ -689,10 +779,10 @@ struct CategoriesListView: View {
         ]
 
         if !category.isSystem {
-            actions.append(RowAction(id: "merge", title: "Merge", systemImage: "arrow.triangle.merge") {
+            actions.append(RowAction(id: "merge", title: String(localized: "Merge"), systemImage: "arrow.triangle.merge") {
                 mergeSource = category
             })
-            actions.append(RowAction(id: "delete", title: "Delete", systemImage: "trash", role: .destructive) {
+            actions.append(RowAction(id: "delete", title: String(localized: "Delete"), systemImage: "trash", role: .destructive) {
                 deleteCategory(category)
             })
         }
@@ -727,7 +817,7 @@ struct CategoryFormView: View {
             Form {
                 Section {
                     TextField("Name", text: $name)
-                    Picker("Type", selection: $type) {
+                    Picker("field.type", selection: $type) {
                         Text("Expense").tag(CategoryType.expense)
                         Text("Income").tag(CategoryType.income)
                     }
@@ -782,13 +872,13 @@ struct CategoryEditView: View {
                 Section {
                     if category.isSystem {
                         LabeledContent("Name", value: category.name)
-                        LabeledContent("Type", value: category.type == .income ? "Income" : "Expense")
-                        Text("System categories keep their name and type, but you can customize the icon and color.")
+                        LabeledContent("field.type", value: category.type == .income ? String(localized: "Income") : String(localized: "Expense"))
+                        Text("Name and type stay fixed; you can still change the icon and color.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     } else {
                         TextField("Name", text: $name)
-                        Picker("Type", selection: $type) {
+                        Picker("field.type", selection: $type) {
                             Text("Expense").tag(CategoryType.expense)
                             Text("Income").tag(CategoryType.income)
                         }
@@ -845,8 +935,8 @@ struct CategoryMergeView: View {
         NavigationStack {
             Form {
                 Section {
-                    Text("Merge \"\(source.name)\" into:")
-                    Picker("Target Category", selection: $target) {
+                    Text(String(localized: "Merge \"\(source.name)\" into:"))
+                    Picker("Target category", selection: $target) {
                         ForEach(categories.filter { $0.id != source.id && !$0.isHidden }) { category in
                             CategoryNameLabel.picker(category: category).tag(Optional(category))
                         }
@@ -854,7 +944,7 @@ struct CategoryMergeView: View {
                 }
                 .accentListRows()
             }
-            .navigationTitle("Merge Category")
+            .navigationTitle("Merge category")
             .accentTintedBackground()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -864,7 +954,7 @@ struct CategoryMergeView: View {
                     ToolbarIcon.confirm(
                         { merge() },
                         systemImage: "arrow.triangle.merge",
-                        label: "Merge",
+                        label: String(localized: "Merge"),
                         disabled: target == nil
                     )
                 }
