@@ -38,7 +38,7 @@ struct PursefulWebImportView: View {
                 importSection
             }
         }
-        .navigationTitle("Purseful Web Import")
+        .navigationTitle("Web backup import")
         .navigationBarTitleDisplayMode(.inline)
         .accentTintedBackground()
         .navigationBarBackButtonHidden(true)
@@ -66,7 +66,7 @@ struct PursefulWebImportView: View {
                 importError = error.localizedDescription
             }
         }
-        .alert("Import Failed", isPresented: .init(
+        .alert("Import failed", isPresented: .init(
             get: { importError != nil },
             set: { if !$0 { importError = nil } }
         )) {
@@ -79,16 +79,16 @@ struct PursefulWebImportView: View {
     private var setupSection: some View {
         Group {
             Section {
-                Text("Import a JSON backup from legacy Purseful Web. You’ll map each legacy account and category to an existing one, or create new records. Account balances are reconciled using the backup snapshot and an opening balance.")
+                Text("Import a backup from the old Purseful website. Match each account and category to yours, or create new ones. Balances come from the file.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
             .accentListRows()
 
             Section {
-                Toggle("Merge with existing data", isOn: $mergeExisting)
+                Toggle("Keep my existing data", isOn: $mergeExisting)
                 if mergeExisting {
-                    Text("Re-importing the same backup skips transactions already imported. For a clean migration, turn this off.")
+                    Text("Duplicates are skipped when merging. Turn this off to start clean.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -110,7 +110,7 @@ struct PursefulWebImportView: View {
 
             if backup != nil {
                 Section {
-                    Button("Continue to Account Mapping") {
+                    Button("Continue to accounts") {
                         step = .mapAccounts
                     }
                 }
@@ -122,7 +122,7 @@ struct PursefulWebImportView: View {
     @ViewBuilder
     private var accountMappingSection: some View {
         Section {
-            Text("Choose which existing account each legacy account should use.")
+            Text("For each account in the backup, pick which of yours it should become.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
@@ -141,7 +141,7 @@ struct PursefulWebImportView: View {
                 }
                 .pickerStyle(.navigationLink)
 
-                LabeledContent("Legacy type", value: webAccount.type.capitalized)
+                LabeledContent("Old type", value: webAccount.type.capitalized)
                 LabeledContent("Currency", value: webAccount.currency)
             } header: {
                 AccentListSectionHeader(title: webAccount.name)
@@ -153,7 +153,7 @@ struct PursefulWebImportView: View {
     @ViewBuilder
     private var categoryMappingSection: some View {
         Section {
-            Text("Map legacy categories to your existing ones. Only categories of the same type are suggested.")
+            Text("Match each category from the backup to one of yours. Only the same type is shown—income or expense.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
@@ -166,13 +166,13 @@ struct PursefulWebImportView: View {
                         .tag(PursefulWebImportService.MappingTarget.createNew)
 
                     ForEach(selectableCategories(for: webCategory)) { category in
-                        Text(category.name)
+                        Text(category.name.localizedDisplayName)
                             .tag(PursefulWebImportService.MappingTarget.existing(category.id))
                     }
                 }
                 .pickerStyle(.navigationLink)
 
-                LabeledContent("Type", value: webCategory.type.capitalized)
+                LabeledContent("field.type", value: webCategory.type.capitalized)
             } header: {
                 AccentListSectionHeader(title: webCategory.name)
             }
@@ -193,7 +193,7 @@ struct PursefulWebImportView: View {
 
             Section {
                 FormActionButton(
-                    title: isImporting ? "Importing…" : "Import Backup",
+                    title: isImporting ? String(localized: "Importing…") : String(localized: "Import backup"),
                     systemImage: "square.and.arrow.down"
                 ) {
                     runImport()
@@ -211,10 +211,10 @@ struct PursefulWebImportView: View {
                         LabeledContent("Skipped duplicates", value: "\(importResult.skippedDuplicates)")
                     }
                     if importResult.skippedInvalid > 0 {
-                        LabeledContent("Skipped invalid rows", value: "\(importResult.skippedInvalid)")
+                        LabeledContent("Skipped bad rows", value: "\(importResult.skippedInvalid)")
                     }
                 } header: {
-                    AccentListSectionHeader(title: "Last Import")
+                    AccentListSectionHeader(title: "Last import")
                 }
                 .accentListRows()
             }
@@ -243,7 +243,7 @@ struct PursefulWebImportView: View {
 
     private func loadBackup(from url: URL) {
         guard url.startAccessingSecurityScopedResource() else {
-            importError = "Could not access the selected file."
+            importError = String(localized: "Couldn’t open that file.")
             return
         }
         defer { url.stopAccessingSecurityScopedResource() }

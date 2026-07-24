@@ -39,11 +39,7 @@ enum NotificationScheduler {
             NotificationService.shared.scheduleGoalReminder(goal: goal)
         }
 
-        NotificationService.shared.scheduleWeeklySummary(
-            transactions: txs,
-            baseCurrency: baseCurrency,
-            exchangeRates: rates
-        )
+        NotificationService.shared.scheduleWeeklySummary()
     }
 
     static func syncAfterSave(

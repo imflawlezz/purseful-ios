@@ -103,8 +103,10 @@ final class NotificationService {
         components.hour = 9
 
         let content = UNMutableNotificationContent()
-        content.title = "Upcoming Payment"
-        content.body = "\(payment.name) is due on \(DateFormatters.short.string(from: payment.nextDueDate))."
+        content.title = String(localized: "Upcoming payment")
+        let name = payment.name
+        let date = DateFormatters.short.string(from: payment.nextDueDate)
+        content.body = String(localized: "\(name) is due on \(date).")
         content.sound = .default
 
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
@@ -130,8 +132,10 @@ final class NotificationService {
         components.hour = 9
 
         let content = UNMutableNotificationContent()
-        content.title = "Debt Due"
-        content.body = "\(debt.name) with \(debt.counterparty) is due soon."
+        content.title = String(localized: "Debt due")
+        let name = debt.name
+        let counterparty = debt.counterparty
+        content.body = String(localized: "\(name) with \(counterparty) is due soon.")
         content.sound = .default
 
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
@@ -157,8 +161,10 @@ final class NotificationService {
         components.hour = 9
 
         let content = UNMutableNotificationContent()
-        content.title = "Goal Reminder"
-        content.body = "\(goal.name) target date is \(DateFormatters.short.string(from: targetDate))."
+        content.title = String(localized: "Goal reminder")
+        let name = goal.name
+        let date = DateFormatters.short.string(from: targetDate)
+        content.body = String(localized: "\(name) target date is \(date).")
         content.sound = .default
 
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
@@ -170,37 +176,17 @@ final class NotificationService {
         cancelNotification(id: goalNotificationID(goal.id))
     }
 
-    func scheduleWeeklySummary(
-        transactions: [Transaction],
-        baseCurrency: String,
-        exchangeRates: [String: Decimal]
-    ) {
+    func scheduleWeeklySummary() {
         cancelWeeklySummary()
 
         guard AppSettings.shared.weeklySummaryEnabled else { return }
         guard let fireDate = NotificationHelpers.nextMondayMorning() else { return }
         guard fireDate > Date() else { return }
 
-        let calendar = Calendar.current
-        let mondayStart = calendar.startOfDay(for: fireDate)
-        guard let periodStart = calendar.date(byAdding: .day, value: -7, to: mondayStart),
-              let periodEnd = calendar.date(byAdding: .second, value: -1, to: mondayStart) else {
-            return
-        }
-
-        let spent = BalanceCalculator.totalExpenses(
-            transactions: transactions,
-            from: periodStart,
-            through: periodEnd,
-            baseCurrency: baseCurrency,
-            exchangeRates: exchangeRates
-        )
-
-        let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: fireDate)
+        let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: fireDate)
 
         let content = UNMutableNotificationContent()
-        content.title = "Weekly Summary"
-        content.body = "Last week you spent \(CurrencyFormatter.format(spent, currencyCode: baseCurrency))."
+        content.title = String(localized: "Weekly summary")
         content.sound = .default
 
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
@@ -243,11 +229,13 @@ final class NotificationService {
         guard !UserDefaults.standard.bool(forKey: dedupKey) else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = "Budget Alert"
+        content.title = String(localized: "Budget alert")
+        let name = budget.name
         if level == .exceeded {
-            content.body = "\(budget.name) has exceeded your limit."
+            content.body = String(localized: "\(name) has exceeded your limit.")
         } else {
-            content.body = "\(budget.name) is at \(Int(progress * 100))% of your limit."
+            let percent = Int(progress * 100)
+            content.body = String(localized: "\(name) is at \(percent)% of your limit.")
         }
         content.sound = .default
 

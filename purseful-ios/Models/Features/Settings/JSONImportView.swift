@@ -13,14 +13,14 @@ struct JSONImportView: View {
     var body: some View {
         Form {
             Section {
-                Text("Import a Purseful JSON export file. Accounts, categories, transactions, budgets, goals, planned payments, debts, shopping list, and app preferences are restored. Merge keeps your current settings; replace applies exported preferences.")
+                Text("Restore a Purseful backup—accounts, transactions, budgets, goals, and more. Merge keeps your current settings; otherwise the file’s settings are used.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
             .accentListRows()
 
             Section {
-                Toggle("Merge with existing data", isOn: $mergeExisting)
+                Toggle("Keep my existing data", isOn: $mergeExisting)
             }
             .accentListRows()
 
@@ -38,15 +38,15 @@ struct JSONImportView: View {
                     LabeledContent("Transactions", value: "\(importResult.transactions)")
                     LabeledContent("Budgets", value: "\(importResult.budgets)")
                     LabeledContent("Goals", value: "\(importResult.goals)")
-                    LabeledContent("Planned Payments", value: "\(importResult.plannedPayments)")
+                    LabeledContent("Planned payments", value: "\(importResult.plannedPayments)")
                     LabeledContent("Debts", value: "\(importResult.debts)")
-                    LabeledContent("Recurring Rules", value: "\(importResult.recurringRules)")
-                    LabeledContent("Shopping List", value: "\(importResult.shoppingList)")
+                    LabeledContent("Recurring rules", value: "\(importResult.recurringRules)")
+                    LabeledContent("Shopping list", value: "\(importResult.shoppingList)")
                     if importResult.skippedDuplicates > 0 {
                         LabeledContent("Skipped duplicates", value: "\(importResult.skippedDuplicates)")
                     }
                 } header: {
-                    AccentListSectionHeader(title: "Last Import")
+                    AccentListSectionHeader(title: "Last import")
                 }
                 .accentListRows()
             }
@@ -62,7 +62,7 @@ struct JSONImportView: View {
                 importError = error.localizedDescription
             }
         }
-        .alert("Import Failed", isPresented: .init(
+        .alert("Import failed", isPresented: .init(
             get: { importError != nil },
             set: { if !$0 { importError = nil } }
         )) {
@@ -74,7 +74,7 @@ struct JSONImportView: View {
 
     private func importJSON(from url: URL) {
         guard url.startAccessingSecurityScopedResource() else {
-            importError = "Could not access the selected file."
+            importError = String(localized: "Couldn’t open that file.")
             return
         }
         defer { url.stopAccessingSecurityScopedResource() }
@@ -82,7 +82,7 @@ struct JSONImportView: View {
         do {
             let data = try Data(contentsOf: url)
             guard ImportService.isAppExport(data) else {
-                importError = "This file is not a Purseful app export. Use Purseful Web Import for legacy web backups."
+                importError = String(localized: "This isn’t a Purseful export. For old website backups, use Web backup import.")
                 return
             }
             importResult = try dependencies.importExport.importJSON(
@@ -97,9 +97,6 @@ struct JSONImportView: View {
     }
 
     private func syncWidgets() {
-        let accounts = (try? dependencies.repository.fetch(FetchDescriptor<Account>())) ?? []
-        let transactions = (try? dependencies.repository.fetch(FetchDescriptor<Transaction>())) ?? []
-        let budgets = (try? dependencies.repository.fetch(FetchDescriptor<Budget>())) ?? []
-        dependencies.importExport.syncWidgets(accounts: accounts, transactions: transactions, budgets: budgets)
+        dependencies.importExport.syncWidgets()
     }
 }
