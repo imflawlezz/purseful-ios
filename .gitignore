@@ -1,6 +1,12 @@
-# --- Project-specific ---
-# Local AI/planning spec — kept out of the public repo; use docs/features.md instead.
+# --- Local helpers (not part of the product) ---
+# Planning / AI scratch notes
 prompt.md
+*.prompt.md
+
+# One-shot maintenance scripts (locale dumps, codegen helpers, etc.)
+scripts/
+*.pyc
+__pycache__/
 
 # --- macOS ---
 .DS_Store
@@ -125,7 +131,7 @@ TestResults/
 !.vscode/extensions.json
 *.code-workspace
 
-# --- Cursor (keep rules/skills if added later; ignore local state) ---
+# --- Cursor (keep rules; ignore local state/commands) ---
 .cursor/
 !.cursor/rules/
 !.cursor/skills/

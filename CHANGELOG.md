@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-07-24
+
+### Added
+
+- Redesigned WidgetKit suite: Balances, Budget, Recent, Lock Screen spent today
+- Widget snapshot sync after transaction save/delete
+- Settings → App Language entry that opens iOS Settings for per-app language
+- Settings → About donate link (Buy Me a Coffee)
+- English String Catalogs (`Localizable.xcstrings`) for app and widgets, with pl / ru / uk / de / es / fr translations
+
+### Changed
+
+- Widget snapshot includes accounts, budgets, goals, base currency, accent, and richer transaction rows
+- Removed sparse single-metric home widgets in favor of fewer denser compositions
+- Report cash flow and net worth charts use period-aware buckets and thinned axis labels
+
+### Fixed
+
+- Shopping list parser classifies quantity vs price regardless of token order; rejects `Decimal` scientific-notation false positives (e.g. "Eggs")
+
 ## [1.1.1] - 2026-07-23
 
 ### Added
@@ -101,7 +121,8 @@ Initial public release. Local-first personal finance for iOS with no subscriptio
 - CSV import/export
 - Additional transaction filters (date range, amount range, swipe duplicate)
 
-[Unreleased]: https://github.com/imflawlezz/purseful-ios/compare/v1.1.1...HEAD
+[Unreleased]: https://github.com/imflawlezz/purseful-ios/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/imflawlezz/purseful-ios/releases/tag/v1.2.0
 [1.1.1]: https://github.com/imflawlezz/purseful-ios/releases/tag/v1.1.1
 [1.1.0]: https://github.com/imflawlezz/purseful-ios/releases/tag/v1.1.0
 [1.0.0]: https://github.com/imflawlezz/purseful-ios/releases/tag/v1.0.0
