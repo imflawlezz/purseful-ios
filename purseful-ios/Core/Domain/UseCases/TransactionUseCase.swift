@@ -37,6 +37,7 @@ struct TransactionUseCase {
 
         try repository.save()
         NotificationScheduler.syncAfterSave(context: repository.context)
+        WidgetDataSync.sync(using: repository)
     }
 
     func delete(_ transaction: Transaction) throws {
@@ -50,6 +51,7 @@ struct TransactionUseCase {
         repository.delete(transaction)
         try repository.save()
         NotificationScheduler.syncAfterSave(context: repository.context)
+        WidgetDataSync.sync(using: repository)
     }
 
     func deleteMany(_ transactions: [Transaction]) throws {

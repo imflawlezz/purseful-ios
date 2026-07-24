@@ -30,22 +30,16 @@ struct WidgetSyncObserver: View {
     }
 
     private func performForegroundSync() {
-        let accounts = (try? dependencies.repository.fetch(FetchDescriptor<Account>())) ?? []
         let transactions = (try? dependencies.repository.fetch(FetchDescriptor<Transaction>(
             sortBy: [SortDescriptor(\.date, order: .reverse)]
         ))) ?? []
-        let budgets = (try? dependencies.repository.fetch(FetchDescriptor<Budget>())) ?? []
         let exchangeRates = ExchangeRateCache.load(for: AppSettings.shared.baseCurrency)
 
         try? dependencies.budgets.processRollovers(
             transactions: transactions,
             exchangeRates: exchangeRates
         )
-        dependencies.importExport.syncWidgets(
-            accounts: accounts,
-            transactions: transactions,
-            budgets: budgets
-        )
+        dependencies.importExport.syncWidgets()
 
         Task {
             await NotificationScheduler.syncAll(

@@ -35,15 +35,23 @@ struct ImportExportUseCase {
             merge: merge
         )
         Task { await NotificationScheduler.syncAll(context: repository.context) }
+        WidgetDataSync.sync(using: repository)
         return result
     }
 
     func clearAllData() throws {
         try PursefulWebImportService.clearAllData(context: repository.context)
-        WidgetDataSync.update(accounts: [], transactions: [], budgets: [])
+        WidgetDataSync.update(accounts: [], transactions: [], budgets: [], plannedPayments: [], goals: [])
     }
 
-    func syncWidgets(accounts: [Account], transactions: [Transaction], budgets: [Budget]) {
-        WidgetDataSync.update(accounts: accounts, transactions: transactions, budgets: budgets)
+    func syncWidgets(
+        accounts: [Account]? = nil,
+        transactions: [Transaction]? = nil,
+        budgets: [Budget]? = nil
+    ) {
+        _ = accounts
+        _ = transactions
+        _ = budgets
+        WidgetDataSync.sync(using: repository)
     }
 }

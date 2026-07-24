@@ -51,12 +51,13 @@ struct GoalUseCase {
         guard let account = goal.linkedAccount else { return }
 
         let category = CategoryService.resolvedCategory(nil, for: TransactionType.income, context: repository.context)
+        let goalName = goal.name
         let transaction = Transaction(
-            title: "Goal: \(goal.name)",
+            title: String(localized: "Goal: \(goalName)"),
             amount: goal.targetAmount,
             type: .income,
             date: Date(),
-            note: goal.note.isEmpty ? "Savings goal completed" : goal.note,
+            note: goal.note.isEmpty ? String(localized: "Savings goal done") : goal.note,
             account: account,
             category: category
         )

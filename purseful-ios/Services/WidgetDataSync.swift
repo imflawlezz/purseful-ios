@@ -5,22 +5,87 @@ import WidgetKit
 enum WidgetDataSync {
     private static let suiteName = AppConstants.appGroupIdentifier
     private static let snapshotFileName = "widget-snapshot.json"
+    static let staleAfter: TimeInterval = 60 * 60 * 24
 
-    struct RecentTransactionSnapshot: Codable {
+    struct AccountSnapshot: Codable, Identifiable, Hashable {
+        let id: String
+        let name: String
+        let balance: String
+        let currency: String
+    }
+
+    struct BudgetSnapshot: Codable, Identifiable, Hashable {
+        let id: String
+        let name: String
+        let period: String
+        let spent: String
+        let limit: String
+        let remaining: String
+    }
+
+    struct GoalSnapshot: Codable, Identifiable, Hashable {
+        let id: String
+        let name: String
+        let current: String
+        let target: String
+        let colorHex: String
+    }
+
+    struct RecentTransactionSnapshot: Codable, Hashable {
         let title: String
         let amount: String
         let date: Date
+        let type: String
+        let categoryColorHex: String
+    }
+
+    struct NextPaymentSnapshot: Codable, Hashable {
+        let name: String
+        let amount: String
+        let currency: String
+        let dueDate: Date
+        let isOverdue: Bool
     }
 
     struct Snapshot: Codable {
-        var accountName: String
-        var accountBalance: String
-        var accountCurrency: String
-        var budgetSpent: String
-        var budgetLimit: String
+        var accentColorHex: String
+        var baseCurrency: String
+        var accounts: [AccountSnapshot]
+        var budgets: [BudgetSnapshot]
+        var goals: [GoalSnapshot]
         var todaySpend: String
+        var netWorth: String
         var recentTransactions: [RecentTransactionSnapshot]
+        var upcomingPayments: [NextPaymentSnapshot]
         var updatedAt: Date
+
+        var nextPayment: NextPaymentSnapshot? { upcomingPayments.first }
+    }
+
+    @MainActor
+    static func sync(using repository: DataRepositoryProtocol) {
+        let accounts = (try? repository.fetch(
+            FetchDescriptor<Account>(sortBy: [SortDescriptor(\.sortOrder)])
+        )) ?? []
+        let transactions = (try? repository.fetch(
+            FetchDescriptor<Transaction>(sortBy: [SortDescriptor(\.date, order: .reverse)])
+        )) ?? []
+        let budgets = (try? repository.fetch(
+            FetchDescriptor<Budget>(sortBy: [SortDescriptor(\.name)])
+        )) ?? []
+        let payments = (try? repository.fetch(
+            FetchDescriptor<PlannedPayment>(sortBy: [SortDescriptor(\.nextDueDate)])
+        )) ?? []
+        let goals = (try? repository.fetch(
+            FetchDescriptor<Goal>(sortBy: [SortDescriptor(\.name)])
+        )) ?? []
+        update(
+            accounts: accounts,
+            transactions: transactions,
+            budgets: budgets,
+            plannedPayments: payments,
+            goals: goals
+        )
     }
 
     @MainActor
@@ -28,38 +93,55 @@ enum WidgetDataSync {
         accounts: [Account],
         transactions: [Transaction],
         budgets: [Budget],
+        plannedPayments: [PlannedPayment] = [],
+        goals: [Goal] = [],
         exchangeRates: [String: Decimal]? = nil
     ) {
         let baseCurrency = AppSettings.shared.baseCurrency
         let rates = exchangeRates ?? ExchangeRateCache.load(for: baseCurrency)
-        let visibleAccounts = accounts.filter { !$0.isHidden }
-        let primary = visibleAccounts.first
+        let visibleAccounts = accounts
+            .filter { !$0.isHidden }
+            .sorted { $0.sortOrder < $1.sortOrder }
 
-        let accountName = primary?.name ?? "No Account"
-        let accountCurrency = primary?.currency ?? baseCurrency
-        let accountBalance: String
-        if let primary {
-            let balance = BalanceCalculator.currentBalance(for: primary, transactions: transactions)
-            accountBalance = NSDecimalNumber(decimal: balance).stringValue
-        } else {
-            accountBalance = "0"
+        let accountSnapshots = visibleAccounts.map { account in
+            AccountSnapshot(
+                id: account.id.uuidString,
+                name: account.name,
+                balance: decimalString(BalanceCalculator.currentBalance(for: account, transactions: transactions)),
+                currency: account.currency
+            )
         }
 
-        let budgetSpent: String
-        let budgetLimit: String
-        if let budget = budgets.first {
+        let budgetSnapshots = budgets.map { budget -> BudgetSnapshot in
             let spent = BudgetService.spentAmount(
                 budget: budget,
                 transactions: transactions,
                 baseCurrency: baseCurrency,
                 exchangeRates: rates
             )
-            budgetSpent = NSDecimalNumber(decimal: spent).stringValue
-            budgetLimit = NSDecimalNumber(decimal: BudgetService.effectiveLimit(budget: budget)).stringValue
-        } else {
-            budgetSpent = "0"
-            budgetLimit = "0"
+            let limit = BudgetService.effectiveLimit(budget: budget)
+            let remaining = max(0, limit - spent)
+            return BudgetSnapshot(
+                id: budget.id.uuidString,
+                name: budget.name,
+                period: budget.period.displayName,
+                spent: decimalString(spent),
+                limit: decimalString(limit),
+                remaining: decimalString(remaining)
+            )
         }
+
+        let goalSnapshots = goals
+            .filter { !$0.isCompleted }
+            .map { goal in
+                GoalSnapshot(
+                    id: goal.id.uuidString,
+                    name: goal.name,
+                    current: decimalString(goal.currentAmount),
+                    target: decimalString(goal.targetAmount),
+                    colorHex: goal.colorHex
+                )
+            }
 
         let today = Calendar.current.startOfDay(for: Date())
         let todaySpend = BalanceCalculator.totalExpenses(
@@ -70,30 +152,73 @@ enum WidgetDataSync {
             exchangeRates: rates
         )
 
+        let netWorth = BalanceCalculator.netWorth(
+            accounts: accounts,
+            transactions: transactions,
+            baseCurrency: baseCurrency,
+            exchangeRates: rates
+        )
+
         let recent = transactions
             .filter { !$0.isSplitChild }
-            .prefix(5)
-            .map {
-                RecentTransactionSnapshot(
-                    title: $0.title.isEmpty ? ($0.category?.name ?? "Transaction") : $0.title,
-                    amount: NSDecimalNumber(decimal: $0.amount).stringValue,
-                    date: $0.date
+            .sorted { $0.date > $1.date }
+            .prefix(6)
+            .map { tx in
+                let rawTitle = tx.title.trimmingCharacters(in: .whitespacesAndNewlines)
+                let categoryName = tx.category?.name
+                let title: String
+                if rawTitle.isEmpty {
+                    title = categoryName?.localizedDisplayName ?? tx.type.displayName
+                } else if let categoryName,
+                          rawTitle.localizedCaseInsensitiveCompare(categoryName) == .orderedSame {
+                    title = categoryName.localizedDisplayName
+                } else {
+                    title = rawTitle
+                }
+                return RecentTransactionSnapshot(
+                    title: title,
+                    amount: decimalString(tx.amount),
+                    date: tx.date,
+                    type: tx.type.rawValue,
+                    categoryColorHex: tx.category?.colorHex
+                        ?? tx.account?.colorHex
+                        ?? "#8E8E93"
+                )
+            }
+
+        let upcomingPayments: [NextPaymentSnapshot] = plannedPayments
+            .filter { $0.isActive && !PlannedPaymentSchedule.isPaidInCurrentPeriod($0) }
+            .sorted { $0.nextDueDate < $1.nextDueDate }
+            .prefix(8)
+            .map { payment in
+                NextPaymentSnapshot(
+                    name: payment.name,
+                    amount: decimalString(payment.amount),
+                    currency: payment.account?.currency ?? baseCurrency,
+                    dueDate: payment.nextDueDate,
+                    isOverdue: payment.isOverdue
                 )
             }
 
         let snapshot = Snapshot(
-            accountName: accountName,
-            accountBalance: accountBalance,
-            accountCurrency: accountCurrency,
-            budgetSpent: budgetSpent,
-            budgetLimit: budgetLimit,
-            todaySpend: NSDecimalNumber(decimal: todaySpend).stringValue,
+            accentColorHex: AppSettings.shared.accentColorHex,
+            baseCurrency: baseCurrency,
+            accounts: accountSnapshots,
+            budgets: budgetSnapshots,
+            goals: goalSnapshots,
+            todaySpend: decimalString(todaySpend),
+            netWorth: decimalString(netWorth),
             recentTransactions: Array(recent),
+            upcomingPayments: Array(upcomingPayments),
             updatedAt: Date()
         )
 
         persist(snapshot)
         WidgetCenter.shared.reloadAllTimelines()
+    }
+
+    private static func decimalString(_ value: Decimal) -> String {
+        NSDecimalNumber(decimal: value).stringValue
     }
 
     private static func persist(_ snapshot: Snapshot) {
@@ -111,32 +236,9 @@ enum WidgetDataSync {
         }
     }
 
-    static func readAccountBalance() -> (name: String, balance: Decimal, currency: String) {
-        let snapshot = loadSnapshot()
-        return (
-            snapshot.accountName,
-            Decimal(string: snapshot.accountBalance) ?? 0,
-            snapshot.accountCurrency
-        )
-    }
+    // MARK: - Readers
 
-    static func readBudgetProgress() -> (spent: Decimal, limit: Decimal) {
-        let snapshot = loadSnapshot()
-        return (
-            Decimal(string: snapshot.budgetSpent) ?? 0,
-            Decimal(string: snapshot.budgetLimit) ?? 0
-        )
-    }
-
-    static func readTodaySpend() -> Decimal {
-        Decimal(string: loadSnapshot().todaySpend) ?? 0
-    }
-
-    static func readRecentTransactions() -> [RecentTransactionSnapshot] {
-        loadSnapshot().recentTransactions
-    }
-
-    private static func loadSnapshot() -> Snapshot {
+    static func loadSnapshot() -> Snapshot {
         if let container = FileManager.default.containerURL(
             forSecurityApplicationGroupIdentifier: suiteName
         ) {
@@ -153,14 +255,20 @@ enum WidgetDataSync {
             return snapshot
         }
 
-        return Snapshot(
-            accountName: "Purseful",
-            accountBalance: "0",
-            accountCurrency: "USD",
-            budgetSpent: "0",
-            budgetLimit: "0",
+        return emptySnapshot()
+    }
+
+    static func emptySnapshot() -> Snapshot {
+        Snapshot(
+            accentColorHex: "#FF3B30",
+            baseCurrency: "USD",
+            accounts: [],
+            budgets: [],
+            goals: [],
             todaySpend: "0",
+            netWorth: "0",
             recentTransactions: [],
+            upcomingPayments: [],
             updatedAt: .distantPast
         )
     }

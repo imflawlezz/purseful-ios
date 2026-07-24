@@ -13,7 +13,7 @@ struct DashboardRefreshUseCase {
     ) async {
         try? budgets.processRollovers(transactions: transactions, exchangeRates: exchangeRates)
         RecurrenceProcessor.processDueItems(context: repository.context)
-        WidgetDataSync.update(accounts: accounts, transactions: transactions, budgets: allBudgets)
+        WidgetDataSync.sync(using: repository)
         await NotificationScheduler.syncAll(
             context: repository.context,
             transactions: transactions,

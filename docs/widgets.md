@@ -36,42 +36,59 @@ sequenceDiagram
 
 - Dashboard pull-to-refresh
 - App foreground (`WidgetSyncObserver`)
-- Import/export clear
-- Other paths calling `ImportExportUseCase.syncWidgets`
+- Transaction save/delete
+- Import/export / clear all data
+- Other paths calling `ImportExportUseCase.syncWidgets` / `WidgetDataSync.sync(using:)`
 
 ---
 
 ## Widget types
 
-| Widget | Family | Content |
-|--------|--------|---------|
-| `AccountBalanceWidget` | systemSmall | First visible account balance |
-| `BudgetProgressWidget` | systemMedium | First budget spent vs limit |
-| `RecentTransactionsWidget` | systemLarge | Last 5 transactions |
-| `TodaySpendWidget` | accessoryRectangular / inline | Today’s expenses in base currency |
+Four kinds — dense home/lock surfaces, not one-metric clones:
 
-Timeline refresh: ~15 minutes (`PursefulProvider.getTimeline`).
+| Widget | Families | Configuration | Content |
+|--------|----------|---------------|---------|
+| `BalancesWidget` | systemSmall, systemMedium | Account (App Intent) | Primary + up to 4 other balances (app order); medium right: spent today + upcoming payments with titles |
+| `BudgetProgressWidget` | systemMedium | Budget (App Intent) | Remaining hero, spent/limit, period, progress ring |
+| `RecentTransactionsWidget` | systemLarge | — | Last 6 txs + spent today + next payment (title + amount + date) |
+| `TodaySpendLockWidget` | accessoryInline / Rectangular | — | Lock Screen spent today; rectangular next due as amount + date only |
+
+Timeline refresh: ~15 minutes. Accent wash from snapshot `accentColorHex`. Stale snapshots (`updatedAt` older than 24h or missing) show “Open Purseful to refresh”.
 
 ---
 
-## Snapshot selection rules
+## Snapshot fields
 
-**File:** `Services/WidgetDataSync.swift`
+**Writer:** `purseful-ios/Services/WidgetDataSync.swift`  
+**Reader:** `PursefulWidgets/WidgetDataSync.swift`
 
 | Field | Source |
 |-------|--------|
-| Account | First account where `!isHidden`, by `sortOrder` |
-| Budget | First budget by name sort |
-| Today spend | Sum of expenses today (base currency, split-aware via `BalanceCalculator`) |
-| Recent txs | 5 newest non-split children |
+| `accentColorHex` | `AppSettings.accentColorHex` |
+| `baseCurrency` | `AppSettings.baseCurrency` |
+| `accounts[]` | Visible accounts (default account first); balance via `BalanceCalculator` |
+| `budgets[]` | Name, period display name, spent / limit / remaining in base currency |
+| `goals[]` | Incomplete goals: current, target, color |
+| `todaySpend` | Expenses today in base currency |
+| `netWorth` | `BalanceCalculator.netWorth` |
+| `recentTransactions[]` | 6 newest non-split-child txs (date desc): title, amount, type, category color |
+| `upcomingPayments[]` | Active unpaid planned payments by due date (up to 8) |
+| `updatedAt` | Sync timestamp |
 
-No user-configurable widget intents in v1.
+---
+
+## App Intents
+
+| Intent | Entity | Widget |
+|--------|--------|--------|
+| `SelectAccountIntent` | `AccountEntity` | Balances |
+| `SelectBudgetIntent` | `BudgetEntity` | Budget |
+
+Suggested entities come from the latest snapshot; open the app once after adding accounts/budgets so the picker lists them.
 
 ---
 
 ## Deep links
-
-Widgets use URL scheme **`purseful://`**:
 
 | Host | Tab |
 |------|-----|
@@ -81,16 +98,16 @@ Widgets use URL scheme **`purseful://`**:
 | `planning` | 3 |
 | `reports` | 4 |
 
-Handled in `MainTabView.handleDeepLink`.
+Scheme: `purseful://`. Handled in `MainTabView.handleDeepLink`.
 
 ---
 
 ## Development notes
 
-1. Run the **main app** at least once so snapshot exists.
-2. Widget previews use placeholder data in `PursefulProvider.placeholder`.
-3. Exchange rates for budget/today spend come from `ExchangeRateCache` at sync time.
-4. Widget bundle version must match app `MARKETING_VERSION` (1.1.0).
+1. Run the **main app** at least once so the snapshot exists.
+2. Placeholders use `WidgetDataSync.placeholderSnapshot()`.
+3. Exchange rates for budget / today spend / net worth come from `ExchangeRateCache` at sync time.
+4. Widget bundle version must match app `MARKETING_VERSION`.
 
 ---
 
@@ -99,13 +116,7 @@ Handled in `MainTabView.handleDeepLink`.
 | Path | Role |
 |------|------|
 | `PursefulWidgets/PursefulWidgets.swift` | Widget definitions & views |
-| `PursefulWidgets/WidgetDataSync.swift` | Read helpers (duplicate of app-side writer pattern) |
-| `purseful-ios/Services/WidgetDataSync.swift` | Write snapshot + reload timelines |
-
----
-
-## Known limitations
-
-- “Monthly Budget” label shown even for weekly budgets.
-- Single account/budget only — no `AppIntent` configuration.
-- Stale until app syncs or timeline reloads.
+| `PursefulWidgets/WidgetIntents.swift` | Account / budget configuration intents |
+| `PursefulWidgets/WidgetFormatting.swift` | Money formatting, accent background |
+| `PursefulWidgets/WidgetDataSync.swift` | Snapshot reader |
+| `purseful-ios/Services/WidgetDataSync.swift` | Snapshot writer + `sync(using:)` |
