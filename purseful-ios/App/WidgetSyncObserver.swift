@@ -3,6 +3,7 @@ import SwiftUI
 
 struct WidgetSyncObserver: View {
     let dependencies: DependencyContainer
+    let appState: AppState
 
     @Environment(\.scenePhase) private var scenePhase
     @State private var syncTask: Task<Void, Never>?
@@ -30,18 +31,19 @@ struct WidgetSyncObserver: View {
     }
 
     private func performForegroundSync() {
-        let transactions = (try? dependencies.repository.fetch(FetchDescriptor<Transaction>(
-            sortBy: [SortDescriptor(\.date, order: .reverse)]
-        ))) ?? []
-        let exchangeRates = ExchangeRateCache.load(for: AppSettings.shared.baseCurrency)
-
-        try? dependencies.budgets.processRollovers(
-            transactions: transactions,
-            exchangeRates: exchangeRates
-        )
-        dependencies.importExport.syncWidgets()
-
         Task {
+            await appState.refreshExchangeRates()
+            let exchangeRates = appState.resolvedExchangeRates()
+            let transactions = (try? dependencies.repository.fetch(FetchDescriptor<Transaction>(
+                sortBy: [SortDescriptor(\.date, order: .reverse)]
+            ))) ?? []
+
+            try? dependencies.budgets.processRollovers(
+                transactions: transactions,
+                exchangeRates: exchangeRates
+            )
+            dependencies.importExport.syncWidgets()
+
             await NotificationScheduler.syncAll(
                 context: dependencies.repository.context,
                 transactions: transactions,

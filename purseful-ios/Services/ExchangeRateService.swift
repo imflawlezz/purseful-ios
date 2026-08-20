@@ -6,11 +6,20 @@ actor ExchangeRateService {
     private static let currencyCodes = ["USD", "EUR", "GBP", "PLN", "CHF", "JPY", "CAD", "AUD", "SEK", "NOK"]
 
     private var cachedRates: [String: Decimal] = [:]
+    private var cachedBase: String?
     private var lastFetch: Date?
     private let cacheDuration: TimeInterval = 3600
 
     func rates(base: String) async -> [String: Decimal] {
-        if let lastFetch, Date().timeIntervalSince(lastFetch) < cacheDuration, !cachedRates.isEmpty {
+        if cachedBase != base {
+            cachedRates = [:]
+            lastFetch = nil
+        }
+
+        if let lastFetch,
+           cachedBase == base,
+           Date().timeIntervalSince(lastFetch) < cacheDuration,
+           !cachedRates.isEmpty {
             return cachedRates
         }
 
@@ -18,8 +27,12 @@ actor ExchangeRateService {
         if let fetched = await fetchRates(base: base) {
             rates.merge(fetched) { _, new in new }
             cachedRates = rates
+            cachedBase = base
             lastFetch = Date()
-        } else if !cachedRates.isEmpty {
+            return rates
+        }
+
+        if cachedBase == base, !cachedRates.isEmpty {
             return cachedRates
         }
 
@@ -27,7 +40,14 @@ actor ExchangeRateService {
             rates[code] = 1
         }
         cachedRates = rates
+        cachedBase = base
         return rates
+    }
+
+    func invalidateCache() {
+        cachedRates = [:]
+        cachedBase = nil
+        lastFetch = nil
     }
 
     func setManualRate(currency: String, rate: Decimal, base: String) {
@@ -87,6 +107,15 @@ enum ExchangeRateCache {
         var rates = payload.rates.mapValues { Decimal($0) }
         rates[base] = 1
         return rates
+    }
+
+    static func lastFetchedAt(for base: String) -> Date? {
+        guard let data = UserDefaults.standard.data(forKey: AppConstants.exchangeRatesCacheKey),
+              let payload = try? JSONDecoder().decode(Payload.self, from: data),
+              payload.baseCurrency == base else {
+            return nil
+        }
+        return payload.fetchedAt
     }
 
     static func fallbackRates(base: String) -> [String: Decimal] {

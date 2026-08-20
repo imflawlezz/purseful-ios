@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 
 @MainActor
 struct DashboardRefreshUseCase {
@@ -18,6 +19,20 @@ struct DashboardRefreshUseCase {
             context: repository.context,
             transactions: transactions,
             exchangeRates: exchangeRates
+        )
+    }
+
+    func refreshExchangeRates(appState: AppState) async {
+        await appState.refreshExchangeRates()
+        let rates = appState.resolvedExchangeRates()
+        let transactions = (try? repository.fetch(FetchDescriptor<Transaction>())) ?? []
+        let accounts = (try? repository.fetch(FetchDescriptor<Account>())) ?? []
+        let allBudgets = (try? repository.fetch(FetchDescriptor<Budget>())) ?? []
+        await refresh(
+            accounts: accounts,
+            transactions: transactions,
+            budgets: allBudgets,
+            exchangeRates: rates
         )
     }
 }
