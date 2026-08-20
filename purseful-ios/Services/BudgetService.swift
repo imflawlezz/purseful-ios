@@ -153,7 +153,6 @@ enum BudgetService {
         return "#34C759"
     }
 
-    /// Budget category, ancestor, or descendant.
     static func categoriesMatch(_ transactionCategory: Category?, budgetCategory: Category) -> Bool {
         guard let transactionCategory else { return false }
 

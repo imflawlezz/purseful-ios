@@ -137,7 +137,6 @@ enum ReportPeriod: String, CaseIterable, Identifiable {
         return (start, end)
     }
 
-    /// Inclusive start-of-day … end-of-day.
     static func normalizedCustomRange(start: Date, end: Date) -> (start: Date, end: Date) {
         let calendar = Calendar.current
         let orderedStart = calendar.startOfDay(for: min(start, end))
@@ -147,7 +146,6 @@ enum ReportPeriod: String, CaseIterable, Identifiable {
     }
 }
 
-/// Chart buckets scale with the selected period.
 enum ReportChartGranularity {
     case day, week, month
 
@@ -210,7 +208,6 @@ enum ReportChartGranularity {
         return starts
     }
 
-    /// Cap line charts at ~12 points.
     func sampleDates(from start: Date, to end: Date, calendar: Calendar) -> [Date] {
         let startDay = calendar.startOfDay(for: start)
         let endDay = calendar.startOfDay(for: end)

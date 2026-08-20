@@ -8,7 +8,6 @@ extension View {
     }
 }
 
-/// Background tap dismisses keyboard without stealing control touches.
 private struct KeyboardDismissInstaller: UIViewRepresentable {
     func makeCoordinator() -> Coordinator { Coordinator() }
 

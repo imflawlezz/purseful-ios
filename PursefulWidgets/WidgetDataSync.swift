@@ -1,6 +1,5 @@
 import Foundation
 
-/// Reads the App Group widget snapshot from the main app.
 enum WidgetDataSync {
     private static let suiteName = "group.dev.imflawlezz.purseful-ios"
     private static let snapshotFileName = "widget-snapshot.json"

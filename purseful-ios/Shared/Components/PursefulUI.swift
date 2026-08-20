@@ -157,7 +157,6 @@ struct FormLeadingToolbar: ToolbarContent {
             }
         }
         if showDelete, let onDelete {
-            // Keep delete off the leading cluster so cancel stays isolated on the far left.
             ToolbarItem(placement: .topBarTrailing) {
                 ToolbarIcon.delete(onDelete)
             }

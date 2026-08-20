@@ -78,7 +78,6 @@ enum ShoppingListParser {
         item.rawText = rawText(name: line.name, price: line.price, quantity: line.quantity)
     }
 
-    /// Fractional tokens are prices; whole numbers are quantities / whole prices.
     private static func classify(
         fractions: [Decimal],
         wholes: [Int],
@@ -106,11 +105,9 @@ enum ShoppingListParser {
         case 0:
             return (nil, 1)
         case 1:
-            // Single whole number → quantity ("Apples 3")
             return (nil, max(1, wholes[0]))
         default:
-            // Two+ whole numbers, no fractional price:
-            // smaller → quantity, larger → unit price (order-independent).
+            // No fractional price: min → quantity, max → unit price (order-independent).
             let sorted = wholes.sorted()
             return (Decimal(sorted.last!), max(1, sorted[0]))
         }
