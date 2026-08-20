@@ -24,10 +24,12 @@ Services remain for **stateless logic** (calculators, parsers, export encoding).
 - Centralized write paths and side effects.
 - Testable domain behavior (`GoalUseCaseTests`, etc.).
 - Clear place for new features to hook in.
+- Category resolution and mark-paid transaction creation live in use cases.
 
 **Negative**
 
-- Not fully enforced — `PursefulWebImportView` and some Planning helpers still touch `modelContext`.
+- Not fully enforced — `PursefulWebImportView` still touches `modelContext`; Settings still calls `NotificationScheduler.syncAll` with repository context after toggles.
+- Presentation helpers (`AccountPreferences.visibleAccounts`, `DebtService` read APIs) remain callable from views by design.
 - No ViewModel layer; large views (`PlanningView`, `SettingsView`) remain.
 
 ## Alternatives considered

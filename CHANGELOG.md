@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-08-20
+
+### Added
+
+- Weekly summary sheet opened from Monday notification tap, deep link `purseful://weekly-summary`, and Settings preview
+- `PursefulNotificationCenterDelegate` for notification response routing
+- Liquid Glass helper (`pursefulGlass`) with iOS 26 `glassEffect` and iOS 18–25 ultra-thin material fallback
+
+### Changed
+
+- Minimum deployment target **iOS 18.0** (Liquid Glass on iOS 26+)
+- Exchange rates: cache keyed by base currency; refresh on launch, foreground, and base-currency change
+- Transaction day headers convert into base currency via `BalanceCalculator.dayNetCashFlow`
+- Settings polish: notification status, backup labels, currency rates caption, About accent link
+- Writes tighten toward use cases: category resolution on transaction/planned-payment save; account reorder/delete; planned-payment mark-paid factory
+- Pure parsers (`ReceiptParser`) marked `nonisolated` under default MainActor isolation
+- Accent list chrome uses `UIBackgroundConfiguration.listCell()` (iOS 18 rename)
+
+### Fixed
+
+- Same-version JSON backup rejection caused by date-decoding mismatch (`isAppExport` now uses ISO-8601)
+- Day group totals showing base-currency symbol on raw foreign amounts (no conversion)
+- `WidgetSyncObserver` crash from missing `AppState` environment (pass `appState` explicitly)
+
 ## [1.2.0] - 2026-07-24
 
 ### Added
@@ -121,7 +145,8 @@ Initial public release. Local-first personal finance for iOS with no subscriptio
 - CSV import/export
 - Additional transaction filters (date range, amount range, swipe duplicate)
 
-[Unreleased]: https://github.com/imflawlezz/purseful-ios/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/imflawlezz/purseful-ios/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/imflawlezz/purseful-ios/releases/tag/v1.3.0
 [1.2.0]: https://github.com/imflawlezz/purseful-ios/releases/tag/v1.2.0
 [1.1.1]: https://github.com/imflawlezz/purseful-ios/releases/tag/v1.1.1
 [1.1.0]: https://github.com/imflawlezz/purseful-ios/releases/tag/v1.1.0

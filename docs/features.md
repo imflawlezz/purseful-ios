@@ -1,6 +1,6 @@
 # Features
 
-Status for **v1.1.0**.
+Status for **v1.3.0**.
 
 Legend: ✅ Done · ⚠️ Partial · ❌ Not implemented · 🚫 Deferred
 
@@ -25,7 +25,7 @@ Legend: ✅ Done · ⚠️ Partial · ❌ Not implemented · 🚫 Deferred
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Group by day + daily total | ✅ | |
+| Group by day + daily total | ✅ | Day total converted to base currency |
 | Search | ✅ | Title, note, category, amount |
 | Filter account/category/type | ✅ | |
 | Filter date range | ❌ | |
@@ -75,7 +75,7 @@ Legend: ✅ Done · ⚠️ Partial · ❌ Not implemented · 🚫 Deferred
 |---------|--------|-------|
 | Planned payments list | ✅ | |
 | Calendar month grid | ✅ | Toolbar on Payments, Debts, and Goals |
-| Mark as paid → transaction | ✅ | |
+| Mark as paid → transaction | ✅ | Via `PlannedPaymentUseCase.markPaid(from:)` |
 | Auto-create on due date | ✅ | `RecurrenceProcessor` |
 | Payment reminders | ✅ | Configurable days before |
 | Overdue indicator | ✅ | |
@@ -99,6 +99,7 @@ Legend: ✅ Done · ⚠️ Partial · ❌ Not implemented · 🚫 Deferred
 | Daily average | ✅ | |
 | Period selector | ✅ | 7D–12M + custom |
 | Export PDF | ✅ | A4 portrait report with period stats and transaction ledger |
+| Weekly summary sheet | ✅ | From notification / Settings preview |
 
 ---
 
@@ -108,16 +109,17 @@ Legend: ✅ Done · ⚠️ Partial · ❌ Not implemented · 🚫 Deferred
 |---------|--------|-------|
 | Appearance (accent) | ✅ | Page wash + solid Form/List surfaces; glass effects untinted |
 | App icon picker | ❌ | |
-| Currency & base currency | ✅ | |
-| Notifications settings | ✅ | Permission + weekly summary |
+| Currency & base currency | ✅ | Invalidates + refreshes rates on change |
+| Notifications settings | ✅ | Permission + weekly summary + preview |
 | App language | ✅ | Opens iOS Settings (per-app language) |
 | Donate / Buy Me a Coffee | ✅ | About → external BMC link |
 | Localization (String Catalogs) | ✅ | en + pl, ru, uk, de, es, fr |
-| JSON export/import | ✅ | Format v2, merge mode |
+| JSON export/import | ✅ | Format v2, merge mode; ISO-8601 export detection |
 | Purseful Web backup import | ✅ | Extra |
 | CSV export/import | 🚫 | |
 | Clear all data | ✅ | |
 | Bank connections UI | 🚫 | Model + service stub only |
+| Minimum iOS | ✅ | **iOS 18.0**; Liquid Glass on 26+ |
 
 ---
 
@@ -126,8 +128,8 @@ Legend: ✅ Done · ⚠️ Partial · ❌ Not implemented · 🚫 Deferred
 | Feature | Status | Notes |
 |---------|--------|-------|
 | Per-account currency | ✅ | |
-| Base currency totals | ✅ | |
-| Frankfurter exchange rates | ✅ | Cached |
+| Base currency totals | ✅ | Dashboard, reports, day headers |
+| Frankfurter exchange rates | ✅ | Launch, foreground, base-currency change; cache by base |
 | Manual rates UI | ❌ | API exists |
 | Transaction foreign currency UI | ❌ | Model + import support |
 | Stored rate in calculations | ✅ | When `exchangeRate` set |
@@ -157,7 +159,7 @@ See [widgets.md](widgets.md).
 | Payment reminders | ✅ | Scheduled |
 | Debt due reminders | ✅ | |
 | Goal target date | ✅ | Not in Settings UI |
-| Weekly summary | ✅ | Mon 9:00, previous calendar week |
+| Weekly summary | ✅ | Mon 9:00 → opens weekly summary sheet; Settings preview |
 
 See [notifications.md](notifications.md).
 
@@ -181,7 +183,7 @@ See [notifications.md](notifications.md).
 | Area | Test file |
 |------|-----------|
 | Budget math & rollover | `BudgetServiceTests` |
-| Balances & conversion | `BalanceCalculatorTests` |
+| Balances & conversion | `BalanceCalculatorTests` (incl. day net cash flow) |
 | Import/export v2 | `ImportExportTests` |
 | Receipt parsing | `ReceiptParserTests` |
 | Debts | `DebtServiceTests` |

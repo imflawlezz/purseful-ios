@@ -6,7 +6,7 @@ Purseful supports **JSON backup** (format version 2) and **Purseful Web backup**
 
 ## JSON export
 
-**UI:** Settings → Export JSON  
+**UI:** Settings → Export Backup (.json)  
 **Code:** `ImportExportUseCase.exportJSON` → `ExportService.exportJSON`
 
 ### Payload structure
@@ -51,13 +51,15 @@ v1 files import with empty arrays for missing sections (`ImportService` + `Expor
 
 ## JSON import
 
-**UI:** Settings → Import JSON  
+**UI:** Settings → Import Backup (.json)  
 **Code:** `ImportExportUseCase.importJSON(data:merge:)`
 
 | Mode | Behavior |
 |------|----------|
 | Replace | Clears existing data first (via merge flag false path) |
 | Merge | Skips entities whose UUID already exists |
+
+**Detection:** `ImportService.isAppExport` decodes with **ISO-8601** dates (same as export). Using the default `JSONDecoder` date strategy falsely rejected every real backup.
 
 **Import order** (respects relationships):
 
@@ -88,10 +90,10 @@ After import: `NotificationScheduler.syncAll`.
 
 ## Purseful Web backup
 
-**UI:** Settings → Import Purseful Web Backup  
+**UI:** Settings → Import Backup (Legacy)  
 **Code:** `PursefulWebImportService`
 
-Separate format from native JSON export. Supports merge/replace and duplicate skipping. Uses `modelContext` directly (legacy path).
+Separate format from native JSON export. Supports merge/replace and duplicate skipping. Uses `modelContext` directly (legacy path — known clean-arch leak).
 
 Tests: `PursefulWebImportTests`.
 

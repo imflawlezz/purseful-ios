@@ -6,14 +6,23 @@ Unit tests live in **purseful-iosTests**. No UI test target currently.
 
 ## Running tests
 
+Prefer a **physical iPhone** when connected (see `.cursor/rules/device-testing.mdc`). Fall back to Simulator only if no device is available.
+
 ### Xcode
 
 Select **purseful-ios** scheme → `⌘U`.
 
-### Command line
+### Command line (device)
 
 ```bash
-cd purseful-ios.xcodeproj/..
+xcodebuild -scheme purseful-ios \
+  -destination 'platform=iOS,id=DEVICE_UDID' \
+  test
+```
+
+### Command line (simulator fallback)
+
+```bash
 xcodebuild -scheme purseful-ios \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
   test
@@ -23,7 +32,7 @@ Run a single suite:
 
 ```bash
 xcodebuild -scheme purseful-ios \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+  -destination 'platform=iOS,id=DEVICE_UDID' \
   -only-testing:purseful-iosTests/BudgetServiceTests \
   test
 ```
@@ -37,12 +46,12 @@ Swift Testing (`@Test`) and XCTest (`XCTestCase`) are both used.
 | File | Framework | Covers |
 |------|-----------|--------|
 | `BudgetServiceTests` | XCTest | Progress, effective limit, **rollover processing** |
-| `BalanceCalculatorTests` | XCTest | Currency conversion, split category totals, stored exchange rate |
-| `ImportExportTests` | Swift Testing | JSON v2 round-trip, v1 backward compat |
+| `BalanceCalculatorTests` | XCTest | Currency conversion, split category totals, stored exchange rate, day net cash flow |
+| `ImportExportTests` | Swift Testing | JSON v2 round-trip, v1 backward compat, `isAppExport` ISO-8601 |
 | `ReceiptParserTests` | XCTest | Polish fiscal totals (incl. VIVE/Pepco fixtures), dates, merchants, NIP |
 | `DebtServiceTests` | Swift Testing | Opening/repayment txs, remaining balance |
 | `GoalUseCaseTests` | Swift Testing | Completion transaction when linked account set |
-| `NotificationHelpersTests` | XCTest | Budget dedup keys, next Monday |
+| `NotificationHelpersTests` | XCTest | Budget dedup keys, next Monday, previous calendar week |
 | `PursefulWebImportTests` | Swift Testing | Web backup parsing/import |
 | `BankTransactionDedupTests` | XCTest | Import dedup hash |
 | `ShoppingListParserTests` | XCTest | List text parsing |

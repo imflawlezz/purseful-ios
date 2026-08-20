@@ -57,7 +57,7 @@ flowchart TB
    - `.environment(appState)` — `@Observable AppState`
    - `.environment(dependencies)` — `@Observable DependencyContainer`
 4. Runs `appBootstrap.runStartupTasks()` on launch.
-5. Attaches `WidgetSyncObserver` for foreground sync.
+5. Attaches `WidgetSyncObserver(dependencies:appState:)` for foreground sync (explicit params — no `@Environment` from `.background`).
 
 ### DependencyContainer
 
@@ -66,15 +66,15 @@ flowchart TB
 | Use case | Responsibility |
 |----------|----------------|
 | `AppBootstrapUseCase` | Seed data, sort orders, budget rollover, recurrence, notifications |
-| `TransactionUseCase` | Save/delete transactions, split children |
+| `TransactionUseCase` | Save/delete transactions, split children, category resolution |
 | `BudgetUseCase` | Save/delete budgets, process rollovers |
-| `PlannedPaymentUseCase` | CRUD planned payments |
-| `DebtUseCase` | Debt CRUD via `DebtService` |
+| `PlannedPaymentUseCase` | CRUD, mark paid (builds transaction), category resolution |
+| `DebtUseCase` | Debt CRUD via `DebtService` (opening tx sync on save) |
 | `GoalUseCase` | Goals; completion transaction when linked account set |
 | `CategoryUseCase` | Categories; merge reassigns tx/budgets/payments |
-| `AccountUseCase` | Account CRUD |
+| `AccountUseCase` | Account CRUD, reorder, clear default on delete |
 | `ImportExportUseCase` | JSON import/export, clear data, widget sync trigger |
-| `DashboardRefreshUseCase` | Pull-to-refresh pipeline |
+| `DashboardRefreshUseCase` | Pull-to-refresh + exchange-rate refresh pipeline |
 | `ShoppingListUseCase` | Shopping list CRUD |
 
 ### Reading dependencies in views
@@ -95,10 +95,22 @@ Previews use `PreviewDependencies.withPreviewDependencies()`.
 |-----------|---------|
 | List transactions, budgets, etc. | `@Query` in the view |
 | Create/update/delete | Use case → `repository.save()` |
-| Calculations (spent, net worth) | `BudgetService`, `BalanceCalculator` (called from views with `@Query` data) |
+| Calculations (spent, net worth, day totals) | `BudgetService`, `BalanceCalculator` (called from views with `@Query` data) |
 | Export JSON | `ImportExportUseCase` → `ExportService` |
 
-Views should **not** call `modelContext` directly except in legacy spots (e.g. `PursefulWebImportView`).
+Views should **not** call `modelContext` / `repository.context` for writes. Acceptable presentation helpers:
+
+- `AccountPreferences.visibleAccounts` / `preferredAccount` (pure filtering)
+- `DebtService` read helpers (`debtsDue`, `openingTransaction`, `isDebtLinkedTransaction`)
+- `NotificationScheduler.syncAll` from Settings after permission / toggle changes
+
+Known leak: `PursefulWebImportView` still uses `modelContext` directly (legacy import path).
+
+---
+
+## Concurrency
+
+App target sets `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`. Pure parsers and calculators that must run off the main actor (or be passed as function values) are marked `nonisolated` (e.g. `ReceiptParser`). UI and use cases stay on the main actor.
 
 ---
 
@@ -130,9 +142,10 @@ Views should **not** call `modelContext` directly except in legacy spots (e.g. `
 
 | Trigger | Actions |
 |---------|---------|
-| App launch | Bootstrap (above) |
-| Scene becomes active | `WidgetSyncObserver`: rollover, widget snapshot, `NotificationScheduler.syncAll` |
-| Dashboard pull-to-refresh | Exchange rates + `DashboardRefreshUseCase.refresh` |
+| App launch | Bootstrap (above); `MainTabView.task` refreshes exchange rates |
+| Scene becomes active | `WidgetSyncObserver`: exchange rates → rollover → widget snapshot → `NotificationScheduler.syncAll` |
+| Dashboard pull-to-refresh | `DashboardRefreshUseCase.refresh` |
+| Base currency change | Invalidate rate cache → `DashboardRefreshUseCase.refreshExchangeRates` |
 | After most saves | `NotificationScheduler.syncAfterSave` (async) |
 
 ---
@@ -141,9 +154,9 @@ Views should **not** call `modelContext` directly except in legacy spots (e.g. `
 
 **File:** `purseful-ios/App/AppState.swift`
 
-- Exchange rate cache in memory + `ExchangeRateCache` (UserDefaults)
-- Tab selection, planning section, Spotlight pending IDs
-- `refreshExchangeRates()` → `ExchangeRateService` (Frankfurter API)
+- In-memory exchange rates + `ExchangeRateCache` (UserDefaults, keyed by base)
+- Tab selection, planning section, Spotlight pending IDs, weekly-summary sheet flag
+- `refreshExchangeRates()` → `ExchangeRateService` (Frankfurter); does not return stale rates for a different base
 
 ---
 
@@ -156,17 +169,17 @@ Views should **not** call `modelContext` directly except in legacy spots (e.g. `
 | Service | Role |
 |---------|------|
 | `BudgetService` | Period ranges, spent amount, rollover processing |
-| `BalanceCalculator` | Balances, net worth, currency conversion |
+| `BalanceCalculator` | Balances, net worth, currency conversion, day net cash flow |
 | `CategoryService` | Resolve “Other” category, debt-only categories |
 | `DebtService` | Debt categories, repayments, linked transactions |
 | `RecurrenceProcessor` | Auto transactions from planned payments |
-| `ExportService` / `ImportService` | JSON v2 |
+| `ExportService` / `ImportService` | JSON v2 (ISO-8601 dates for export detection) |
 | `ReportSummaryBuilder` / `ReportPDFExportService` | Reports PDF export |
 | `NotificationService` / `NotificationScheduler` | Local notifications |
 | `ReceiptScanner` / `ReceiptParser` | On-device OCR (PL fiscal heuristics) |
 | `AccentTheme` | Accent page wash and solid list/form surfaces |
 | `SpotlightService` | Core Spotlight indexing |
-| `WidgetDataSync` | App Group JSON snapshot for WidgetKit (accounts, budgets, goals, accent) |
+| `WidgetDataSync` | App Group JSON snapshot for WidgetKit |
 | `PursefulWebImportService` | Import from web app backup |
 | `BankSyncService` / `EnableBankingService` | Prepared, disabled in v1 |
 
@@ -184,7 +197,7 @@ Views should **not** call `modelContext` directly except in legacy spots (e.g. `
 | 3 Planned | `PlanningView` |
 | 4 Reports | `ReportsView` |
 
-Settings is reached from the Dashboard toolbar. Deep links: URL scheme `purseful://`, widget links, Spotlight via `AppState.handleSpotlightIdentifier`.
+Settings is reached from the Dashboard toolbar. Deep links: URL scheme `purseful://`, widget links, Spotlight via `AppState.handleSpotlightIdentifier`, weekly summary via `purseful://weekly-summary`.
 
 User-facing copy lives in String Catalogs — see [i18n.md](i18n.md).
 

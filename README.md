@@ -3,22 +3,25 @@
 Native iOS personal finance app — SwiftUI, SwiftData, WidgetKit. Free, on-device first, no paywalls.
 
 **Bundle ID:** `dev.imflawlezz.purseful-ios`  
-**Version:** 1.2.0  
-**Minimum deployment:** iOS 26.0  
+**Version:** 1.3.0  
+**Minimum deployment:** iOS 18.0 (Liquid Glass on iOS 26+)  
 **App Group:** `group.dev.imflawlezz.purseful-ios`  
 **Locales:** English (source) · Polish · Russian · Ukrainian · German · Spanish · French
 
 ---
 
-## What’s in 1.2.0
+## What’s in 1.3.0
 
 - Five-tab app: Dashboard, Transactions, Budgets, Planning, Reports
 - Accounts, categories, budgets, planned payments, debts, goals, shopping list
-- Multi-currency with cached Frankfurter rates
+- Multi-currency with Frankfurter rates (launch, foreground, base-currency refresh; cache by base)
+- Day totals and reports convert into the base currency
 - Receipt OCR (Vision + Polish fiscal parser) and PDF report export
+- Weekly summary notification → in-app summary sheet
 - WidgetKit suite: Balances, Budget, Recent transactions, Lock Screen spent today
 - String Catalogs for app and widgets; per-app language via Settings
 - JSON backup (format v2) and Purseful Web import
+- Runs on **iOS 18.0+** (Liquid Glass on iOS 26+)
 
 Full matrix: [docs/features.md](docs/features.md). Release notes: [CHANGELOG.md](CHANGELOG.md).
 
@@ -26,7 +29,7 @@ Full matrix: [docs/features.md](docs/features.md). Release notes: [CHANGELOG.md]
 
 ## Requirements
 
-- Xcode 26+ (iOS 26 SDK)
+- Xcode 26+ (iOS 26 SDK; app runs on **iOS 18.0+**)
 - macOS with iOS Simulator or a physical device
 - Apple Developer account (for App Group + widgets on device)
 
@@ -110,7 +113,9 @@ See [docs/architecture.md](docs/architecture.md) for diagrams and data flows.
 ## Key conventions
 
 - Inject dependencies with `.environment(dependencies)` and read `@Environment(DependencyContainer.self)`.
-- Pass `DependencyContainer` explicitly to background helpers (e.g. `WidgetSyncObserver`) that miss SwiftUI environment.
+- Pass `DependencyContainer` / `AppState` explicitly to background helpers (e.g. `WidgetSyncObserver`) that miss SwiftUI environment.
+- Views read via `@Query`; mutations go through use cases. Prefer resolving categories and building paid transactions inside use cases, not views.
+- Pure calculation/parser services stay free of UI and should be `nonisolated` when the target uses default MainActor isolation.
 - Do not store secrets in SwiftData — use Keychain (`KeychainService`) for future bank tokens.
 - Recurring bills use **Planned Payments** + `RecurrenceProcessor`, not standalone recurring transactions.
 - UI copy uses English catalog keys; do not localize SF Symbol names, URLs, App Group IDs, or user-entered text.
