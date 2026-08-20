@@ -16,7 +16,9 @@ enum ImportService {
     }
 
     static func isAppExport(_ data: Data) -> Bool {
-        guard let payload = try? JSONDecoder().decode(ExportPayload.self, from: data) else { return false }
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        guard let payload = try? decoder.decode(ExportPayload.self, from: data) else { return false }
         return payload.formatVersion >= 1
     }
 

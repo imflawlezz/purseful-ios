@@ -27,6 +27,7 @@ struct ImportExportTests {
         let payload = try decoder.decode(ExportPayload.self, from: data)
         #expect(payload.formatVersion == 2)
         #expect(payload.settings != nil)
+        #expect(ImportService.isAppExport(data))
     }
 
     @Test func v1PayloadDecodesWithDefaults() throws {
