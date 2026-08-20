@@ -51,16 +51,16 @@ struct TransactionsView: View {
 
     private var groupedTransactions: [(day: Date, items: [Transaction], total: Decimal)] {
         let calendar = Calendar.current
+        let baseCurrency = AppSettings.shared.baseCurrency
+        let rates = appState.resolvedExchangeRates()
         let grouped = Dictionary(grouping: transactions) { calendar.startOfDay(for: $0.date) }
         return grouped.keys.sorted(by: >).map { day in
             let items = grouped[day] ?? []
-            let total = items.reduce(Decimal.zero) { partial, item in
-                switch item.type {
-                case .income: partial + item.amount
-                case .expense: partial - item.amount
-                case .transfer: partial
-                }
-            }
+            let total = BalanceCalculator.dayNetCashFlow(
+                transactions: items,
+                baseCurrency: baseCurrency,
+                exchangeRates: rates
+            )
             return (day, items, total)
         }
     }

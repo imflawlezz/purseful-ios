@@ -67,4 +67,33 @@ final class BalanceCalculatorTests: XCTestCase {
 
         XCTAssertEqual(converted, 430)
     }
+
+    func testDayNetCashFlowConvertsIntoBaseCurrency() {
+        let plnAccount = Account(name: "Cash", type: .cash, currency: "PLN")
+        let expense = Transaction(
+            title: "Rent",
+            amount: 1118,
+            type: .expense,
+            account: plnAccount
+        )
+        let groceries = Transaction(
+            title: "Food",
+            amount: 27.77,
+            type: .expense,
+            account: plnAccount
+        )
+
+        let total = BalanceCalculator.dayNetCashFlow(
+            transactions: [expense, groceries],
+            baseCurrency: "EUR",
+            exchangeRates: rates
+        )
+
+        // rates: EUR=0.23, PLN=1 → PLN→EUR = amount * 0.23
+        XCTAssertEqual(
+            NSDecimalNumber(decimal: total).doubleValue,
+            -263.5271,
+            accuracy: 0.01
+        )
+    }
 }

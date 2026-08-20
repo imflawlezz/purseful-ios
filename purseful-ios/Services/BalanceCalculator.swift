@@ -81,6 +81,26 @@ enum BalanceCalculator {
         return convert(payment.amount, from: currency, to: baseCurrency, rates: exchangeRates)
     }
 
+    static func dayNetCashFlow(
+        transactions: [Transaction],
+        baseCurrency: String,
+        exchangeRates: [String: Decimal]
+    ) -> Decimal {
+        transactions.reduce(Decimal.zero) { partial, item in
+            let converted = convertedAmount(
+                item.amount,
+                for: item,
+                baseCurrency: baseCurrency,
+                exchangeRates: exchangeRates
+            )
+            switch item.type {
+            case .income: return partial + converted
+            case .expense: return partial - converted
+            case .transfer: return partial
+            }
+        }
+    }
+
     static func cashFlow(
         transactions: [Transaction],
         from start: Date,
