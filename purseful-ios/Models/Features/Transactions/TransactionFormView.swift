@@ -359,11 +359,7 @@ struct TransactionFormView: View {
         target.note = note
         target.account = selectedAccount
         target.toAccount = type == .transfer ? selectedToAccount : nil
-        target.category = CategoryService.resolvedCategory(
-            selectedCategory,
-            for: type,
-            context: dependencies.repository.context
-        )
+        target.category = selectedCategory
         target.attachmentData = pendingAttachmentData
 
         var splitLines: [(category: Category, amount: Decimal)] = []

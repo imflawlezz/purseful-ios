@@ -1,7 +1,7 @@
 import Foundation
 import NaturalLanguage
 
-struct ReceiptParseResult {
+nonisolated struct ReceiptParseResult: Sendable {
     var merchant: String?
     var total: Decimal?
     var date: Date?
@@ -11,7 +11,7 @@ struct ReceiptParseResult {
     var nip: String?
 }
 
-enum ReceiptParser {
+nonisolated enum ReceiptParser {
     private static let primaryTotalKeywords = [
         "DO ZAPŁATY",
         "DO ZAPLATY",

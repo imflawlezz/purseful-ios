@@ -97,6 +97,7 @@ private func plannedPaymentColor(_ payment: PlannedPayment) -> Color {
     }
 }
 
+@MainActor
 private func plannedPaymentSubtitle(_ payment: PlannedPayment) -> String {
     switch payment.type {
     case .transfer:
@@ -106,24 +107,6 @@ private func plannedPaymentSubtitle(_ payment: PlannedPayment) -> String {
     case .income, .expense:
         return payment.category?.name.localizedDisplayName ?? payment.type.displayName
     }
-}
-
-@MainActor
-private func makePlannedTransaction(from payment: PlannedPayment, context: ModelContext, date: Date = Date()) -> Transaction {
-    let category = payment.type == .transfer
-        ? nil
-        : CategoryService.resolvedCategory(payment.category, for: payment.type, context: context)
-
-    return Transaction(
-        title: payment.name,
-        amount: payment.amount,
-        type: payment.type,
-        date: date,
-        note: payment.note,
-        account: payment.account,
-        toAccount: payment.type == .transfer ? payment.toAccount : nil,
-        category: category
-    )
 }
 
 struct PlannedPaymentsView: View {
@@ -249,8 +232,7 @@ struct PlannedPaymentsView: View {
     }
 
     private func markPaid(_ payment: PlannedPayment) {
-        let tx = makePlannedTransaction(from: payment, context: dependencies.repository.context)
-        try? dependencies.plannedPayments.markPaid(payment, transaction: tx)
+        try? dependencies.plannedPayments.markPaid(from: payment)
         Haptics.success()
     }
 
@@ -415,10 +397,9 @@ struct PaymentCalendarView: View {
             VStack(spacing: 3) {
                 ZStack {
                     if isSelected {
-                        Circle()
-                            .fill(.clear)
+                        Color.clear
                             .frame(width: 38, height: 38)
-                            .glassEffect(.regular.interactive(), in: .circle)
+                            .pursefulGlass(in: Circle(), interactive: true)
                     }
 
                     Text("\(dayNumber)")
@@ -572,11 +553,7 @@ struct PaymentCalendarView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(.clear)
-                .glassEffect(in: .rect(cornerRadius: 16))
-        }
+        .pursefulGlass(in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     private func projectionRow(
@@ -763,16 +740,7 @@ struct PlannedPaymentFormView: View {
         target.nextDueDate = nextDueDate
         target.account = account
         target.toAccount = type == .transfer ? selectedToAccount : nil
-        if type == .transfer {
-            target.category = nil
-        } else {
-            let categoryType: CategoryType = type == .income ? .income : .expense
-            target.category = CategoryService.resolvedCategory(
-                selectedCategory,
-                for: categoryType,
-                context: dependencies.repository.context
-            )
-        }
+        target.category = type == .transfer ? nil : selectedCategory
         target.autoCategorize = autoCategorize
         target.reminderDaysBefore = reminderDays
         target.isActive = isActive
@@ -793,8 +761,7 @@ struct PlannedPaymentFormView: View {
     }
 
     private func markPaid(_ payment: PlannedPayment) {
-        let tx = makePlannedTransaction(from: payment, context: dependencies.repository.context)
-        try? dependencies.plannedPayments.markPaid(payment, transaction: tx)
+        try? dependencies.plannedPayments.markPaid(from: payment)
         Haptics.success()
         dismiss()
     }
@@ -1028,9 +995,6 @@ struct DebtFormView: View {
             debt.note = note
             debt.createdAt = openingDate
             debt.createsLinkedTransactions = createsLinkedTransactions
-            if debt.createsLinkedTransactions {
-                DebtService.syncOpeningTransaction(for: debt, context: dependencies.repository.context)
-            }
             try? dependencies.debts.saveExisting(debt)
             dismiss()
             return

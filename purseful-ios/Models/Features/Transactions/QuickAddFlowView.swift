@@ -145,11 +145,7 @@ struct QuickAddFlowView: View {
         .padding(.horizontal, 24)
         .padding(.vertical, 18)
         .frame(maxWidth: .infinity)
-        .background {
-            Capsule(style: .continuous)
-                .fill(.clear)
-                .glassEffect(.regular.interactive(), in: .capsule)
-        }
+        .pursefulGlass(in: Capsule(style: .continuous), interactive: true)
     }
 
     private var categoryStep: some View {
@@ -250,11 +246,7 @@ struct QuickAddFlowView: View {
             amount: amount,
             type: type,
             account: account,
-            category: CategoryService.resolvedCategory(
-                selectedCategory,
-                for: type,
-                context: dependencies.repository.context
-            ),
+            category: selectedCategory,
             attachmentData: pendingAttachmentData
         )
         try? dependencies.transactions.save(transaction: transaction, isNew: true, splitLines: [])

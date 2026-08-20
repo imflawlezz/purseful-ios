@@ -10,6 +10,12 @@ struct TransactionUseCase {
         isNew: Bool,
         splitLines: [(category: Category, amount: Decimal)]
     ) throws {
+        transaction.category = CategoryService.resolvedCategory(
+            transaction.category,
+            for: transaction.type,
+            context: repository.context
+        )
+
         if isNew {
             repository.insert(transaction)
         }
