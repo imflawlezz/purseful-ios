@@ -6,6 +6,12 @@ enum BudgetAlertLevel: String {
     case exceeded
 }
 
+enum NotificationIdentifiers {
+    static let weeklySummary = "weekly-summary"
+    static let routeKey = "route"
+    static let weeklySummaryRoute = "weekly-summary"
+}
+
 enum NotificationHelpers {
     static func budgetAlertDedupKey(budgetID: UUID, periodStart: Date, level: BudgetAlertLevel) -> String {
         let day = Calendar.current.startOfDay(for: periodStart)
@@ -24,6 +30,19 @@ enum NotificationHelpers {
             matching: components,
             matchingPolicy: .nextTimePreservingSmallerComponents
         )
+    }
+
+    /// Previous Monday 00:00 through Sunday 23:59:59 relative to `date` (Monday-based week).
+    static func previousCalendarWeek(
+        from date: Date = Date(),
+        calendar: Calendar = .current
+    ) -> (start: Date, end: Date)? {
+        var cal = calendar
+        cal.firstWeekday = 2
+        guard let thisWeekStart = cal.dateInterval(of: .weekOfYear, for: date)?.start else { return nil }
+        guard let start = cal.date(byAdding: .day, value: -7, to: thisWeekStart) else { return nil }
+        guard let end = cal.date(byAdding: .second, value: -1, to: thisWeekStart) else { return nil }
+        return (start, end)
     }
 }
 
@@ -188,14 +207,19 @@ final class NotificationService {
         let content = UNMutableNotificationContent()
         content.title = String(localized: "Weekly summary")
         content.sound = .default
+        content.userInfo = [NotificationIdentifiers.routeKey: NotificationIdentifiers.weeklySummaryRoute]
 
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
-        let request = UNNotificationRequest(identifier: weeklySummaryID, content: content, trigger: trigger)
+        let request = UNNotificationRequest(
+            identifier: NotificationIdentifiers.weeklySummary,
+            content: content,
+            trigger: trigger
+        )
         UNUserNotificationCenter.current().add(request)
     }
 
     func cancelWeeklySummary() {
-        cancelNotification(id: weeklySummaryID)
+        cancelNotification(id: NotificationIdentifiers.weeklySummary)
     }
 
     func clearBudgetAlertState(for budgetID: UUID) {
@@ -208,8 +232,6 @@ final class NotificationService {
     func cancelNotification(id: String) {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id])
     }
-
-    private let weeklySummaryID = "weekly-summary"
 
     private func paymentNotificationID(_ id: UUID) -> String { "payment-\(id.uuidString)" }
     private func debtNotificationID(_ id: UUID) -> String { "debt-\(id.uuidString)" }

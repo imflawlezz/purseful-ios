@@ -11,6 +11,11 @@ final class AppState {
     var pendingTransactionID: UUID?
     var pendingAccountID: UUID?
     var pendingCategoryID: UUID?
+    var showWeeklySummary = false
+
+    func presentWeeklySummary() {
+        showWeeklySummary = true
+    }
 
     func navigateToTab(_ tab: Int, planningSection: Int? = nil) {
         selectedTab = tab

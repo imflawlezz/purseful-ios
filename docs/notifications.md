@@ -88,13 +88,17 @@ Not exposed in Settings UI (always on when authorized).
 **Scheduled** for next **Monday 9:00** (one-shot, rescheduled each sync).
 
 | Setting | `AppSettings.weeklySummaryEnabled` |
-| Body | “Last week you spent {amount}.” |
 | Period | Monday 00:00 – Sunday 23:59:59 **before** the fire Monday |
 | Identifier | `weekly-summary` |
+| Route | `purseful://weekly-summary` / `userInfo.route = weekly-summary` |
 
-Spend is recomputed from transactions on each sync so the body stays fresh as the week progresses. If the app is not opened between Sunday night and Monday 9:00, the last synced amount is delivered.
+Tap opens **Weekly summary** sheet (`WeeklySummaryView`): last week’s income, expenses, net, trend vs prior week, and top spending categories.
 
-Helper: `NotificationHelpers.nextMondayMorning()`.
+Preview from **Settings → Notifications → Preview weekly summary**.
+
+Helper: `NotificationHelpers.nextMondayMorning()`, `NotificationHelpers.previousCalendarWeek()`.
+
+Notification response handling: `PursefulNotificationCenterDelegate`.
 
 ---
 
@@ -104,6 +108,7 @@ Helper: `NotificationHelpers.nextMondayMorning()`.
 
 - Request permission / show status
 - Toggle weekly summary (`AppSettings.weeklySummaryEnabled`)
+- Preview weekly summary sheet
 
 Per-budget threshold is on each budget form (`alertThreshold` slider).  
 Per-payment reminder lead time is on each planned payment form (`reminderDaysBefore` stepper).
@@ -116,7 +121,9 @@ Per-payment reminder lead time is on each planned payment form (`reminderDaysBef
 |------|------|
 | `Services/NotificationScheduler.swift` | Orchestrator |
 | `Services/NotificationService.swift` | UNCenter APIs |
-| `NotificationHelpers` | Dedup keys, next Monday |
+| `NotificationHelpers` | Dedup keys, week bounds, next Monday |
+| `App/PursefulNotificationCenterDelegate.swift` | Tap → weekly summary sheet |
+| `Models/Features/Reports/WeeklySummaryView.swift` | Summary UI |
 | `BudgetService` | Spent/limit for budget alerts |
 
 ---

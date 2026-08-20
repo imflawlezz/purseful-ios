@@ -47,6 +47,11 @@ struct MainTabView: View {
         }
         .tint(settings.accentColor)
         .environment(dependencies)
+        .accentSheet(isPresented: $appState.showWeeklySummary) {
+            NavigationStack {
+                WeeklySummaryView()
+            }
+        }
         .onOpenURL { url in
             handleDeepLink(url)
         }
@@ -55,7 +60,7 @@ struct MainTabView: View {
             appState.handleSpotlightIdentifier(identifier)
         }
         .task {
-            await appState.refreshExchangeRates()
+            await dependencies.dashboardRefresh.refreshExchangeRates(appState: appState)
         }
     }
 
@@ -67,6 +72,8 @@ struct MainTabView: View {
         case "budgets": appState.selectedTab = 2
         case "planning": appState.selectedTab = 3
         case "reports": appState.selectedTab = 4
+        case NotificationIdentifiers.weeklySummaryRoute:
+            appState.presentWeeklySummary()
         default: break
         }
     }
