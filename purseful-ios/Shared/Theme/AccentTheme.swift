@@ -36,7 +36,7 @@ enum AccentTheme {
         UITableView.appearance().backgroundColor = .clear
         UICollectionView.appearance().backgroundColor = .clear
 
-        var cellConfig = UIBackgroundConfiguration.listGroupedCell()
+        var cellConfig = UIBackgroundConfiguration.listCell()
         cellConfig.backgroundColor = currentSurfaceUIColor
         UICollectionViewListCell.appearance().backgroundConfiguration = cellConfig
         UITableViewCell.appearance().backgroundColor = currentSurfaceUIColor
@@ -61,13 +61,23 @@ enum AccentTheme {
     static func retintVisibleSurfaces(from root: UIView) {
         let surface = currentSurfaceUIColor
         func walk(_ view: UIView) {
+            if view is UITableViewHeaderFooterView {
+                return
+            }
             if let cell = view as? UICollectionViewListCell {
-                guard cell.tag != headerClearTag else { return }
-                var config = UIBackgroundConfiguration.listGroupedCell()
+                if cell.tag == headerClearTag {
+                    cell.backgroundConfiguration = .clear()
+                    return
+                }
+                var config = UIBackgroundConfiguration.listCell()
                 config.backgroundColor = surface
                 cell.backgroundConfiguration = config
             } else if let cell = view as? UITableViewCell {
-                guard cell.tag != headerClearTag else { return }
+                if cell.tag == headerClearTag {
+                    cell.backgroundColor = .clear
+                    cell.backgroundConfiguration = .clear()
+                    return
+                }
                 cell.backgroundColor = surface
                 if var config = cell.backgroundConfiguration {
                     config.backgroundColor = surface
@@ -188,11 +198,23 @@ struct AccentListSectionHeader: View {
             .foregroundStyle(.secondary)
             .textCase(.uppercase)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .clearListSectionHeaderBackground()
+            .clearListSupplementaryBackground()
     }
 }
 
-private struct ClearListSectionHeaderBackground: UIViewRepresentable {
+struct AccentListSectionFooter: View {
+    let text: LocalizedStringKey
+
+    var body: some View {
+        Text(text)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .clearListSupplementaryBackground()
+    }
+}
+
+private struct ClearListSupplementaryBackground: UIViewRepresentable {
     func makeUIView(context: Context) -> UIView {
         let view = UIView(frame: .zero)
         view.isUserInteractionEnabled = false
@@ -244,14 +266,12 @@ private struct ClearListSectionHeaderBackground: UIViewRepresentable {
 private struct AccentTintedBackgroundModifier: ViewModifier {
     @Bindable private var settings = AppSettings.shared
 
+    @ViewBuilder
     func body(content: Content) -> some View {
-        content
+        let base = content
             .scrollContentBackground(.hidden)
             .background { AccentScreenBackground() }
             .background { AccentSurfaceInstaller() }
-            .containerBackground(for: .navigation) {
-                AccentScreenBackground()
-            }
             .presentationBackground {
                 AccentScreenBackground()
             }
@@ -264,6 +284,14 @@ private struct AccentTintedBackgroundModifier: ViewModifier {
                     }
                 }
             }
+
+        if #available(iOS 26.0, *) {
+            base.containerBackground(for: .navigation) {
+                AccentScreenBackground()
+            }
+        } else {
+            base
+        }
     }
 }
 
@@ -277,7 +305,11 @@ extension View {
     }
 
     func clearListSectionHeaderBackground() -> some View {
-        background(ClearListSectionHeaderBackground())
+        clearListSupplementaryBackground()
+    }
+
+    func clearListSupplementaryBackground() -> some View {
+        background(ClearListSupplementaryBackground())
     }
 
     func accentSheet(

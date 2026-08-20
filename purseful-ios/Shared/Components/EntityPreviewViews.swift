@@ -32,11 +32,7 @@ struct PreviewSection<Content: View>: View {
             }
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(.clear)
-                    .glassEffect(in: .rect(cornerRadius: 12))
-            }
+            .pursefulGlass(in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
     }
 }

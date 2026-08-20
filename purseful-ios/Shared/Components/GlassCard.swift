@@ -11,8 +11,8 @@ struct GlassCard<Content: View>: View {
         content
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
-            .glassEffect(in: .rect(cornerRadius: 16))
-            .contentShape(.rect(cornerRadius: 16))
+            .pursefulGlass(in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 
@@ -38,12 +38,8 @@ struct AccountBalanceCard: View {
         }
         .padding()
         .frame(width: 160, alignment: .leading)
-        .background {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(.clear)
-                .glassEffect(in: .rect(cornerRadius: 14))
-        }
-        .contentShape(.rect(cornerRadius: 14))
+        .pursefulGlass(in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 }
 
