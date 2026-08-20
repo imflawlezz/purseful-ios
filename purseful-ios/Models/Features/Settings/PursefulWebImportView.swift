@@ -38,7 +38,8 @@ struct PursefulWebImportView: View {
                 importSection
             }
         }
-        .navigationTitle("Web backup import")
+        .listSectionSpacing(24)
+        .navigationTitle("Import Backup (Legacy)")
         .navigationBarTitleDisplayMode(.inline)
         .accentTintedBackground()
         .navigationBarBackButtonHidden(true)
@@ -79,19 +80,27 @@ struct PursefulWebImportView: View {
     private var setupSection: some View {
         Group {
             Section {
-                Text("Import a backup from the old Purseful website. Match each account and category to yours, or create new ones. Balances come from the file.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-            .accentListRows()
-
-            Section {
                 Toggle("Keep my existing data", isOn: $mergeExisting)
-                if mergeExisting {
-                    Text("Duplicates are skipped when merging. Turn this off to start clean.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+            } header: {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Restore a backup from legacy Purseful website.")
+                    Link(destination: URL(string: "https://purseful-app.vercel.app/")!) {
+                        HStack(spacing: 4) {
+                            Text("purseful-app.vercel.app")
+                                .underline()
+                            Image(systemName: "arrow.up.forward")
+                                .font(.caption.weight(.semibold))
+                        }
+                    }
+                    .foregroundStyle(AppSettings.shared.accentColor)
+                    Text("You will be prompted to match accounts and categories before importing.")
                 }
+                .font(.body)
+                .foregroundStyle(.primary)
+                .textCase(nil)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.bottom, 10)
+                .clearListSupplementaryBackground()
             }
             .accentListRows()
 

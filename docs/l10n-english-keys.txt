@@ -14,8 +14,10 @@
 %@’s target date is %@.
 %lld
 %lld day(s) before
+%lld transactions
 %lld%%
 %lld%% of %@
+%lld%% of spending
 0
 0.00
 12M
@@ -83,6 +85,7 @@ Categories mapped
 Category
 Change the app language in iOS Settings.
 Checked
+Choose .json Backup File
 Choose Backup File
 Choose JSON File
 Clear All
@@ -96,6 +99,7 @@ Confirm
 Continue
 Continue to accounts
 Contribution
+Could not determine last week’s dates.
 Couldn’t clear data
 Couldn’t export
 Couldn’t open that file.
@@ -157,6 +161,7 @@ Edit Payment
 Edit Transaction
 Education
 Electronics
+Enable notifications
 End
 Entertainment
 Ephemeral
@@ -164,6 +169,7 @@ Estimated completion
 Expected net worth
 Expense
 Expenses
+Export Backup (.json)
 Export JSON
 field.type
 Filters
@@ -196,6 +202,8 @@ imflawlezz
 Import a backup from the old Purseful website. Match each account and category to yours, or create new ones. Balances come from the file.
 Import as
 Import backup
+Import Backup (.json)
+Import Backup (Legacy)
 Import failed
 Import JSON
 Import web backup
@@ -208,6 +216,7 @@ Initial Balance
 Investments
 Keep my existing data
 Last import
+Last week
 Latest activity.
 Lent On
 Lent: %@
@@ -233,6 +242,7 @@ Money you owe, or that’s owed to you.
 Monthly
 Name
 Name and type stay fixed; you can still change the icon and color.
+Net
 Net cash flow
 Net worth
 New Account
@@ -272,6 +282,7 @@ OK
 Old type
 On
 Once
+Open notification settings
 Open Purseful to update
 Original
 Original Amount
@@ -300,12 +311,15 @@ Pick categories like Food or Entertainment
 Planned
 Planned payments
 Preferences
+Preview weekly summary
 Primary and other account balances; medium also shows spent today and upcoming payments.
 Provisional
 Public Transit
 Purseful %@ (Build %@)
 Purseful report
+purseful-app.vercel.app
 Quick add
+Rates for %1$@ updated %2$@
 Receipt scan
 Received: %@
 Recent
@@ -327,6 +341,7 @@ Repayment due
 Repayment: %@
 Reports
 Restaurants
+Restore a backup from legacy Purseful website.
 Restore a Purseful backup—accounts, transactions, budgets, goals, and more. Merge keeps your current settings; otherwise the file’s settings are used.
 Roll over unused
 Salary
@@ -355,8 +370,8 @@ Sort
 Spending by category
 Spending trend
 Spent %@
-SPENT TODAY
 Spent today
+SPENT TODAY
 Spent today %@
 Split transaction
 Start
@@ -372,6 +387,7 @@ Target category
 Target Date
 They Owe Me
 This deletes everything — accounts, transactions, budgets, goals, payments, debts, the shopping list, and more. Default categories come back.
+This isn’t a Purseful export. For old website backups, use Import Backup (Legacy).
 This isn’t a Purseful export. For old website backups, use Web backup import.
 Title
 To
@@ -379,9 +395,11 @@ To Account
 Today’s spend
 Today’s spending on the Lock Screen.
 Top payees
+Top spending
 Total expenses
 Total income
 Totals and reports convert into this currency.
+Totals and reports convert into this currency. Rates come from Frankfurter and refresh when the app opens or you change base currency.
 Transaction
 Transactions
 Transactions (%lld)
@@ -400,6 +418,7 @@ Untitled
 UPCOMING
 Upcoming payment
 Upcoming payments
+Updating exchange rates…
 Used for buttons, backgrounds, and lists.
 Utilities
 Version
@@ -415,6 +434,7 @@ What’s left in a budget.
 Which budget to show.
 Yearly
 Yes
+You will be prompted to match accounts and categories before importing.
 Your account balances. The larger size also shows today’s spend and what’s coming up.
 ·
 –

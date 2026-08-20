@@ -13,19 +13,12 @@ struct JSONImportView: View {
     var body: some View {
         Form {
             Section {
-                Text("Restore a Purseful backup—accounts, transactions, budgets, goals, and more. Merge keeps your current settings; otherwise the file’s settings are used.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-            .accentListRows()
-
-            Section {
                 Toggle("Keep my existing data", isOn: $mergeExisting)
             }
             .accentListRows()
 
             Section {
-                Button("Choose JSON File") {
+                Button("Choose .json Backup File") {
                     showImporter = true
                 }
             }
@@ -51,7 +44,7 @@ struct JSONImportView: View {
                 .accentListRows()
             }
         }
-        .navigationTitle("Import JSON")
+        .navigationTitle("Import Backup (.json)")
         .navigationBarTitleDisplayMode(.inline)
         .accentTintedBackground()
         .fileImporter(isPresented: $showImporter, allowedContentTypes: [.json]) { result in
@@ -82,7 +75,7 @@ struct JSONImportView: View {
         do {
             let data = try Data(contentsOf: url)
             guard ImportService.isAppExport(data) else {
-                importError = String(localized: "This isn’t a Purseful export. For old website backups, use Web backup import.")
+                importError = String(localized: "This isn’t a Purseful export. For old website backups, use Import Backup (Legacy).")
                 return
             }
             importResult = try dependencies.importExport.importJSON(

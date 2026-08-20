@@ -90,18 +90,18 @@ struct SettingsView: View {
                 Button {
                     exportJSON()
                 } label: {
-                    settingsLabel("Export JSON", systemImage: "square.and.arrow.up.fill", tint: .indigo)
+                    settingsLabel("Export Backup (.json)", systemImage: "square.and.arrow.up.fill", tint: .indigo)
                 }
                 .foregroundStyle(.primary)
                 NavigationLink {
                     JSONImportView()
                 } label: {
-                    settingsLabel("Import JSON", systemImage: "square.and.arrow.down.fill", tint: .teal)
+                    settingsLabel("Import Backup (.json)", systemImage: "square.and.arrow.down.fill", tint: .teal)
                 }
                 NavigationLink {
                     PursefulWebImportView()
                 } label: {
-                    settingsLabel("Import web backup", systemImage: "globe", tint: .cyan)
+                    settingsLabel("Import Backup (Legacy)", systemImage: "globe", tint: .cyan)
                 }
                 Button(role: .destructive) {
                     showClearDataAlert = true
@@ -147,16 +147,8 @@ struct SettingsView: View {
                                 Text("by")
                                 Text("imflawlezz")
                                     .fontWeight(.regular)
-                                    .foregroundStyle(
-                                        LinearGradient(
-                                            colors: [
-                                                Color(red: 0.00000, green: 0.77647, blue: 1.00000),
-                                                Color(red: 0.94902, green: 0.44314, blue: 0.12941)
-                                            ],
-                                            startPoint: .leading,
-                                            endPoint: .trailing
-                                        )
-                                    )
+                                    .foregroundStyle(AppSettings.shared.accentColor)
+                                    .underline()
                             }
                         } icon: {
                             ZStack {
@@ -292,7 +284,8 @@ struct SettingsView: View {
 }
 
 struct ExportDocument: FileDocument {
-    static var readableContentTypes: [UTType] { [.plainText, .json, .commaSeparatedText] }
+    static var readableContentTypes: [UTType] { [.json] }
+    static var writableContentTypes: [UTType] { [.json] }
     var text: String
 
     init(text: String) { self.text = text }
@@ -304,7 +297,12 @@ struct ExportDocument: FileDocument {
     }
 }
 
+import SwiftData
+import SwiftUI
+
 struct CurrencySettingsView: View {
+    @Environment(AppState.self) private var appState
+    @Environment(DependencyContainer.self) private var dependencies
     @State private var baseCurrency = AppSettings.shared.baseCurrency
 
     var body: some View {
@@ -316,16 +314,43 @@ struct CurrencySettingsView: View {
                     }
                 }
                 .onChange(of: baseCurrency) { _, newValue in
+                    guard newValue != AppSettings.shared.baseCurrency else { return }
                     AppSettings.shared.baseCurrency = newValue
+                    Task {
+                        await ExchangeRateService.shared.invalidateCache()
+                        await dependencies.dashboardRefresh.refreshExchangeRates(appState: appState)
+                    }
                 }
-                Text("Totals and reports convert into this currency.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+
+                if appState.isLoadingRates {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                        Text("Updating exchange rates…")
+                            .foregroundStyle(.secondary)
+                    }
+                } else if let status = exchangeRateStatus {
+                    Text(status)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            } footer: {
+                AccentListSectionFooter(
+                    text: "Totals and reports convert into this currency. Rates come from Frankfurter and refresh when the app opens or you change base currency."
+                )
             }
             .accentListRows()
         }
         .accentTintedBackground()
         .navigationTitle("Currency")
+        .task {
+            await appState.refreshExchangeRates()
+        }
+    }
+
+    private var exchangeRateStatus: String? {
+        guard let fetchedAt = ExchangeRateCache.lastFetchedAt(for: baseCurrency) else { return nil }
+        let formatted = fetchedAt.formatted(date: .abbreviated, time: .shortened)
+        return String(format: String(localized: "Rates for %1$@ updated %2$@"), baseCurrency, formatted)
     }
 }
 
@@ -335,13 +360,6 @@ struct AppearanceSettingsView: View {
     var body: some View {
         Form {
             Section {
-                Text("Used for buttons, backgrounds, and lists.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .accentListRows()
-
-            Section {
                 ColorPickerGrid(selectedHex: $settings.accentColorHex)
                     .padding(.vertical, 4)
             } header: {
@@ -350,25 +368,35 @@ struct AppearanceSettingsView: View {
             .accentListRows()
         }
         .accentTintedBackground()
-        .id(settings.accentColorHex)
         .navigationTitle("Appearance")
     }
 }
 
 struct NotificationSettingsView: View {
     @Environment(DependencyContainer.self) private var dependencies
+    @Environment(AppState.self) private var appState
     @State private var weeklySummary = AppSettings.shared.weeklySummaryEnabled
     @State private var authorizationStatus: UNAuthorizationStatus = .notDetermined
 
     var body: some View {
         Form {
             Section {
-                LabeledContent("Permission", value: authorizationLabel)
-                Button("Allow notifications") {
-                    Task {
-                        _ = await NotificationService.shared.requestAuthorization()
-                        await refreshAuthorizationStatus()
-                        await NotificationScheduler.syncAll(context: dependencies.repository.context)
+                LabeledContent {
+                    HStack(spacing: 8) {
+                        Circle()
+                            .fill(permissionStatusColor)
+                            .frame(width: 9, height: 9)
+                        Text(authorizationLabel)
+                    }
+                } label: {
+                    Text("Permission")
+                }
+
+                if showsPermissionAction {
+                    Button(permissionActionTitle) {
+                        Task {
+                            await handlePermissionAction()
+                        }
                     }
                 }
             }
@@ -386,6 +414,9 @@ struct NotificationSettingsView: View {
                             await NotificationScheduler.syncAll(context: dependencies.repository.context)
                         }
                     }
+                Button("Preview weekly summary") {
+                    appState.presentWeeklySummary()
+                }
             }
             .accentListRows()
         }
@@ -394,6 +425,42 @@ struct NotificationSettingsView: View {
         .task {
             await refreshAuthorizationStatus()
         }
+    }
+
+    private var permissionStatusColor: Color {
+        switch authorizationStatus {
+        case .authorized: .green
+        case .denied: .red
+        case .notDetermined: .orange
+        case .provisional, .ephemeral: .blue
+        @unknown default: .secondary
+        }
+    }
+
+    private var showsPermissionAction: Bool {
+        authorizationStatus != .authorized && authorizationStatus != .provisional
+    }
+
+    private var permissionActionTitle: String {
+        switch authorizationStatus {
+        case .denied: String(localized: "Open notification settings")
+        default: String(localized: "Enable notifications")
+        }
+    }
+
+    private func handlePermissionAction() async {
+        if authorizationStatus == .denied {
+            openNotificationSettings()
+            return
+        }
+        _ = await NotificationService.shared.requestAuthorization()
+        await refreshAuthorizationStatus()
+        await NotificationScheduler.syncAll(context: dependencies.repository.context)
+    }
+
+    private func openNotificationSettings() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(url)
     }
 
     private var authorizationLabel: String {
@@ -453,7 +520,7 @@ struct AccountsListView: View {
         .navigationTitle("Accounts")
         .environment(\.editMode, $editMode)
         .onAppear {
-            AccountPreferences.ensureSortOrders(accounts: accounts, context: dependencies.repository.context)
+            dependencies.accounts.ensureSortOrders(accounts: accounts)
         }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -530,18 +597,12 @@ struct AccountsListView: View {
     }
 
     private func delete(_ account: Account) {
-        AccountPreferences.clearDefaultIfNeeded(for: account)
         try? dependencies.accounts.delete(account)
         Haptics.light()
     }
 
     private func moveAccounts(from source: IndexSet, to destination: Int) {
-        AccountPreferences.moveAccounts(
-            from: source,
-            to: destination,
-            accounts: accounts,
-            context: dependencies.repository.context
-        )
+        dependencies.accounts.moveAccounts(from: source, to: destination, accounts: accounts)
     }
 }
 
@@ -593,7 +654,6 @@ struct AccountFormView: View {
                     showDelete: account != nil,
                     onDelete: account == nil ? nil : {
                         guard let account else { return }
-                        AccountPreferences.clearDefaultIfNeeded(for: account)
                         try? dependencies.accounts.delete(account)
                         dismiss()
                     },
