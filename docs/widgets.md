@@ -86,6 +86,20 @@ Timeline refresh: ~15 minutes. Accent wash from snapshot `accentColorHex`. Stale
 
 Suggested entities come from the latest snapshot; open the app once after adding accounts/budgets so the picker lists them.
 
+### Main-app intents (Shortcuts)
+
+| Intent | Parameters | Behavior |
+|--------|------------|----------|
+| `AddExpenseIntent` | Amount (`Double`), Category (`ExpenseCategoryEntity`) | Expense on preferred/default account; `openAppWhenRun = false` |
+
+Donated via `PursefulShortcuts` (`AppShortcutsProvider`). Categories come from SwiftData (not the widget snapshot). Writes go through `TransactionUseCase.addQuickExpense`, then the usual notification + widget sync side effects.
+
+`PursefulIntentRuntime` reuses the process `ModelContainer` when the app registered it at launch; cold Shortcut runs open the App Group store themselves.
+
+**Wire once in the Shortcuts app:** New Shortcut → Add Action → search **Add Expense** (Purseful). Leave Amount and Category empty so Back Tap / Action Button / Siri prompts for them. Optionally bind that Shortcut under iOS Settings → Accessibility → Touch → Back Tap.
+
+Files: `purseful-ios/Intents/`.
+
 ---
 
 ## Deep links
@@ -120,3 +134,4 @@ Scheme: `purseful://`. Handled in `MainTabView.handleDeepLink`.
 | `PursefulWidgets/WidgetFormatting.swift` | Money formatting, accent background |
 | `PursefulWidgets/WidgetDataSync.swift` | Snapshot reader |
 | `purseful-ios/Services/WidgetDataSync.swift` | Snapshot writer + `sync(using:)` |
+| `purseful-ios/Intents/` | Main-app Shortcuts intents (`AddExpenseIntent`, entities, runtime) |

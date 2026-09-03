@@ -1,6 +1,6 @@
 # Features
 
-Status for **v1.3.0**.
+Status for **v1.4.0**.
 
 Legend: ✅ Done · ⚠️ Partial · ❌ Not implemented · 🚫 Deferred
 
@@ -32,6 +32,7 @@ Legend: ✅ Done · ⚠️ Partial · ❌ Not implemented · 🚫 Deferred
 | Filter amount range | ❌ | |
 | Sort options | ✅ | Date, amount, category |
 | Quick add (3 taps) | ⚠️ | Account → amount → category (skips account if default set) |
+| Shortcuts / Back Tap add expense | ✅ | `AddExpenseIntent`: amount + category → preferred/default account; see [widgets.md](widgets.md#main-app-intents-shortcuts) |
 | Transfer type | ✅ | |
 | Split transaction | ✅ | |
 | Swipe delete | ✅ | |
@@ -194,5 +195,6 @@ See [notifications.md](notifications.md).
 | Shopping list parser | `ShoppingListParserTests` |
 | Daily spend | `DailySpendCalculatorTests` |
 | PDF report export | `ReportPDFExportTests` |
+| Quick expense App Intent path | `TransactionUseCaseQuickExpenseTests` |
 
 Full list: [testing.md](testing.md).

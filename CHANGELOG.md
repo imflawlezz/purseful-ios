@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-09-03
+
+### Added
+
+- **Add Expense** App Intent for Shortcuts / Back Tap / Action Button / Siri — prompts for amount and category, saves to the default (or first) account without opening the app
+- `TransactionUseCase.addQuickExpense` for the shared write path
+
 ## [1.3.0] - 2026-08-20
 
 ### Added
@@ -145,7 +152,8 @@ Initial public release. Local-first personal finance for iOS with no subscriptio
 - CSV import/export
 - Additional transaction filters (date range, amount range, swipe duplicate)
 
-[Unreleased]: https://github.com/imflawlezz/purseful-ios/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/imflawlezz/purseful-ios/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/imflawlezz/purseful-ios/releases/tag/v1.4.0
 [1.3.0]: https://github.com/imflawlezz/purseful-ios/releases/tag/v1.3.0
 [1.2.0]: https://github.com/imflawlezz/purseful-ios/releases/tag/v1.2.0
 [1.1.1]: https://github.com/imflawlezz/purseful-ios/releases/tag/v1.1.1

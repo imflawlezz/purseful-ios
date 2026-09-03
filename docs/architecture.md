@@ -52,12 +52,13 @@ flowchart TB
 **File:** `purseful-ios/purseful_iosApp.swift`
 
 1. Creates `ModelContainer` via `ModelContainerProvider`.
-2. Builds `DependencyContainer(context: mainContext)`.
-3. Injects into SwiftUI:
+2. Registers it with `PursefulIntentRuntime` for Shortcuts / App Intents.
+3. Builds `DependencyContainer(context: mainContext)`.
+4. Injects into SwiftUI:
    - `.environment(appState)` — `@Observable AppState`
    - `.environment(dependencies)` — `@Observable DependencyContainer`
-4. Runs `appBootstrap.runStartupTasks()` on launch.
-5. Attaches `WidgetSyncObserver(dependencies:appState:)` for foreground sync (explicit params — no `@Environment` from `.background`).
+5. Runs `appBootstrap.runStartupTasks()` on launch.
+6. Attaches `WidgetSyncObserver(dependencies:appState:)` for foreground sync (explicit params — no `@Environment` from `.background`).
 
 ### DependencyContainer
 
@@ -66,7 +67,7 @@ flowchart TB
 | Use case | Responsibility |
 |----------|----------------|
 | `AppBootstrapUseCase` | Seed data, sort orders, budget rollover, recurrence, notifications |
-| `TransactionUseCase` | Save/delete transactions, split children, category resolution |
+| `TransactionUseCase` | Save/delete transactions, split children, category resolution, quick expense for Shortcuts |
 | `BudgetUseCase` | Save/delete budgets, process rollovers |
 | `PlannedPaymentUseCase` | CRUD, mark paid (builds transaction), category resolution |
 | `DebtUseCase` | Debt CRUD via `DebtService` (opening tx sync on save) |
@@ -207,8 +208,8 @@ User-facing copy lives in String Catalogs — see [i18n.md](i18n.md).
 
 | Target | Purpose |
 |--------|---------|
-| `purseful-ios` | Main app |
-| `PursefulWidgets` | WidgetKit extension (reads App Group snapshot) |
+| `purseful-ios` | Main app (includes Shortcuts App Intents under `Intents/`) |
+| `PursefulWidgets` | WidgetKit extension (reads App Group snapshot; config intents only) |
 | `purseful-iosTests` | Unit tests |
 
 Shared constants: `AppConstants.appGroupIdentifier`.

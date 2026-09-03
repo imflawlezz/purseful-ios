@@ -3,27 +3,19 @@
 Native iOS personal finance app — SwiftUI, SwiftData, WidgetKit. Free, on-device first, no paywalls.
 
 **Bundle ID:** `dev.imflawlezz.purseful-ios`  
-**Version:** 1.3.0  
+**Version:** 1.4.0  
 **Minimum deployment:** iOS 18.0 (Liquid Glass on iOS 26+)  
 **App Group:** `group.dev.imflawlezz.purseful-ios`  
 **Locales:** English (source) · Polish · Russian · Ukrainian · German · Spanish · French
 
 ---
 
-## What’s in 1.3.0
+## What’s in 1.4.0
 
-- Five-tab app: Dashboard, Transactions, Budgets, Planning, Reports
-- Accounts, categories, budgets, planned payments, debts, goals, shopping list
-- Multi-currency with Frankfurter rates (launch, foreground, base-currency refresh; cache by base)
-- Day totals and reports convert into the base currency
-- Receipt OCR (Vision + Polish fiscal parser) and PDF report export
-- Weekly summary notification → in-app summary sheet
-- WidgetKit suite: Balances, Budget, Recent transactions, Lock Screen spent today
-- String Catalogs for app and widgets; per-app language via Settings
-- JSON backup (format v2) and Purseful Web import
-- Runs on **iOS 18.0+** (Liquid Glass on iOS 26+)
+- **Add Expense** App Intent — Shortcuts / Back Tap / Action Button / Siri prompt for amount + category and save without opening the app UI
+- Everything from 1.3.0: five-tab app, multi-currency, receipt OCR, weekly summary, WidgetKit suite, JSON backup, iOS 18+
 
-Full matrix: [docs/features.md](docs/features.md). Release notes: [CHANGELOG.md](CHANGELOG.md).
+Full matrix: [docs/features.md](docs/features.md). Release notes: [CHANGELOG.md](CHANGELOG.md). Shortcuts wiring: [docs/widgets.md](docs/widgets.md#main-app-intents-shortcuts).
 
 ---
 
@@ -44,6 +36,16 @@ Full matrix: [docs/features.md](docs/features.md). Release notes: [CHANGELOG.md]
 
 ### Run tests
 
+Prefer a connected physical iPhone when available:
+
+```bash
+xcodebuild -scheme purseful-ios \
+  -destination 'platform=iOS,id=DEVICE_UDID' \
+  test
+```
+
+Simulator fallback:
+
 ```bash
 xcodebuild -scheme purseful-ios \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
@@ -62,6 +64,7 @@ purseful-ios/                 # Main app target
 ├── Core/
 │   ├── Domain/UseCases/      # Write paths & orchestration
 │   └── Persistence/          # SwiftData repository
+├── Intents/                  # Shortcuts / App Intents (Add Expense)
 ├── Models/                   # SwiftData @Model types
 │   └── Features/             # SwiftUI screens (by tab/feature)
 ├── Services/                 # Pure logic, calculators, I/O, widget snapshot
@@ -85,6 +88,7 @@ Canonical UI code lives under `purseful-ios/Models/Features/`.
 - **Writes:** Views call **use cases** via `@Environment(DependencyContainer.self)`.
 - **Services:** Stateless helpers (budget math, OCR, JSON/PDF export, notifications, widget snapshot).
 - **Persistence:** Single SwiftData store in the App Group container (shared with widgets).
+- **Shortcuts:** Main-app App Intents reuse the registered `ModelContainer` when possible.
 - **Localization:** English keys in String Catalogs; stored system names use `localizedDisplayName`.
 
 See [docs/architecture.md](docs/architecture.md) for diagrams and data flows.
@@ -102,7 +106,7 @@ See [docs/architecture.md](docs/architecture.md) for diagrams and data flows.
 | [docs/features.md](docs/features.md) | Feature matrix (implemented vs planned) |
 | [docs/notifications.md](docs/notifications.md) | Alert types, scheduling, dedup |
 | [docs/import-export.md](docs/import-export.md) | JSON backup format v2 |
-| [docs/widgets.md](docs/widgets.md) | WidgetKit extension & snapshot sync |
+| [docs/widgets.md](docs/widgets.md) | WidgetKit, snapshot sync, Shortcuts intents |
 | [docs/i18n.md](docs/i18n.md) | String Catalogs & locales |
 | [docs/testing.md](docs/testing.md) | Test targets & coverage map |
 | [docs/decisions/](docs/decisions/) | Architecture decision records (ADRs) |

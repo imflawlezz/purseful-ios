@@ -57,6 +57,7 @@ Swift Testing (`@Test`) and XCTest (`XCTestCase`) are both used.
 | `ShoppingListParserTests` | XCTest | List text parsing |
 | `DailySpendCalculatorTests` | XCTest | Category-filtered daily spend |
 | `ReportPDFExportTests` | XCTest | Report summary builder, PDF generation, filename |
+| `TransactionUseCaseQuickExpenseTests` | Swift Testing | Shortcuts quick-expense write path |
 
 ---
 

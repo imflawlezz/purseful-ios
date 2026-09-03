@@ -8,7 +8,7 @@
 | See what's done vs planned | [features.md](features.md) |
 | Debug notifications | [notifications.md](notifications.md) |
 | Backup/restore JSON | [import-export.md](import-export.md) |
-| Work on widgets | [widgets.md](widgets.md) |
+| Work on widgets or Shortcuts intents | [widgets.md](widgets.md) |
 | Localize UI copy | [i18n.md](i18n.md) |
 | Run or add tests | [testing.md](testing.md) |
 | Understand a design choice | [decisions/](decisions/) |
@@ -22,6 +22,6 @@ Update these docs when you change:
 - **data-model.md** — SwiftData schema or export format version
 - **features.md** — ship or defer a feature
 - **notifications.md** — alert logic, triggers, dedup keys
-- **widgets.md** — widget kinds, snapshot payload, App Group sync
+- **widgets.md** — widget kinds, snapshot payload, App Group sync, main-app Shortcuts intents
 - **i18n.md** — String Catalogs, locales, display helpers
 - **decisions/** — non-obvious tradeoffs (new ADR)
