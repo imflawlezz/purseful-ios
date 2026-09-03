@@ -2,7 +2,7 @@ import AppIntents
 import WidgetKit
 
 struct AccountEntity: AppEntity, Identifiable, Hashable {
-    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Account")
+    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: LocalizedStringResource("Account"))
     static var defaultQuery = AccountEntityQuery()
 
     var id: String
@@ -31,7 +31,7 @@ struct AccountEntityQuery: EntityQuery {
 }
 
 struct BudgetEntity: AppEntity, Identifiable, Hashable {
-    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Budget")
+    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: LocalizedStringResource("Budget"))
     static var defaultQuery = BudgetEntityQuery()
 
     var id: String
@@ -61,9 +61,9 @@ struct BudgetEntityQuery: EntityQuery {
 
 struct SelectAccountIntent: WidgetConfigurationIntent {
     static var title: LocalizedStringResource = "Account"
-    static var description = IntentDescription("Main account for Balances.")
+    static var description = IntentDescription(LocalizedStringResource("Main account for Balances."))
 
-    @Parameter(title: "Account")
+    @Parameter(title: LocalizedStringResource("Account"))
     var account: AccountEntity?
 
     init() {}
@@ -75,9 +75,9 @@ struct SelectAccountIntent: WidgetConfigurationIntent {
 
 struct SelectBudgetIntent: WidgetConfigurationIntent {
     static var title: LocalizedStringResource = "Budget"
-    static var description = IntentDescription("Which budget to show.")
+    static var description = IntentDescription(LocalizedStringResource("Which budget to show."))
 
-    @Parameter(title: "Budget")
+    @Parameter(title: LocalizedStringResource("Budget"))
     var budget: BudgetEntity?
 
     init() {}

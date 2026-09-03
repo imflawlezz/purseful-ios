@@ -439,3 +439,20 @@ Your account balances. The larger size also shows today’s spend and what’s c
 ·
 –
 —
+Add Expense
+Add an account in Purseful before using Shortcuts.
+Add ${amount} to ${category}
+Add expense in %@
+Add expense in ${applicationName}
+Add spending in %@
+Add spending in ${applicationName}
+Added %@ to %@
+Enter an amount greater than zero.
+Expense category
+How much did you spend?
+How much you spent
+Log an expense to your default Purseful account. You’ll be asked for the amount and category.
+Log expense with %@
+Log expense with ${applicationName}
+That category isn’t available anymore.
+Which category?

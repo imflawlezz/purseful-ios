@@ -1,3 +1,4 @@
+import AppIntents
 import SwiftData
 import SwiftUI
 import UserNotifications
@@ -13,12 +14,14 @@ struct purseful_iosApp: App {
         do {
             let state = AppState()
             modelContainer = try ModelContainerProvider.makeContainer()
+            PursefulIntentRuntime.register(modelContainer)
             _appState = State(initialValue: state)
             _dependencies = State(initialValue: DependencyContainer(context: modelContainer.mainContext))
             let delegate = PursefulNotificationCenterDelegate(appState: state)
             notificationDelegate = delegate
             UNUserNotificationCenter.current().delegate = delegate
             AccentTheme.prepareListChrome(accent: AppSettings.shared.accentColor)
+            PursefulShortcuts.updateAppShortcutParameters()
         } catch {
             fatalError("Failed to create ModelContainer: \(error)")
         }
