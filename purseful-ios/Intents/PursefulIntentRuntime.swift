@@ -30,4 +30,10 @@ enum PursefulIntentRuntime {
         let context = try modelContainer().mainContext
         return try context.fetch(FetchDescriptor<Category>(sortBy: [SortDescriptor(\.sortOrder)]))
     }
+
+    static func fetchAccounts() throws -> [Account] {
+        let context = try modelContainer().mainContext
+        let accounts = try context.fetch(FetchDescriptor<Account>(sortBy: [SortDescriptor(\.sortOrder)]))
+        return AccountPreferences.visibleAccounts(accounts)
+    }
 }

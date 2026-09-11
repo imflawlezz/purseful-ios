@@ -456,3 +456,29 @@ Log expense with %@
 Log expense with ${applicationName}
 That category isn’t available anymore.
 Which category?
+Add Income
+Add Transfer
+Account for this transaction
+Which account?
+From account
+Account money leaves
+Account money goes to
+Transfer from which account?
+Transfer to which account?
+How much to transfer
+How much do you want to transfer?
+How much you received
+How much did you receive?
+Income category
+Log an expense in Purseful. Pin the account in the shortcut or leave it empty to choose each time.
+Log income to a Purseful account. You’ll be asked for the amount and category when they aren’t set in the shortcut.
+Move money between Purseful accounts. You’ll be asked for any value that isn’t set in the shortcut.
+That account isn’t available anymore.
+Choose two different accounts for a transfer.
+Transferred %@ from %@ to %@
+Add income in ${applicationName}
+Log income with ${applicationName}
+Transfer money in ${applicationName}
+Log transfer with ${applicationName}
+Add ${amount} to ${category} in ${account}
+Transfer ${amount} from ${fromAccount} to ${toAccount}

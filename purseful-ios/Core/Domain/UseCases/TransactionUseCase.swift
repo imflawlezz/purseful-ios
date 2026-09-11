@@ -5,45 +5,63 @@ import SwiftData
 struct TransactionUseCase {
     let repository: DataRepositoryProtocol
 
-    enum QuickExpenseError: Error, LocalizedError {
+    enum QuickTransactionError: Error, LocalizedError {
         case noAccount
+        case accountNotFound
         case categoryNotFound
         case invalidAmount
+        case transferSameAccount
 
         var errorDescription: String? {
             switch self {
             case .noAccount:
                 String(localized: "Add an account in Purseful before using Shortcuts.")
+            case .accountNotFound:
+                String(localized: "That account isn’t available anymore.")
             case .categoryNotFound:
                 String(localized: "That category isn’t available anymore.")
             case .invalidAmount:
                 String(localized: "Enter an amount greater than zero.")
+            case .transferSameAccount:
+                String(localized: "Choose two different accounts for a transfer.")
             }
         }
     }
 
     @discardableResult
-    func addQuickExpense(amount: Decimal, categoryID: UUID) throws -> Transaction {
-        guard amount > 0 else { throw QuickExpenseError.invalidAmount }
-
-        let accounts = (try? repository.fetch(FetchDescriptor<Account>())) ?? []
-        guard let account = AccountPreferences.preferredAccount(from: accounts) else {
-            throw QuickExpenseError.noAccount
-        }
-
-        let categories = (try? repository.fetch(FetchDescriptor<Category>())) ?? []
-        guard let category = Category.userSelectable(categories, type: .expense)
-            .first(where: { $0.id == categoryID })
-        else {
-            throw QuickExpenseError.categoryNotFound
-        }
-
-        let transaction = Transaction(
-            title: category.name,
+    func addQuickExpense(amount: Decimal, categoryID: UUID, accountID: UUID? = nil) throws -> Transaction {
+        try addQuickTransaction(
             amount: amount,
             type: .expense,
-            account: account,
-            category: category
+            categoryID: categoryID,
+            accountID: accountID
+        )
+    }
+
+    @discardableResult
+    func addQuickIncome(amount: Decimal, categoryID: UUID, accountID: UUID? = nil) throws -> Transaction {
+        try addQuickTransaction(
+            amount: amount,
+            type: .income,
+            categoryID: categoryID,
+            accountID: accountID
+        )
+    }
+
+    @discardableResult
+    func addQuickTransfer(amount: Decimal, fromAccountID: UUID, toAccountID: UUID) throws -> Transaction {
+        guard amount > 0 else { throw QuickTransactionError.invalidAmount }
+        guard fromAccountID != toAccountID else { throw QuickTransactionError.transferSameAccount }
+
+        let fromAccount = try account(for: fromAccountID)
+        let toAccount = try account(for: toAccountID)
+
+        let transaction = Transaction(
+            title: String(localized: "Transfer"),
+            amount: amount,
+            type: .transfer,
+            account: fromAccount,
+            toAccount: toAccount
         )
         try save(transaction: transaction, isNew: true, splitLines: [])
         return transaction
@@ -108,5 +126,52 @@ struct TransactionUseCase {
         for transaction in transactions {
             try delete(transaction)
         }
+    }
+
+    @discardableResult
+    private func addQuickTransaction(
+        amount: Decimal,
+        type: TransactionType,
+        categoryID: UUID,
+        accountID: UUID?
+    ) throws -> Transaction {
+        guard amount > 0 else { throw QuickTransactionError.invalidAmount }
+
+        let account = try resolveAccount(accountID)
+        let categoryType: CategoryType = type == .income ? .income : .expense
+        let categories = (try? repository.fetch(FetchDescriptor<Category>())) ?? []
+        guard let category = Category.userSelectable(categories, type: categoryType)
+            .first(where: { $0.id == categoryID })
+        else {
+            throw QuickTransactionError.categoryNotFound
+        }
+
+        let transaction = Transaction(
+            title: category.name,
+            amount: amount,
+            type: type,
+            account: account,
+            category: category
+        )
+        try save(transaction: transaction, isNew: true, splitLines: [])
+        return transaction
+    }
+
+    private func resolveAccount(_ accountID: UUID?) throws -> Account {
+        let accounts = (try? repository.fetch(FetchDescriptor<Account>())) ?? []
+        if let accountID {
+            guard let account = accounts.first(where: { $0.id == accountID && !$0.isHidden }) else {
+                throw QuickTransactionError.accountNotFound
+            }
+            return account
+        }
+        guard let account = AccountPreferences.preferredAccount(from: accounts) else {
+            throw QuickTransactionError.noAccount
+        }
+        return account
+    }
+
+    private func account(for accountID: UUID) throws -> Account {
+        try resolveAccount(accountID)
     }
 }

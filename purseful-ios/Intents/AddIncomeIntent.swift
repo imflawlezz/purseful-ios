@@ -1,11 +1,11 @@
 import AppIntents
 import Foundation
 
-struct AddExpenseIntent: AppIntent {
-    static var title: LocalizedStringResource = "Add Expense"
+struct AddIncomeIntent: AppIntent {
+    static var title: LocalizedStringResource = "Add Income"
     static var description = IntentDescription(
         LocalizedStringResource(
-            "Log an expense in Purseful. Pin the account in the shortcut or leave it empty to choose each time."
+            "Log income to a Purseful account. You’ll be asked for the amount and category when they aren’t set in the shortcut."
         )
     )
     static var openAppWhenRun = false
@@ -20,17 +20,17 @@ struct AddExpenseIntent: AppIntent {
 
     @Parameter(
         title: LocalizedStringResource("Amount"),
-        description: LocalizedStringResource("How much you spent"),
-        requestValueDialog: IntentDialog(LocalizedStringResource("How much did you spend?"))
+        description: LocalizedStringResource("How much you received"),
+        requestValueDialog: IntentDialog(LocalizedStringResource("How much did you receive?"))
     )
     var amount: Double
 
     @Parameter(
         title: LocalizedStringResource("Category"),
-        description: LocalizedStringResource("Expense category"),
+        description: LocalizedStringResource("Income category"),
         requestValueDialog: IntentDialog(LocalizedStringResource("Which category?"))
     )
-    var category: ExpenseCategoryEntity
+    var category: IncomeCategoryEntity
 
     static var parameterSummary: some ParameterSummary {
         Summary("Add \(\.$amount) to \(\.$category) in \(\.$account)")
@@ -44,14 +44,14 @@ struct AddExpenseIntent: AppIntent {
 
         let accountID = account.flatMap { UUID(uuidString: $0.id) }
         let decimalAmount = Decimal(amount)
-        let transaction = try PursefulIntentRuntime.transactions().addQuickExpense(
+        let transaction = try PursefulIntentRuntime.transactions().addQuickIncome(
             amount: decimalAmount,
             categoryID: categoryID,
             accountID: accountID
         )
 
         let currency = transaction.account?.currency ?? AppSettings.shared.baseCurrency
-        let formatted = CurrencyFormatter.format(transaction.amount, currencyCode: currency)
+        let formatted = CurrencyFormatter.format(decimalAmount, currencyCode: currency)
         let message = String(
             format: String(localized: "Added %@ to %@"),
             formatted,
