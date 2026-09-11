@@ -53,12 +53,13 @@ flowchart TB
 
 1. Creates `ModelContainer` via `ModelContainerProvider`.
 2. Registers it with `PursefulIntentRuntime` for Shortcuts / App Intents.
-3. Builds `DependencyContainer(context: mainContext)`.
-4. Injects into SwiftUI:
+3. Calls `PursefulShortcuts.updateAppShortcutParameters()` so donated shortcuts stay current.
+4. Builds `DependencyContainer(context: mainContext)`.
+5. Injects into SwiftUI:
    - `.environment(appState)` — `@Observable AppState`
    - `.environment(dependencies)` — `@Observable DependencyContainer`
-5. Runs `appBootstrap.runStartupTasks()` on launch.
-6. Attaches `WidgetSyncObserver(dependencies:appState:)` for foreground sync (explicit params — no `@Environment` from `.background`).
+6. Runs `appBootstrap.runStartupTasks()` on launch.
+7. Attaches `WidgetSyncObserver(dependencies:appState:)` for foreground sync (explicit params — no `@Environment` from `.background`).
 
 ### DependencyContainer
 
@@ -67,7 +68,7 @@ flowchart TB
 | Use case | Responsibility |
 |----------|----------------|
 | `AppBootstrapUseCase` | Seed data, sort orders, budget rollover, recurrence, notifications |
-| `TransactionUseCase` | Save/delete transactions, split children, category resolution, quick expense for Shortcuts |
+| `TransactionUseCase` | Save/delete transactions, split children, category resolution, quick expense/income/transfer for Shortcuts |
 | `BudgetUseCase` | Save/delete budgets, process rollovers |
 | `PlannedPaymentUseCase` | CRUD, mark paid (builds transaction), category resolution |
 | `DebtUseCase` | Debt CRUD via `DebtService` (opening tx sync on save) |

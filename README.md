@@ -3,16 +3,17 @@
 Native iOS personal finance app — SwiftUI, SwiftData, WidgetKit. Free, on-device first, no paywalls.
 
 **Bundle ID:** `dev.imflawlezz.purseful-ios`  
-**Version:** 1.4.0  
+**Version:** 1.5.0  
 **Minimum deployment:** iOS 18.0 (Liquid Glass on iOS 26+)  
 **App Group:** `group.dev.imflawlezz.purseful-ios`  
 **Locales:** English (source) · Polish · Russian · Ukrainian · German · Spanish · French
 
 ---
 
-## What’s in 1.4.0
+## What’s in 1.5.0
 
-- **Add Expense** App Intent — Shortcuts / Back Tap / Action Button / Siri prompt for amount + category and save without opening the app UI
+- **Add Expense**, **Add Income**, and **Add Transfer** App Intents — Shortcuts / Back Tap / Action Button / Siri; pin account(s) in the shortcut or choose at run time
+- Everything from 1.4.0: localized Shortcuts prompts, quick expense without opening the app
 - Everything from 1.3.0: five-tab app, multi-currency, receipt OCR, weekly summary, WidgetKit suite, JSON backup, iOS 18+
 
 Full matrix: [docs/features.md](docs/features.md). Release notes: [CHANGELOG.md](CHANGELOG.md). Shortcuts wiring: [docs/widgets.md](docs/widgets.md#main-app-intents-shortcuts).
@@ -60,12 +61,13 @@ Or use **Product → Test** in Xcode (`⌘U`).
 
 ```
 purseful-ios/                 # Main app target
-├── App/                      # Entry, DI, settings, bootstrap, widget sync
+├── purseful_iosApp.swift     # @main entry
+├── App/                      # DI, navigation, app settings, widget sync, notification delegate
 ├── Core/
-│   ├── Domain/UseCases/      # Write paths & orchestration
+│   ├── Domain/UseCases/      # Write paths & orchestration (incl. bootstrap)
 │   └── Persistence/          # SwiftData repository
-├── Intents/                  # Shortcuts / App Intents (Add Expense)
-├── Models/                   # SwiftData @Model types
+├── Intents/                  # Shortcuts App Intents (expense, income, transfer) + entities
+├── Models/                   # SwiftData @Model types (Account, Transaction, …)
 │   └── Features/             # SwiftUI screens (by tab/feature)
 ├── Services/                 # Pure logic, calculators, I/O, widget snapshot
 ├── Shared/                   # UI, formatters, theme, localization helpers
@@ -88,7 +90,7 @@ Canonical UI code lives under `purseful-ios/Models/Features/`.
 - **Writes:** Views call **use cases** via `@Environment(DependencyContainer.self)`.
 - **Services:** Stateless helpers (budget math, OCR, JSON/PDF export, notifications, widget snapshot).
 - **Persistence:** Single SwiftData store in the App Group container (shared with widgets).
-- **Shortcuts:** Main-app App Intents reuse the registered `ModelContainer` when possible.
+- **Shortcuts:** Add Expense / Add Income / Add Transfer reuse `PursefulIntentRuntime` and `TransactionUseCase` quick helpers.
 - **Localization:** English keys in String Catalogs; stored system names use `localizedDisplayName`.
 
 See [docs/architecture.md](docs/architecture.md) for diagrams and data flows.

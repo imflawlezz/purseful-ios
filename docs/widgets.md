@@ -90,15 +90,17 @@ Suggested entities come from the latest snapshot; open the app once after adding
 
 | Intent | Parameters | Behavior |
 |--------|------------|----------|
-| `AddExpenseIntent` | Amount (`Double`), Category (`ExpenseCategoryEntity`) | Expense on preferred/default account; `openAppWhenRun = false` |
+| `AddExpenseIntent` | Account (`PursefulAccountEntity`, optional), Amount (`Double`), Category (`ExpenseCategoryEntity`) | Expense on pinned/chosen account, else preferred/default; `openAppWhenRun = false` |
+| `AddIncomeIntent` | Account (optional), Amount, Income category (`IncomeCategoryEntity`) | Income on pinned/chosen account, else preferred/default |
+| `AddTransferIntent` | From account, To account, Amount | Transfer between accounts; prompts if unset |
 
-Donated via `PursefulShortcuts` (`AppShortcutsProvider`). Categories come from SwiftData (not the widget snapshot). Writes go through `TransactionUseCase.addQuickExpense`, then the usual notification + widget sync side effects.
+Donated via `PursefulShortcuts` (`AppShortcutsProvider`). Categories and accounts come from SwiftData (not the widget snapshot). Writes go through `TransactionUseCase` quick transaction helpers, then the usual notification + widget sync side effects.
 
 `PursefulIntentRuntime` reuses the process `ModelContainer` when the app registered it at launch; cold Shortcut runs open the App Group store themselves.
 
-**Wire once in the Shortcuts app:** New Shortcut → Add Action → search **Add Expense** (Purseful). Leave Amount and Category empty so Back Tap / Action Button / Siri prompts for them. Optionally bind that Shortcut under iOS Settings → Accessibility → Touch → Back Tap.
+**Wire once in the Shortcuts app:** New Shortcut → Add Action → search **Add Expense**, **Add Income**, or **Add Transfer** (Purseful). Leave parameters empty to prompt at run time; pin Account (or From/To for transfers) to skip those prompts. Optionally bind the shortcut under iOS Settings → Accessibility → Touch → Back Tap.
 
-Files: `purseful-ios/Intents/`.
+Files: `purseful-ios/Intents/` — intents plus `ExpenseCategoryEntity`, `IncomeCategoryEntity`, `PursefulAccountEntity`, and `PursefulIntentRuntime`.
 
 ---
 
@@ -134,4 +136,4 @@ Scheme: `purseful://`. Handled in `MainTabView.handleDeepLink`.
 | `PursefulWidgets/WidgetFormatting.swift` | Money formatting, accent background |
 | `PursefulWidgets/WidgetDataSync.swift` | Snapshot reader |
 | `purseful-ios/Services/WidgetDataSync.swift` | Snapshot writer + `sync(using:)` |
-| `purseful-ios/Intents/` | Main-app Shortcuts intents (`AddExpenseIntent`, entities, runtime) |
+| `purseful-ios/Intents/` | Main-app Shortcuts intents (`AddExpenseIntent`, `AddIncomeIntent`, `AddTransferIntent`, entities, runtime) |

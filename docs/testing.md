@@ -57,7 +57,7 @@ Swift Testing (`@Test`) and XCTest (`XCTestCase`) are both used.
 | `ShoppingListParserTests` | XCTest | List text parsing |
 | `DailySpendCalculatorTests` | XCTest | Category-filtered daily spend |
 | `ReportPDFExportTests` | XCTest | Report summary builder, PDF generation, filename |
-| `TransactionUseCaseQuickExpenseTests` | Swift Testing | Shortcuts quick-expense write path |
+| `TransactionUseCaseQuickExpenseTests` | Swift Testing | Shortcuts quick expense / income / transfer write paths |
 
 ---
 
@@ -92,6 +92,7 @@ Used across import, goal, and debt tests.
 | Goal completion side effects | `GoalUseCaseTests` |
 | Debt linking | `DebtServiceTests` |
 | PDF report layout / summary | `ReportPDFExportTests` |
+| Shortcuts quick transactions | `TransactionUseCaseQuickExpenseTests` |
 
 ---
 

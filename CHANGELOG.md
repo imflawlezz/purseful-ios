@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-09-11
+
+### Added
+
+- **Add Income** and **Add Transfer** App Intents for Shortcuts / Back Tap / Action Button / Siri
+- Optional **account** on **Add Expense** — pin in the shortcut or leave empty to choose each run
+- Localized Shortcuts prompts and Siri phrases for all three transaction intents (pl / ru / uk / de / es / fr)
+
+### Changed
+
+- **Add Expense** falls back to the app default account when no account is pinned or chosen at run time
+- Shortcuts write path consolidated under `TransactionUseCase` quick transaction helpers
+
 ## [1.4.0] - 2026-09-03
 
 ### Added
@@ -152,7 +165,8 @@ Initial public release. Local-first personal finance for iOS with no subscriptio
 - CSV import/export
 - Additional transaction filters (date range, amount range, swipe duplicate)
 
-[Unreleased]: https://github.com/imflawlezz/purseful-ios/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/imflawlezz/purseful-ios/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/imflawlezz/purseful-ios/releases/tag/v1.5.0
 [1.4.0]: https://github.com/imflawlezz/purseful-ios/releases/tag/v1.4.0
 [1.3.0]: https://github.com/imflawlezz/purseful-ios/releases/tag/v1.3.0
 [1.2.0]: https://github.com/imflawlezz/purseful-ios/releases/tag/v1.2.0

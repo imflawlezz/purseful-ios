@@ -1,6 +1,6 @@
 # Features
 
-Status for **v1.4.0**.
+Status for **v1.5.0**.
 
 Legend: ✅ Done · ⚠️ Partial · ❌ Not implemented · 🚫 Deferred
 
@@ -32,7 +32,9 @@ Legend: ✅ Done · ⚠️ Partial · ❌ Not implemented · 🚫 Deferred
 | Filter amount range | ❌ | |
 | Sort options | ✅ | Date, amount, category |
 | Quick add (3 taps) | ⚠️ | Account → amount → category (skips account if default set) |
-| Shortcuts / Back Tap add expense | ✅ | `AddExpenseIntent`: amount + category → preferred/default account; see [widgets.md](widgets.md#main-app-intents-shortcuts) |
+| Shortcuts / Back Tap add expense | ✅ | `AddExpenseIntent`: optional account, amount + category; see [widgets.md](widgets.md#main-app-intents-shortcuts) |
+| Shortcuts / Back Tap add income | ✅ | `AddIncomeIntent`: optional account, amount + income category |
+| Shortcuts / Back Tap add transfer | ✅ | `AddTransferIntent`: from/to accounts + amount |
 | Transfer type | ✅ | |
 | Split transaction | ✅ | |
 | Swipe delete | ✅ | |
@@ -181,20 +183,4 @@ See [notifications.md](notifications.md).
 
 ## Test coverage map
 
-| Area | Test file |
-|------|-----------|
-| Budget math & rollover | `BudgetServiceTests` |
-| Balances & conversion | `BalanceCalculatorTests` (incl. day net cash flow) |
-| Import/export v2 | `ImportExportTests` |
-| Receipt parsing | `ReceiptParserTests` |
-| Debts | `DebtServiceTests` |
-| Goals | `GoalUseCaseTests` |
-| Notifications helpers | `NotificationHelpersTests` |
-| Web import | `PursefulWebImportTests` |
-| Bank dedup | `BankTransactionDedupTests` |
-| Shopping list parser | `ShoppingListParserTests` |
-| Daily spend | `DailySpendCalculatorTests` |
-| PDF report export | `ReportPDFExportTests` |
-| Quick expense App Intent path | `TransactionUseCaseQuickExpenseTests` |
-
-Full list: [testing.md](testing.md).
+Full inventory (including Shortcuts quick expense / income / transfer): [testing.md](testing.md).
