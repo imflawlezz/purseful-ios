@@ -41,6 +41,7 @@ struct ImportExportUseCase {
 
     func clearAllData() throws {
         try PursefulWebImportService.clearAllData(context: repository.context)
+        BalanceCache.clear()
         WidgetDataSync.update(accounts: [], transactions: [], budgets: [], plannedPayments: [], goals: [])
     }
 

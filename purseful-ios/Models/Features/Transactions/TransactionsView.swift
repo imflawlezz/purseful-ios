@@ -9,7 +9,7 @@ private enum TransactionRoute: Hashable {
 struct TransactionsView: View {
     @Environment(DependencyContainer.self) private var dependencies
     @Environment(AppState.self) private var appState
-    @Query(sort: \Transaction.date, order: .reverse) private var allTransactions: [Transaction]
+    @State private var historyStart = Calendar.current.date(byAdding: .day, value: -45, to: Date()) ?? Date()
     @Query(sort: \Account.sortOrder) private var accounts: [Account]
     @Query(sort: \Category.sortOrder) private var categories: [Category]
 
@@ -24,8 +24,23 @@ struct TransactionsView: View {
     @State private var filterType: TransactionType?
     @State private var sortOption: TransactionSortOption = .dateDescending
 
-    private var transactions: [Transaction] {
-        var result = allTransactions.filter { !$0.isSplitChild }
+    private var queryStart: Date {
+        let needsFullHistory = !searchText.isEmpty
+            || filterAccount != nil
+            || filterCategory != nil
+            || filterType != nil
+            || sortOption != .dateDescending
+        return needsFullHistory ? .distantPast : historyStart
+    }
+
+    var body: some View {
+        DatedTransactionQuery(start: queryStart) { loaded in
+            transactionBrowser(allTransactions: loaded)
+        }
+    }
+
+    private func visibleTransactions(from loaded: [Transaction]) -> [Transaction] {
+        var result = loaded.filter { !$0.isSplitChild }
 
         if !searchText.isEmpty {
             result = result.filter {
@@ -49,11 +64,11 @@ struct TransactionsView: View {
         return result
     }
 
-    private var groupedTransactions: [(day: Date, items: [Transaction], total: Decimal)] {
+    private func groupedTransactions(from loaded: [Transaction]) -> [(day: Date, items: [Transaction], total: Decimal)] {
         let calendar = Calendar.current
         let baseCurrency = AppSettings.shared.baseCurrency
         let rates = appState.resolvedExchangeRates()
-        let grouped = Dictionary(grouping: transactions) { calendar.startOfDay(for: $0.date) }
+        let grouped = Dictionary(grouping: visibleTransactions(from: loaded)) { calendar.startOfDay(for: $0.date) }
         return grouped.keys.sorted(by: >).map { day in
             let items = grouped[day] ?? []
             let total = BalanceCalculator.dayNetCashFlow(
@@ -65,10 +80,12 @@ struct TransactionsView: View {
         }
     }
 
-    var body: some View {
+    @ViewBuilder
+    private func transactionBrowser(allTransactions: [Transaction]) -> some View {
+        let groups = groupedTransactions(from: allTransactions)
         NavigationStack(path: $navigationPath) {
             Group {
-                if transactions.isEmpty {
+                if groups.isEmpty {
                     EmptyStateView(
                         title: String(localized: "No transactions"),
                         systemImage: "list.bullet.rectangle",
@@ -76,7 +93,7 @@ struct TransactionsView: View {
                     )
                 } else {
                     List {
-                        ForEach(groupedTransactions, id: \.day) { group in
+                        ForEach(groups, id: \.day) { group in
                             Section {
                                 ForEach(group.items) { transaction in
                                     transactionRow(transaction)
@@ -91,10 +108,16 @@ struct TransactionsView: View {
                                 }
                                 .clearListSectionHeaderBackground()
                             }
+                            .onAppear {
+                                if group.day == groups.last?.day {
+                                    loadEarlierHistory()
+                                }
+                            }
                         }
                     }
                     .listStyle(.insetGrouped)
                     .animation(nil, value: editMode)
+                    .onTabScrollToTop(1)
                 }
             }
             .accentTintedBackground()
@@ -113,7 +136,7 @@ struct TransactionsView: View {
                 if editMode == .active && !selectedIDs.isEmpty {
                     ToolbarItem(placement: .topBarLeading) {
                         Button(role: .destructive) {
-                            batchDelete()
+                            batchDelete(from: allTransactions)
                         } label: {
                             Image(systemName: "trash")
                         }
@@ -141,9 +164,7 @@ struct TransactionsView: View {
                 case .add:
                     TransactionFormView()
                 case .detail(let id):
-                    if let transaction = allTransactions.first(where: { $0.id == id }) {
-                        TransactionFormView(transaction: transaction)
-                    }
+                    TransactionFormLoader(id: id, fallback: allTransactions.first(where: { $0.id == id }))
                 }
             }
             .accentSheet(isPresented: $showFilters) {
@@ -165,6 +186,9 @@ struct TransactionsView: View {
                 guard let categoryID else { return }
                 filterCategory = categories.first { $0.id == categoryID }
                 appState.pendingCategoryID = nil
+            }
+            .onChange(of: appState.tabScrollToken(for: 1)) { _, _ in
+                navigationPath = NavigationPath()
             }
         }
     }
@@ -221,6 +245,11 @@ struct TransactionsView: View {
         .contentShape(Rectangle())
     }
 
+    private func loadEarlierHistory() {
+        guard queryStart > Date.distantPast else { return }
+        historyStart = Calendar.current.date(byAdding: .day, value: -45, to: historyStart) ?? historyStart
+    }
+
     private func toggleSelection(_ id: UUID) {
         if selectedIDs.contains(id) {
             selectedIDs.remove(id)
@@ -234,11 +263,30 @@ struct TransactionsView: View {
         Haptics.light()
     }
 
-    private func batchDelete() {
-        let toDelete = allTransactions.filter { selectedIDs.contains($0.id) }
+    private func batchDelete(from loaded: [Transaction]) {
+        let toDelete = loaded.filter { selectedIDs.contains($0.id) }
         try? dependencies.transactions.deleteMany(toDelete)
         selectedIDs.removeAll()
         editMode = .inactive
+    }
+}
+
+private struct TransactionFormLoader: View {
+    let id: UUID
+    let fallback: Transaction?
+    @Query private var matches: [Transaction]
+
+    init(id: UUID, fallback: Transaction?) {
+        self.id = id
+        self.fallback = fallback
+        let captured = id
+        _matches = Query(filter: #Predicate<Transaction> { $0.id == captured })
+    }
+
+    var body: some View {
+        if let transaction = matches.first ?? fallback {
+            TransactionFormView(transaction: transaction)
+        }
     }
 }
 

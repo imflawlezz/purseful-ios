@@ -102,12 +102,13 @@ enum WidgetDataSync {
         let visibleAccounts = accounts
             .filter { !$0.isHidden }
             .sorted { $0.sortOrder < $1.sortOrder }
+        let balances = BalanceCalculator.balancesByAccountID(accounts: accounts, transactions: transactions)
 
         let accountSnapshots = visibleAccounts.map { account in
             AccountSnapshot(
                 id: account.id.uuidString,
                 name: account.name,
-                balance: decimalString(BalanceCalculator.currentBalance(for: account, transactions: transactions)),
+                balance: decimalString(balances[account.id] ?? account.initialBalance),
                 currency: account.currency
             )
         }
@@ -154,7 +155,14 @@ enum WidgetDataSync {
 
         let netWorth = BalanceCalculator.netWorth(
             accounts: accounts,
-            transactions: transactions,
+            balances: balances,
+            baseCurrency: baseCurrency,
+            exchangeRates: rates
+        )
+
+        BalanceCache.save(
+            balances: balances,
+            accounts: accounts,
             baseCurrency: baseCurrency,
             exchangeRates: rates
         )

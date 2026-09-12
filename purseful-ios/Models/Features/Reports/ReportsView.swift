@@ -4,7 +4,6 @@ import SwiftUI
 
 struct ReportsView: View {
     @Environment(AppState.self) private var appState
-    @Query(sort: \Transaction.date) private var transactions: [Transaction]
     @Query(filter: #Predicate<Account> { !$0.isHidden }, sort: \Account.sortOrder) private var accounts: [Account]
     @Query(sort: \Category.sortOrder) private var categories: [Category]
 
@@ -34,33 +33,44 @@ struct ReportsView: View {
         return period.dateRange
     }
 
-    private var filteredTransactions: [Transaction] {
-        transactions.filter { !$0.isSplitChild && $0.date >= dateRange.start && $0.date <= dateRange.end }
+    /// Period window plus the previous equal-length span (spending-trend comparison).
+    private var fetchStart: Date {
+        let range = dateRange
+        let calendar = Calendar.current
+        let startDay = calendar.startOfDay(for: range.start)
+        let endDay = calendar.startOfDay(for: range.end)
+        let days = max(1, (calendar.dateComponents([.day], from: startDay, to: endDay).day ?? 30) + 1)
+        return calendar.date(byAdding: .day, value: -days, to: startDay) ?? startDay
     }
 
     var body: some View {
+        DatedTransactionQuery(start: fetchStart) { transactions in
+            reportsBody(transactions: transactions)
+        }
+    }
+
+    @ViewBuilder
+    private func reportsBody(transactions: [Transaction]) -> some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
                     periodPicker
-                    categoryChart
-                    cashFlowChart
-                    netWorthChart
-                    trendsSection
-                    topPayeesSection
-                    dailyAverageCard
+                    categoryChart(transactions)
+                    cashFlowChart(transactions)
+                    netWorthChart(transactions)
+                    trendsSection(transactions)
+                    topPayeesSection(transactions)
+                    dailyAverageCard(transactions)
                 }
                 .padding()
             }
+            .onTabScrollToTop(4)
             .accentTintedBackground()
             .navigationTitle("Reports")
-            .task {
-                await appState.refreshExchangeRates()
-            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        exportReportPDF()
+                        exportReportPDF(transactions)
                     } label: {
                         if isExporting {
                             ProgressView()
@@ -159,7 +169,11 @@ struct ReportsView: View {
         }
     }
 
-    private var categorySpending: [(name: String, amount: Double)] {
+    private func filteredTransactions(_ transactions: [Transaction]) -> [Transaction] {
+        transactions.filter { !$0.isSplitChild && $0.date >= dateRange.start && $0.date <= dateRange.end }
+    }
+
+    private func categorySpending(_ transactions: [Transaction]) -> [(name: String, amount: Double)] {
         BalanceCalculator.categorySpending(
             transactions: transactions,
             from: dateRange.start,
@@ -171,22 +185,23 @@ struct ReportsView: View {
         .sorted { $0.amount > $1.amount }
     }
 
-    private var categoryChart: some View {
-        GlassCard {
+    private func categoryChart(_ transactions: [Transaction]) -> some View {
+        let spending = categorySpending(transactions)
+        return GlassCard {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Spending by category")
                     .font(.headline)
-                if categorySpending.isEmpty {
+                if spending.isEmpty {
                     Text("No spending yet")
                         .foregroundStyle(.secondary)
                 } else {
-                    Chart(categorySpending, id: \.name) { item in
+                    Chart(spending, id: \.name) { item in
                         SectorMark(angle: .value("Amount", item.amount), innerRadius: .ratio(0.55))
                             .foregroundStyle(by: .value("Category", item.name))
                     }
                     .chartForegroundStyleScale(
-                        domain: categorySpending.map(\.name),
-                        range: categorySpending.enumerated().map { index, item in
+                        domain: spending.map(\.name),
+                        range: spending.enumerated().map { index, item in
                             categoryColor(for: item.name, fallbackIndex: index)
                         }
                     )
@@ -194,7 +209,7 @@ struct ReportsView: View {
                     .frame(height: 200)
 
                     VStack(alignment: .leading, spacing: 8) {
-                        ForEach(Array(categorySpending.enumerated()), id: \.element.name) { index, item in
+                        ForEach(Array(spending.enumerated()), id: \.element.name) { index, item in
                             HStack(spacing: 8) {
                                 if let category = category(named: item.name) {
                                     CategoryIconView(category: category, size: 16)
@@ -248,14 +263,15 @@ struct ReportsView: View {
         ReportChartGranularity.preferred(from: dateRange.start, to: dateRange.end)
     }
 
-    private var cashFlowBuckets: [(start: Date, income: Double, expense: Double)] {
+    private func cashFlowBuckets(_ transactions: [Transaction]) -> [(start: Date, income: Double, expense: Double)] {
         let calendar = Calendar.current
         let granularity = chartGranularity
         let starts = granularity.bucketStarts(from: dateRange.start, to: dateRange.end, calendar: calendar)
+        let inPeriod = filteredTransactions(transactions)
 
         return starts.map { start in
             let end = granularity.bucketEnd(after: start, calendar: calendar)
-            let items = filteredTransactions.filter { $0.date >= start && $0.date < end }
+            let items = inPeriod.filter { $0.date >= start && $0.date < end }
             let income = items
                 .filter { $0.type == .income }
                 .reduce(0.0) {
@@ -284,14 +300,15 @@ struct ReportsView: View {
         }
     }
 
-    private var cashFlowChart: some View {
+    private func cashFlowChart(_ transactions: [Transaction]) -> some View {
         let unit = chartGranularity.calendarComponent
+        let buckets = cashFlowBuckets(transactions)
         return GlassCard {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Cash flow")
                     .font(.headline)
                 Chart {
-                    ForEach(cashFlowBuckets, id: \.start) { bucket in
+                    ForEach(buckets, id: \.start) { bucket in
                         BarMark(
                             x: .value("Period", bucket.start, unit: unit),
                             y: .value("Income", bucket.income)
@@ -321,28 +338,30 @@ struct ReportsView: View {
         }
     }
 
-    private var netWorthPoints: [(date: Date, value: Double)] {
+    private func netWorthPoints(_ transactions: [Transaction]) -> [(date: Date, value: Double)] {
         let calendar = Calendar.current
         let granularity = chartGranularity
         let sampleDates = granularity.sampleDates(from: dateRange.start, to: dateRange.end, calendar: calendar)
-        return sampleDates.map { day in
-            let dayTransactions = transactions.filter { !$0.isSplitChild && $0.date <= day }
-            let worth = BalanceCalculator.netWorth(
-                accounts: accounts,
-                transactions: dayTransactions,
-                baseCurrency: baseCurrency,
-                exchangeRates: exchangeRates
-            )
-            return (day, NSDecimalNumber(decimal: worth).doubleValue)
-        }
+        let currentBalances = BalanceCache.balancesMap()
+        guard !currentBalances.isEmpty else { return [] }
+        return BalanceCalculator.netWorthHistory(
+            sampleDates: sampleDates,
+            accounts: accounts,
+            currentBalances: currentBalances,
+            laterTransactions: transactions,
+            baseCurrency: baseCurrency,
+            exchangeRates: exchangeRates
+        )
+        .map { ($0.date, NSDecimalNumber(decimal: $0.value).doubleValue) }
     }
 
-    private var netWorthChart: some View {
-        GlassCard {
+    private func netWorthChart(_ transactions: [Transaction]) -> some View {
+        let points = netWorthPoints(transactions)
+        return GlassCard {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Net worth")
                     .font(.headline)
-                Chart(netWorthPoints, id: \.date) { point in
+                Chart(points, id: \.date) { point in
                     LineMark(
                         x: .value("Date", point.date),
                         y: .value("Net worth", point.value)
@@ -366,7 +385,7 @@ struct ReportsView: View {
         }
     }
 
-    private var spendingTrend: (label: String, color: Color) {
+    private func spendingTrend(_ transactions: [Transaction]) -> (label: String, color: Color) {
         let calendar = Calendar.current
         let periodStart = calendar.startOfDay(for: dateRange.start)
         let periodEnd = dateRange.end
@@ -387,7 +406,7 @@ struct ReportsView: View {
             baseCurrency: baseCurrency,
             exchangeRates: exchangeRates
         )
-        let previous = expenseTotal(from: previousStart, through: previousEnd)
+        let previous = expenseTotal(from: previousStart, through: previousEnd, transactions: transactions)
         let delta = current - previous
 
         guard previous > 0 else {
@@ -404,7 +423,7 @@ struct ReportsView: View {
         return (String(localized: "vs previous period: \(formatted)"), color)
     }
 
-    private func expenseTotal(from start: Date, through end: Date) -> Decimal {
+    private func expenseTotal(from start: Date, through end: Date, transactions: [Transaction]) -> Decimal {
         BalanceCalculator.totalExpenses(
             transactions: transactions,
             from: start,
@@ -414,8 +433,8 @@ struct ReportsView: View {
         )
     }
 
-    private var trendsSection: some View {
-        let trend = spendingTrend
+    private func trendsSection(_ transactions: [Transaction]) -> some View {
+        let trend = spendingTrend(transactions)
 
         return GlassCard {
             VStack(alignment: .leading, spacing: 8) {
@@ -427,8 +446,8 @@ struct ReportsView: View {
         }
     }
 
-    private var topPayees: [(name: String, count: Int)] {
-        let grouped = Dictionary(grouping: filteredTransactions.filter { $0.type == .expense }) { $0.title }
+    private func topPayees(_ transactions: [Transaction]) -> [(name: String, count: Int)] {
+        let grouped = Dictionary(grouping: filteredTransactions(transactions).filter { $0.type == .expense }) { $0.title }
         return grouped
             .map { (name: $0.key, count: $0.value.count) }
             .sorted { lhs, rhs in lhs.count > rhs.count }
@@ -436,12 +455,13 @@ struct ReportsView: View {
             .map { $0 }
     }
 
-    private var topPayeesSection: some View {
-        GlassCard {
+    private func topPayeesSection(_ transactions: [Transaction]) -> some View {
+        let payees = topPayees(transactions)
+        return GlassCard {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Top payees")
                     .font(.headline)
-                ForEach(topPayees, id: \.name) { payee in
+                ForEach(payees, id: \.name) { payee in
                     HStack {
                         Text(payee.name.isEmpty ? String(localized: "Untitled") : payee.name)
                         Spacer()
@@ -453,7 +473,7 @@ struct ReportsView: View {
         }
     }
 
-    private var dailyAverageCard: some View {
+    private func dailyAverageCard(_ transactions: [Transaction]) -> some View {
         let average = DailySpendCalculator.dailyAverage(
             transactions: transactions,
             selectedCategoryIDs: settings.dailySpendCategoryIDs,
@@ -495,7 +515,7 @@ struct ReportsView: View {
         }
     }
 
-    private func exportReportPDF() {
+    private func exportReportPDF(_ transactions: [Transaction]) {
         guard !isExporting else { return }
         isExporting = true
 

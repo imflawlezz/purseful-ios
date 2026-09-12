@@ -2,6 +2,36 @@ import Foundation
 import SwiftData
 
 enum BalanceCalculator {
+    /// One pass over transactions for every account balance (avoids N full scans on dashboard).
+    static func balancesByAccountID(accounts: [Account], transactions: [Transaction]) -> [UUID: Decimal] {
+        var balances: [UUID: Decimal] = [:]
+        balances.reserveCapacity(accounts.count)
+        for account in accounts {
+            balances[account.id] = account.initialBalance
+        }
+
+        for transaction in transactions where !transaction.isSplitChild {
+            switch transaction.type {
+            case .income:
+                if let id = transaction.account?.id {
+                    balances[id, default: 0] += transaction.amount
+                }
+            case .expense:
+                if let id = transaction.account?.id {
+                    balances[id, default: 0] -= transaction.amount
+                }
+            case .transfer:
+                if let id = transaction.account?.id {
+                    balances[id, default: 0] -= transaction.amount
+                }
+                if let id = transaction.toAccount?.id {
+                    balances[id, default: 0] += transaction.amount
+                }
+            }
+        }
+        return balances
+    }
+
     static func currentBalance(for account: Account, transactions: [Transaction]) -> Decimal {
         account.initialBalance + transactionNetEffect(for: account, transactions: transactions)
     }
@@ -32,13 +62,89 @@ enum BalanceCalculator {
         return effect
     }
 
-    static func netWorth(accounts: [Account], transactions: [Transaction], baseCurrency: String, exchangeRates: [String: Decimal]) -> Decimal {
+    static func netWorth(
+        accounts: [Account],
+        transactions: [Transaction],
+        baseCurrency: String,
+        exchangeRates: [String: Decimal]
+    ) -> Decimal {
+        netWorth(
+            accounts: accounts,
+            balances: balancesByAccountID(accounts: accounts, transactions: transactions),
+            baseCurrency: baseCurrency,
+            exchangeRates: exchangeRates
+        )
+    }
+
+    static func netWorth(
+        accounts: [Account],
+        balances: [UUID: Decimal],
+        baseCurrency: String,
+        exchangeRates: [String: Decimal]
+    ) -> Decimal {
         accounts
             .filter { $0.includeInTotal && !$0.isHidden }
             .reduce(Decimal.zero) { partial, account in
-                let balance = currentBalance(for: account, transactions: transactions)
+                let balance = balances[account.id] ?? account.initialBalance
                 return partial + convert(balance, from: account.currency, to: baseCurrency, rates: exchangeRates)
             }
+    }
+
+    /// Net worth at each sample by reversing txs after that date from current balances.
+    /// `laterTransactions` must include every non-split tx with `date > earliestSample`.
+    static func netWorthHistory(
+        sampleDates: [Date],
+        accounts: [Account],
+        currentBalances: [UUID: Decimal],
+        laterTransactions: [Transaction],
+        baseCurrency: String,
+        exchangeRates: [String: Decimal]
+    ) -> [(date: Date, value: Decimal)] {
+        let samples = sampleDates.sorted(by: >)
+        guard !samples.isEmpty else { return [] }
+
+        var balances = currentBalances
+        let txs = laterTransactions
+            .filter { !$0.isSplitChild }
+            .sorted { $0.date > $1.date }
+        var txIndex = 0
+        var points: [(Date, Decimal)] = []
+        points.reserveCapacity(samples.count)
+
+        for sample in samples {
+            while txIndex < txs.count, txs[txIndex].date > sample {
+                apply(txs[txIndex], to: &balances, reversing: true)
+                txIndex += 1
+            }
+            points.append((
+                sample,
+                netWorth(accounts: accounts, balances: balances, baseCurrency: baseCurrency, exchangeRates: exchangeRates)
+            ))
+        }
+
+        return points.reversed()
+    }
+
+    static func apply(_ transaction: Transaction, to balances: inout [UUID: Decimal], reversing: Bool = false) {
+        guard !transaction.isSplitChild else { return }
+        let sign: Decimal = reversing ? -1 : 1
+        switch transaction.type {
+        case .income:
+            if let id = transaction.account?.id {
+                balances[id, default: 0] += transaction.amount * sign
+            }
+        case .expense:
+            if let id = transaction.account?.id {
+                balances[id, default: 0] -= transaction.amount * sign
+            }
+        case .transfer:
+            if let id = transaction.account?.id {
+                balances[id, default: 0] -= transaction.amount * sign
+            }
+            if let id = transaction.toAccount?.id {
+                balances[id, default: 0] += transaction.amount * sign
+            }
+        }
     }
 
     /// Rates are stored as units of each currency per 1 unit of the base currency (Frankfurter `from=base` format).

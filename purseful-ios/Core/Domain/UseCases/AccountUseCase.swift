@@ -10,12 +10,14 @@ struct AccountUseCase {
             repository.insert(account)
         }
         try repository.save()
+        BalanceCache.rebuild(using: repository)
     }
 
     func delete(_ account: Account) throws {
         AccountPreferences.clearDefaultIfNeeded(for: account)
         repository.delete(account)
         try repository.save()
+        BalanceCache.rebuild(using: repository)
     }
 
     func ensureSortOrders(accounts: [Account]) {

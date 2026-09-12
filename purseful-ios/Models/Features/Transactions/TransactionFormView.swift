@@ -6,7 +6,6 @@ struct TransactionFormView: View {
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \Account.sortOrder) private var accounts: [Account]
     @Query(sort: \Category.sortOrder) private var categories: [Category]
-    @Query(sort: \Transaction.date) private var allTransactions: [Transaction]
 
     var transaction: Transaction?
     var showsCancelButton = false
@@ -338,7 +337,10 @@ struct TransactionFormView: View {
         selectedCategory = transaction.category
         pendingAttachmentData = transaction.attachmentData
 
-        let children = allTransactions.filter { $0.parentTransactionID == transaction.id }
+        let parentID = transaction.id
+        let children = (try? dependencies.repository.fetch(
+            FetchDescriptor<Transaction>(predicate: #Predicate { $0.parentTransactionID == parentID })
+        )) ?? []
         if !children.isEmpty {
             isSplitEnabled = true
             additionalSplits = children.map {

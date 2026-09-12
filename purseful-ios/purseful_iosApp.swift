@@ -21,7 +21,6 @@ struct purseful_iosApp: App {
             notificationDelegate = delegate
             UNUserNotificationCenter.current().delegate = delegate
             AccentTheme.prepareListChrome(accent: AppSettings.shared.accentColor)
-            PursefulShortcuts.updateAppShortcutParameters()
         } catch {
             fatalError("Failed to create ModelContainer: \(error)")
         }
@@ -34,8 +33,10 @@ struct purseful_iosApp: App {
                 .environment(dependencies)
                 .dismissKeyboardOnTap()
                 .task(priority: .utility) {
-                    await Task.yield()
                     await dependencies.appBootstrap.runStartupTasks()
+                    appState.markStartupCompleted()
+                    // Rates cache is already in AppState; network refresh after first frame.
+                    await appState.refreshExchangeRates()
                 }
                 .background(WidgetSyncObserver(dependencies: dependencies, appState: appState))
                 .background { AccentScreenBackground() }

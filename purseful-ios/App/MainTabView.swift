@@ -1,16 +1,29 @@
 import SwiftUI
 import CoreSpotlight
 
-private struct LazyTab<Content: View>: View {
-    let selectedTab: Int
-    let tag: Int
+/// First visit builds content; later visits keep it so scroll position survives tab switches.
+private struct StickyTab<Content: View>: View {
+    let isSelected: Bool
     @ViewBuilder let content: () -> Content
+    @State private var activated = false
 
     var body: some View {
-        if selectedTab == tag {
-            content()
-        } else {
-            Color.clear
+        Group {
+            if activated {
+                content()
+            } else {
+                Color.clear
+            }
+        }
+        .onAppear {
+            if isSelected {
+                activated = true
+            }
+        }
+        .onChange(of: isSelected) { _, selected in
+            if selected {
+                activated = true
+            }
         }
     }
 }
@@ -24,27 +37,39 @@ struct MainTabView: View {
     var body: some View {
         @Bindable var appState = appState
 
+        // Scroll-to-top is tab-bar reselect only, not selection changes.
         TabView(selection: $appState.selectedTab) {
-            LazyTab(selectedTab: appState.selectedTab, tag: 0) { DashboardView() }
-                .tabItem { Label("Dashboard", systemImage: "chart.pie") }
-                .tag(0)
+            StickyTab(isSelected: appState.selectedTab == 0) {
+                DashboardView()
+            }
+            .tabItem { Label("Dashboard", systemImage: "chart.pie") }
+            .tag(0)
 
-            LazyTab(selectedTab: appState.selectedTab, tag: 1) { TransactionsView() }
-                .tabItem { Label("Transactions", systemImage: "list.bullet") }
-                .tag(1)
+            StickyTab(isSelected: appState.selectedTab == 1) {
+                TransactionsView()
+            }
+            .tabItem { Label("Transactions", systemImage: "list.bullet") }
+            .tag(1)
 
-            LazyTab(selectedTab: appState.selectedTab, tag: 2) { BudgetsView() }
-                .tabItem { Label("Budgets", systemImage: "chart.bar") }
-                .tag(2)
+            StickyTab(isSelected: appState.selectedTab == 2) {
+                BudgetsView()
+            }
+            .tabItem { Label("Budgets", systemImage: "chart.bar") }
+            .tag(2)
 
-            LazyTab(selectedTab: appState.selectedTab, tag: 3) { PlanningView() }
-                .tabItem { Label("Planned", systemImage: "calendar") }
-                .tag(3)
+            StickyTab(isSelected: appState.selectedTab == 3) {
+                PlanningView()
+            }
+            .tabItem { Label("Planned", systemImage: "calendar") }
+            .tag(3)
 
-            LazyTab(selectedTab: appState.selectedTab, tag: 4) { ReportsView() }
-                .tabItem { Label("Reports", systemImage: "chart.line.uptrend.xyaxis") }
-                .tag(4)
+            StickyTab(isSelected: appState.selectedTab == 4) {
+                ReportsView()
+            }
+            .tabItem { Label("Reports", systemImage: "chart.line.uptrend.xyaxis") }
+            .tag(4)
         }
+        .background(TabBarReselectObserver { appState.requestScrollToTop(for: $0) })
         .tint(settings.accentColor)
         .environment(dependencies)
         .accentSheet(isPresented: $appState.showWeeklySummary) {
@@ -58,9 +83,6 @@ struct MainTabView: View {
         .onContinueUserActivity(CSSearchableItemActionType) { activity in
             guard let identifier = activity.userInfo?[CSSearchableItemActivityIdentifier] as? String else { return }
             appState.handleSpotlightIdentifier(identifier)
-        }
-        .task {
-            await dependencies.dashboardRefresh.refreshExchangeRates(appState: appState)
         }
     }
 

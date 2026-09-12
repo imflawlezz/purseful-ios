@@ -51,6 +51,7 @@ struct BudgetsView: View {
                         }
                         .padding()
                     }
+                    .onTabScrollToTop(2)
                 }
             }
             .accentTintedBackground()

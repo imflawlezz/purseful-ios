@@ -5,7 +5,6 @@ struct DashboardView: View {
     @Environment(DependencyContainer.self) private var dependencies
     @Environment(AppState.self) private var appState
     @Query(filter: #Predicate<Account> { !$0.isHidden }, sort: \Account.sortOrder) private var accounts: [Account]
-    @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @Query(sort: \Budget.name) private var budgets: [Budget]
     @Query(filter: #Predicate<PlannedPayment> { $0.isActive }, sort: \PlannedPayment.nextDueDate) private var plannedPayments: [PlannedPayment]
     @Query(filter: #Predicate<Debt> { $0.remainingAmount > 0 }) private var debts: [Debt]
@@ -15,6 +14,10 @@ struct DashboardView: View {
     @State private var showShoppingList = false
     @State private var selectedTransaction: Transaction?
     @State private var navigateToAccounts = false
+    /// Cash flow / recent rows. Account balances come from `BalanceCache`, not a full ledger scan.
+    @State private var recentWindowTransactions: [Transaction] = []
+    @State private var cachedBalances: [UUID: Decimal] = BalanceCache.balancesMap()
+    @State private var cachedNetWorth: Decimal? = BalanceCache.cachedNetWorth()
 
     private var baseCurrency: String { AppSettings.shared.baseCurrency }
 
@@ -35,6 +38,7 @@ struct DashboardView: View {
                 }
                 .padding(.vertical)
             }
+            .onTabScrollToTop(0)
             .accentTintedBackground()
             .navigationTitle("Dashboard")
             .toolbar {
@@ -69,6 +73,11 @@ struct DashboardView: View {
                     QuickAddFlowView()
                 }
             }
+            .onChange(of: showQuickAdd) { _, isPresented in
+                guard !isPresented else { return }
+                refreshBalanceCacheFromDisk()
+                Task { await loadDashboardExtras() }
+            }
             .accentSheet(isPresented: $showShoppingList) {
                 NavigationStack {
                     ShoppingListView()
@@ -81,23 +90,38 @@ struct DashboardView: View {
                 AccountsListView()
             }
             .task {
-                await appState.refreshExchangeRates()
+                await loadDashboardExtras()
             }
             .onChange(of: appState.pendingAccountID) { _, accountID in
                 guard accountID != nil else { return }
                 navigateToAccounts = true
                 appState.pendingAccountID = nil
             }
+            .onChange(of: appState.tabScrollToken(for: 0)) { _, _ in
+                selectedTransaction = nil
+                navigateToAccounts = false
+            }
             .refreshable {
-                await appState.refreshExchangeRates()
+                await appState.refreshExchangeRates(force: true)
+                await loadDashboardExtras(forceBalanceRebuild: true)
                 await dependencies.dashboardRefresh.refresh(
                     accounts: accounts,
-                    transactions: transactions,
+                    transactions: recentWindowTransactions,
                     budgets: budgets,
                     exchangeRates: appState.resolvedExchangeRates()
                 )
+                refreshBalanceCacheFromDisk()
             }
         }
+    }
+
+    private var accountBalances: [UUID: Decimal] {
+        if !cachedBalances.isEmpty { return cachedBalances }
+        var fallback: [UUID: Decimal] = [:]
+        for account in accounts {
+            fallback[account.id] = account.initialBalance
+        }
+        return fallback
     }
 
     private var accountsStrip: some View {
@@ -116,7 +140,7 @@ struct DashboardView: View {
                     ForEach(AccountPreferences.visibleAccounts(accounts)) { account in
                         AccountBalanceCard(
                             account: account,
-                            balance: BalanceCalculator.currentBalance(for: account, transactions: transactions)
+                            balance: accountBalances[account.id] ?? account.initialBalance
                         )
                     }
                 }
@@ -128,9 +152,10 @@ struct DashboardView: View {
     }
 
     private var netWorth: Decimal {
-        BalanceCalculator.netWorth(
+        if let cachedNetWorth { return cachedNetWorth }
+        return BalanceCalculator.netWorth(
             accounts: accounts,
-            transactions: transactions,
+            balances: accountBalances,
             baseCurrency: baseCurrency,
             exchangeRates: appState.resolvedExchangeRates()
         )
@@ -139,12 +164,36 @@ struct DashboardView: View {
     private var cashFlow: (income: Decimal, expense: Decimal) {
         let range = ReportPeriod.thirtyDays.dateRange
         return BalanceCalculator.cashFlow(
-            transactions: transactions,
+            transactions: recentWindowTransactions,
             from: range.start,
             to: range.end,
             baseCurrency: baseCurrency,
             exchangeRates: appState.resolvedExchangeRates()
         )
+    }
+
+    @MainActor
+    private func loadDashboardExtras(forceBalanceRebuild: Bool = false) async {
+        let start = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date.distantPast
+        var descriptor = FetchDescriptor<Transaction>(
+            predicate: #Predicate { $0.date >= start },
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        descriptor.fetchLimit = 80
+        recentWindowTransactions = (try? dependencies.repository.fetch(descriptor)) ?? []
+
+        if forceBalanceRebuild {
+            BalanceCache.rebuild(
+                using: dependencies.repository,
+                exchangeRates: appState.resolvedExchangeRates()
+            )
+        }
+        refreshBalanceCacheFromDisk()
+    }
+
+    private func refreshBalanceCacheFromDisk() {
+        cachedBalances = BalanceCache.balancesMap()
+        cachedNetWorth = BalanceCache.cachedNetWorth()
     }
 
     private func dashboardCard<Content: View>(
@@ -208,7 +257,7 @@ struct DashboardView: View {
                     ForEach(budgets.prefix(3)) { budget in
                         let spent = BudgetService.spentAmount(
                             budget: budget,
-                            transactions: transactions,
+                            transactions: recentWindowTransactions,
                             baseCurrency: baseCurrency,
                             exchangeRates: appState.resolvedExchangeRates()
                         )
@@ -308,7 +357,7 @@ struct DashboardView: View {
                     }
                     .font(.subheadline)
                 }
-                let recent = transactions.filter { !$0.isSplitChild }.prefix(8)
+                let recent = recentWindowTransactions.filter { !$0.isSplitChild }.prefix(8)
                 if recent.isEmpty {
                     Text("No transactions yet")
                         .foregroundStyle(.secondary)

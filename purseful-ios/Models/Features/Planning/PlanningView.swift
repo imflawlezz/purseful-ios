@@ -30,6 +30,7 @@ struct PlanningView: View {
                     GoalsView()
                 }
             }
+            .onTabScrollToTop(3)
             .accentTintedBackground()
             .navigationTitle("Planned")
             .onAppear {

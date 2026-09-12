@@ -26,6 +26,12 @@ struct WidgetSyncObserver: View {
         syncTask = Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(400))
             guard !Task.isCancelled else { return }
+
+            if appState.shouldSkipRedundantForegroundSync {
+                dependencies.importExport.syncWidgets()
+                return
+            }
+
             performForegroundSync()
         }
     }
