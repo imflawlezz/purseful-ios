@@ -46,7 +46,7 @@ struct ShoppingListView: View {
         .accentListRows()
         .listStyle(.insetGrouped)
         .accentTintedBackground()
-        .scrollDismissesKeyboard(.interactively)
+        .dismissKeyboardOnTap()
         .navigationTitle("Shopping list")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -139,7 +139,7 @@ struct ShoppingListView: View {
             checkboxButton(for: item)
 
             TextField("Start typing…", text: Binding(
-                get: { item.rawText.isEmpty ? item.name : item.rawText },
+                get: { item.rawText },
                 set: { item.rawText = $0; save() }
             ), axis: .vertical)
             .font(.body)
@@ -150,6 +150,7 @@ struct ShoppingListView: View {
                 handleTextItemChange(item, newValue: newValue)
             }
             .onAppear {
+                seedRawTextIfNeeded(item)
                 applyFocusRequest(for: .item(item.id))
             }
         }
@@ -167,6 +168,12 @@ struct ShoppingListView: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(item.isChecked ? String(localized: "Checked") : String(localized: "Unchecked"))
+    }
+
+    private func seedRawTextIfNeeded(_ item: ShoppingListItem) {
+        guard item.rawText.isEmpty, !item.name.isEmpty, focusedField != .item(item.id) else { return }
+        item.rawText = item.name
+        save()
     }
 
     private func applyFocusRequest(for field: FocusField) {
@@ -225,8 +232,7 @@ struct ShoppingListView: View {
     private func commitTextItem(id: UUID) {
         guard let item = items.first(where: { $0.id == id }), !item.isParsed else { return }
 
-        let text = (item.rawText.isEmpty ? item.name : item.rawText)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let text = item.rawText.trimmingCharacters(in: .whitespacesAndNewlines)
 
         if text.isEmpty {
             try? dependencies.shoppingList.delete(item)
