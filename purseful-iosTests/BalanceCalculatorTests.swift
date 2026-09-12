@@ -96,4 +96,64 @@ final class BalanceCalculatorTests: XCTestCase {
             accuracy: 0.01
         )
     }
+
+    func testBalancesByAccountIDMatchesPerAccountScan() {
+        let cash = Account(name: "Cash", type: .cash, currency: "PLN", initialBalance: 100)
+        let card = Account(name: "Card", type: .creditCard, currency: "PLN", initialBalance: 0)
+        let income = Transaction(title: "Pay", amount: 50, type: .income, account: cash)
+        let expense = Transaction(title: "Shop", amount: 20, type: .expense, account: card)
+        let transfer = Transaction(
+            title: "Move",
+            amount: 10,
+            type: .transfer,
+            account: cash,
+            toAccount: card
+        )
+        let transactions = [income, expense, transfer]
+
+        let balances = BalanceCalculator.balancesByAccountID(
+            accounts: [cash, card],
+            transactions: transactions
+        )
+
+        XCTAssertEqual(
+            balances[cash.id],
+            BalanceCalculator.currentBalance(for: cash, transactions: transactions)
+        )
+        XCTAssertEqual(
+            balances[card.id],
+            BalanceCalculator.currentBalance(for: card, transactions: transactions)
+        )
+        XCTAssertEqual(balances[cash.id], 140)
+        XCTAssertEqual(balances[card.id], -10)
+    }
+
+    func testNetWorthHistoryWalksBackwardFromCurrentBalances() {
+        let cash = Account(name: "Cash", type: .cash, currency: "PLN", initialBalance: 100)
+        cash.includeInTotal = true
+        let day0 = Calendar.current.startOfDay(for: Date())
+        let day1 = Calendar.current.date(byAdding: .day, value: 1, to: day0) ?? day0
+        let day2 = Calendar.current.date(byAdding: .day, value: 2, to: day0) ?? day0
+
+        let income = Transaction(title: "Pay", amount: 50, type: .income, date: day1, account: cash)
+        let expense = Transaction(title: "Shop", amount: 20, type: .expense, date: day2, account: cash)
+        let current = BalanceCalculator.balancesByAccountID(
+            accounts: [cash],
+            transactions: [income, expense]
+        )
+
+        let points = BalanceCalculator.netWorthHistory(
+            sampleDates: [day0, day1, day2],
+            accounts: [cash],
+            currentBalances: current,
+            laterTransactions: [income, expense],
+            baseCurrency: "PLN",
+            exchangeRates: ["PLN": 1]
+        )
+
+        XCTAssertEqual(points.map(\.date), [day0, day1, day2])
+        XCTAssertEqual(points[0].value, 100)
+        XCTAssertEqual(points[1].value, 150)
+        XCTAssertEqual(points[2].value, 130)
+    }
 }
