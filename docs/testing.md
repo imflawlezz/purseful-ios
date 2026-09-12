@@ -54,10 +54,11 @@ Swift Testing (`@Test`) and XCTest (`XCTestCase`) are both used.
 | `NotificationHelpersTests` | XCTest | Budget dedup keys, next Monday, previous calendar week |
 | `PursefulWebImportTests` | Swift Testing | Web backup parsing/import |
 | `BankTransactionDedupTests` | XCTest | Import dedup hash |
-| `ShoppingListParserTests` | XCTest | List text parsing |
+| `ShoppingListParserTests` | Swift Testing | List text parsing; editable `rawText` independent of `name` |
 | `DailySpendCalculatorTests` | XCTest | Category-filtered daily spend |
 | `ReportPDFExportTests` | XCTest | Report summary builder, PDF generation, filename |
-| `TransactionUseCaseQuickExpenseTests` | Swift Testing | Shortcuts quick expense / income / transfer write paths |
+| `TransactionUseCaseQuickTransactionTests` | Swift Testing | Shortcuts quick expense / income / transfer write paths |
+| `AppStateTabScrollTests` | Swift Testing | Tab reselect scroll-to-top tokens and debounce |
 
 ---
 
@@ -92,7 +93,8 @@ Used across import, goal, and debt tests.
 | Goal completion side effects | `GoalUseCaseTests` |
 | Debt linking | `DebtServiceTests` |
 | PDF report layout / summary | `ReportPDFExportTests` |
-| Shortcuts quick transactions | `TransactionUseCaseQuickExpenseTests` |
+| Shortcuts quick transactions | `TransactionUseCaseQuickTransactionTests` |
+| Tab reselect scroll-to-top | `AppStateTabScrollTests` |
 
 ---
 
