@@ -119,4 +119,37 @@ struct ShoppingListParserTests {
         #expect(line.price == Decimal(string: "24.90"))
         #expect(line.quantity == 3)
     }
+
+    @Test func applyKeepsRawTextEditableIndependentlyOfName() {
+        let item = ShoppingListItem()
+        ShoppingListParser.apply(ShoppingListParser.parse("Milk 2.50 3"), to: item)
+
+        #expect(item.name == "Milk")
+        #expect(item.isParsed)
+        #expect(!item.rawText.isEmpty)
+
+        item.rawText = ""
+        item.isParsed = false
+
+        #expect(item.rawText.isEmpty)
+        #expect(item.name == "Milk")
+    }
+
+    @Test func applyRawTextMatchesRebuildForEdit() {
+        let parsed = ShoppingListParser.parse("Olive oil 3 24.90")
+        let item = ShoppingListItem()
+        ShoppingListParser.apply(parsed, to: item)
+
+        #expect(
+            item.rawText
+                == ShoppingListParser.rawText(name: item.name, price: item.price, quantity: item.quantity)
+        )
+    }
+
+    @Test func emptyParseYieldsEmptyName() {
+        let line = ShoppingListParser.parse("   ")
+        #expect(line.name.isEmpty)
+        #expect(line.price == nil)
+        #expect(line.quantity == 1)
+    }
 }
