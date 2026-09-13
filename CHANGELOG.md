@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Tab bar reselect scrolls the current screen to the top; switching tabs preserves scroll position
+
+### Changed
+
+- Dashboard, Transactions, and Reports open against a recent transaction window instead of the full history; Transactions loads earlier days as the list scrolls
+- Cold launch defers widget sync, category maintenance, budget rollover, and notification scheduling until after first paint
+
+### Fixed
+
+- Shopping list no longer restores the stored name when an existing item is cleared while editing
+- Shopping list dismisses the keyboard on tap outside the field
+
 ## [1.5.0] - 2026-09-11
 
 ### Added
